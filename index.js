@@ -1,6 +1,6 @@
 const RpcClient = require('node-json-rpc2');
 
-const {Account, Network, Transaction} = require('./lib')
+const {Account, Network, Transaction, Block, Node} = require('./lib')
 
 class IOB {
   
@@ -8,6 +8,8 @@ class IOB {
     this.accounts = {}
     this.network = {}
     this.transaction = {}
+    this.block = {}
+    this.node = {}
     this.setProvider({ip, port, user, password})
   }
 
@@ -24,6 +26,8 @@ class IOB {
     this.accounts = new Account()
     this.network = new Network()
     this.transaction = new Transaction()
+    this.block = new Block()
+    this.node = new Node()
   }
 
 }
