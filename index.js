@@ -5,13 +5,10 @@ const {Account, Network, Transaction} = require('./lib')
 class IOB {
   
   constructor ({ip, port, user, password}) {
-    this.Account = {}
-    this.Network = {}
-    this.Transaction = {}
+    this.accounts = {}
+    this.network = {}
+    this.transaction = {}
     this.setProvider({ip, port, user, password})
-    console.log(this.Account)
-    console.log(this.Network)
-    console.log(this.Transaction)
   }
 
   setProvider ({ip, port, user, password}) {
@@ -24,17 +21,10 @@ class IOB {
     //   method:     'POST'
     // });
 
-    this.Account = new Account()
-    this.Network = new Network()
-    this.Transaction = new Transaction()
+    this.accounts = new Account()
+    this.network = new Network()
+    this.transaction = new Transaction()
   }
 
-  async getBalance (address) {
-    return this.Account.getBalance(address)
-  }
-
-  async createAccount () {
-    this.Account.newAccount()
-  }
 }
 module.exports = IOB
