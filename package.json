@@ -1,13 +1,38 @@
 {
-  "name": "clt-blockchain-sdk",
-  "version": "1.0.0",
+  "name": "@dominantlab/clt-blockchain-sdk",
+  "version": "2.0.0",
   "description": "SDK for IO-Blockchain(IOB)",
   "main": "index.js",
   "scripts": {
     "test": "node ./test/index.js",
-    "start": "echo \"start\""
+    "start": "echo \"start\"",
+    "publish": "npm publish --access public"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bitrustkr/CLT-Blockchain-SDK.git"
+  },
+  "bugs": {
+    "url": "http://github.com/bitrustkr/CLT-Blockchain-SDK/issues"
+  },
+  "author": "Dominantlab",
+  "authors": [
+    {
+      "name": "Park JeongTae",
+      "email": "samuel@ethereum.org",
+      "homepage": "https://github.com/pjt3591oo"
+    },
+    {
+      "name": "Lee YoungSeok",
+      "email": "ookm1020@gmail.com",
+      "url": "https://github.com/ookm1020"
+    },
+    {
+      "name": "Choi InYong",
+      "email": "ChoiInYong@gmail.com",
+      "homepage": "https://github.com/ChoiInYong"
+    }
+  ],
   "license": "ISC",
   "dependencies": {
     "bip39": "^3.0.2",
@@ -15,5 +40,12 @@
     "ed25519": "0.0.4",
     "node-json-rpc2": "^1.1.0",
     "sha256": "^0.2.0"
-  }
+  },
+  "homepage": "https://github.com/bitrustkr/CLT-Blockchain-SDK#readme",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "devDependencies": {}
 }
