@@ -15,9 +15,15 @@ const sdk = new SDK({
 });
 
 (async () => {
-  const account = await sdk.accounts.create('test')
-  console.log(account)
+  const password = 'password'
+  const createdAccount = await sdk.accounts.create('test')
+  const {enctypted} = createdAccount.encrypt(createdAccount.prvKey, password)
+  const decryptPrvKey = sdk.accounts.decrypt(enctypted, password)
+  const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
 
+  console.log(createdAccount)
+  console.log(decryptPrvKey)
+  console.log(recoveryAddress)
   // const seed = await sdk.accounts.getSeed()
   // console.log(seed)
 
