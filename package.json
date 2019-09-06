@@ -1,0 +1,15 @@
+{
+  "name": "clt-blockchain-sdk",
+  "version": "1.0.0",
+  "description": "SDK for IO-Blockchain(IOB)",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test/index.js",
+    "start": "echo \"start\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-json-rpc2": "^1.1.0"
+  }
+}
