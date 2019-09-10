@@ -17,7 +17,7 @@ $ npm install --save @dominantlab/clt-blockchain-sdk
 
 
 ```js
-const SDK = require('@dominantlab/clt-blockchain-sdk')
+const {SDK} = require('@dominantlab/clt-blockchain-sdk')
 
 const sdk = new SDK({
   ip: "127.0.0.1",
@@ -26,9 +26,11 @@ const sdk = new SDK({
   password: ''
 });
 
-const createdAccount = await sdk.accounts.create()
+(async () => {
+  const createdAccount = await sdk.accounts.create()
+  console.log(createdAccount)
+})()
 
-console.log(createdAccount)
 ```
 
 ```json
