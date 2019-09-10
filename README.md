@@ -115,7 +115,9 @@ export default App;
 test 코드는 **`./test/`** 아래에 있다.
 
 `commonjs/`: reuqire() 형태 구동 테스트
+
 `es6`: es6 형태 구동 테스트
+
 `web`: web에서 구동 테스트 
 
 ```base
@@ -133,7 +135,7 @@ $ npm run test:es6
 $ npm build
 ```
 
-webpack을 이용하여 html에서 사용할 수 있는 SDK를 build/index.js에 생성한다.
+webpack을 이용하여 html에서 사용할 수 있는 SDK를 `build/index.js`에 생성한다.
 
 * deploy
 

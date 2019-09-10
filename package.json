@@ -1,8 +1,8 @@
 {
   "name": "@dominantlab/clt-blockchain-sdk",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "SDK for IO-Blockchain(IOB)",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "test:commonjs": "node ./test/commonjs/index.js",
     "test:es6": "npx babel-node ./test/es6/index.js",
