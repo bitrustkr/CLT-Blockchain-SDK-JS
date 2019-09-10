@@ -6,7 +6,8 @@ module.exports = {
   // 컴파일 + 번들링된 js 파일이 저장될 경로와 이름 지정
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'index.js'
+    filename: 'index.js',
+    library: 'SDK',
   },
   module: {
     rules: [
@@ -19,7 +20,16 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env']
+            presets: [
+              [
+                "@babel/preset-env", 
+                {
+                  "targets": { "browsers": ["last 2 chrome versions"] },
+                  "useBuiltIns": "usage"
+                }
+              ],
+              "@babel/preset-react"
+            ]
           }
         }
       }

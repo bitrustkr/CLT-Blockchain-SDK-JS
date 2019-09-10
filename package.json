@@ -1,12 +1,13 @@
 {
   "name": "@dominantlab/clt-blockchain-sdk",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "SDK for IO-Blockchain(IOB)",
   "main": "./build/index.js",
   "scripts": {
     "test:commonjs": "node ./test/commonjs/index.js",
     "test:es6": "npx babel-node ./test/es6/index.js",
-    "build": "npx babel ./src -d ./build",
+    "build:babel": "npx babel ./src -d ./build",
+    "build": "webpack",
     "start": "echo \"start\"",
     "publish": "npm publish --access public"
   },
@@ -37,10 +38,13 @@
   ],
   "license": "ISC",
   "dependencies": {
+    "@babel/runtime": "^7.6.0",
     "bindings": "^1.5.0",
     "bip39": "^3.0.2",
+    "core-js": "^3.2.1",
     "crypto-js": "^3.1.9-1",
     "node-json-rpc2": "^1.1.0",
+    "regenerator-runtime": "^0.13.3",
     "sha256": "^0.2.0",
     "supercop": "^1.0.1"
   },
@@ -54,7 +58,11 @@
     "@babel/cli": "^7.6.0",
     "@babel/core": "^7.6.0",
     "@babel/node": "^7.6.1",
+    "@babel/plugin-transform-runtime": "^7.6.0",
+    "@babel/polyfill": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/runtime-corejs3": "^7.6.0",
     "babel-loader": "^8.0.6",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8"

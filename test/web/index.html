@@ -1,0 +1,21 @@
+<html>
+  <script src="../../build/index.js"></script>
+
+  <body>
+    <script>
+      (async () => {
+        let sdk = new SDK.SDK({})
+        const password = 'password'
+        const createdAccount = await sdk.accounts.create()
+        const { enctypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
+        const decryptPrvKey = sdk.accounts.decrypt(enctypted, password)
+        const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
+        
+        console.log(createdAccount)
+        console.log(enctypted)
+        console.log(recoveryAddress)
+      })()
+     
+    </script>
+  </body>
+</html>
