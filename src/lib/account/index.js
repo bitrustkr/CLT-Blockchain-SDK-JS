@@ -1,12 +1,11 @@
 const crypto = require('crypto');
 const sha256 = require('sha256')
-const ed25519 = require('ed25519');
+// const ed25519 = require('ed25519');
+const ed25519 = require('supercop')
 const bip39 = require("bip39");
 var CryptoJS = require("crypto-js");
 
 const validator = require('../../utils/validator')
-
-
 
 class Account{
   constructor() {
@@ -33,9 +32,9 @@ class Account{
     let { seed } = await this.getSeed(mnemonic)
     seed = Buffer.from(seed, "hex");
     seed = seed.slice(0, 32)
-    let keyPair = ed25519.MakeKeypair(seed);
+    let keyPair = await ed25519.createKeyPair(seed);
 
-    let prvKey = keyPair.privateKey.toString("hex")
+    let prvKey = keyPair.secretKey.toString("hex")
     let pubKey = keyPair.publicKey.toString("hex")
     let address = sha256(pubKey)
 
@@ -80,9 +79,9 @@ class Account{
     return plainText2.toString()
   }
 
-  signature (privateKey) {
+  signature (prvKey) {
     let message = 'Hi Bob, How are your pet monkeys doing? What were their names again? -Alice';
-    let signature = ed25519.Sign(new Buffer(message, 'utf8'), privateKey); //Using Sign(Buffer, Keypair object)
+    let signature = ed25519.Sign(new Buffer(message, 'utf8'), this.privateKeyToPublicKey(prvKey),  prvKey); //Using Sign(Buffer, Keypair object)
 
     return {
       signature
@@ -91,6 +90,10 @@ class Account{
 
   getMnemonic() {
     return bip39.generateMnemonic();
+  }
+
+  privateKeyToPublicKey (prvKey) {
+    return prvKey.slice(64, 128)
   }
 
   privateKeyToAccount (prvKey) {
@@ -119,4 +122,4 @@ class Account{
 }
 
 
-module.exports = Account;
+exports.Account = Account;

@@ -31,4 +31,7 @@ class IOB {
   }
 
 }
-module.exports = IOB
+exports.SDK = IOB
+// module.exports = {
+//   SDK: IOB
+// }

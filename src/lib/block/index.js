@@ -97,4 +97,4 @@ class Block {
   }
 }
 
-module.exports = Block;
+exports.Block =  Block;

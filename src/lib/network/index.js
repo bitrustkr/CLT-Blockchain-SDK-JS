@@ -8,4 +8,4 @@ class Network{
   }
 }
 
-module.exports = Network;
+exports.Network =  Network;

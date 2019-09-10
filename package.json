@@ -1,10 +1,12 @@
 {
   "name": "@dominantlab/clt-blockchain-sdk",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "SDK for IO-Blockchain(IOB)",
-  "main": "index.js",
+  "main": "./build/index.js",
   "scripts": {
-    "test": "node ./test/index.js",
+    "test:commonjs": "node ./test/commonjs/index.js",
+    "test:es6": "npx babel-node ./test/es6/index.js",
+    "build": "npx babel ./src -d ./build",
     "start": "echo \"start\"",
     "publish": "npm publish --access public"
   },
@@ -35,11 +37,12 @@
   ],
   "license": "ISC",
   "dependencies": {
+    "bindings": "^1.5.0",
     "bip39": "^3.0.2",
     "crypto-js": "^3.1.9-1",
-    "ed25519": "0.0.4",
     "node-json-rpc2": "^1.1.0",
-    "sha256": "^0.2.0"
+    "sha256": "^0.2.0",
+    "supercop": "^1.0.1"
   },
   "homepage": "https://github.com/bitrustkr/CLT-Blockchain-SDK#readme",
   "directories": {
@@ -47,5 +50,13 @@
     "lib": "lib",
     "test": "test"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@babel/cli": "^7.6.0",
+    "@babel/core": "^7.6.0",
+    "@babel/node": "^7.6.1",
+    "@babel/preset-env": "^7.6.0",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.8"
+  }
 }

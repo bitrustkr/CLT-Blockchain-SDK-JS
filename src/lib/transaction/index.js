@@ -35,4 +35,4 @@ class Transaction{
   }
 }
 
-module.exports = Transaction;
+exports.Transaction = Transaction;
