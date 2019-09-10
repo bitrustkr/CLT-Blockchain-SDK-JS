@@ -58,7 +58,11 @@ class Account{
     var cipherText = CryptoJS.AES.encrypt(plainText, encKey, {iv: iv});
     // console.log("cipherText", cipherText.ciphertext.toString());
     return {
-      enctypted: {...cipherText, salt, iv} //.ciphertext.toString()
+      enctypted: {
+        ciphertext: cipherText.ciphertext, 
+        salt, 
+        iv
+      }
     }
   }
 

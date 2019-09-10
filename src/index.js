@@ -2,7 +2,7 @@ const RpcClient = require('node-json-rpc2');
 
 const {Account, Network, Transaction, Block, Node} = require('./lib')
 
-class IOB {
+class SDK {
   
   constructor ({ip, port, user, password}) {
     this.accounts = {}
@@ -31,7 +31,8 @@ class IOB {
   }
 
 }
-exports.SDK = IOB
+exports.SDK = SDK
+
 // module.exports = {
 //   SDK: IOB
 // }
