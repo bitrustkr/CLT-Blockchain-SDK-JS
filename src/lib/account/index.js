@@ -35,8 +35,8 @@ class Account{
     seed = seed.slice(0, 32)
     let keyPair = await ed25519.generateKeyPair(seed);
     
-    let prvKey = keyPair.private.toString("hex")
-    let pubKey = keyPair.public.toString("hex")
+    let prvKey = this.decimalToHex(keyPair.private.toString("hex"))
+    let pubKey = this.decimalToHex(keyPair.public.toString("hex"))
     let address = sha256(pubKey)
 
     return {
@@ -46,6 +46,15 @@ class Account{
       address,
       encrypt: this.encrypt
     }
+  }
+
+  decimalToHex (target) {
+    return target.split(',').map(item => {
+      let a = item.toString(16)
+      a = `${a}`
+      a = a.length <2 ? `0${a}`:a
+      return a
+    }).join('')
   }
 
   encrypt (prvKey, password) {
