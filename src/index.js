@@ -1,6 +1,6 @@
 const RpcClient = require('node-json-rpc2');
 
-const {Account, Network, Transaction, Block, Node} = require('./lib')
+const {Account, Network, Transaction, Block, Node, Validator} = require('./lib')
 
 class SDK {
   

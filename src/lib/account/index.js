@@ -1,10 +1,11 @@
 const crypto = require('crypto');
 const sha256 = require('sha256')
 // const ed25519 = require('ed25519');
-const ed25519 = require('supercop')
+const ed25519 = require('curve25519-js')
 const bip39 = require("bip39");
 var CryptoJS = require("crypto-js");
 
+const { generateMnemonic } = require('./words')
 const validator = require('../../utils/validator')
 
 class Account{
@@ -32,10 +33,10 @@ class Account{
     let { seed } = await this.getSeed(mnemonic)
     seed = Buffer.from(seed, "hex");
     seed = seed.slice(0, 32)
-    let keyPair = await ed25519.createKeyPair(seed);
-
-    let prvKey = keyPair.secretKey.toString("hex")
-    let pubKey = keyPair.publicKey.toString("hex")
+    let keyPair = await ed25519.generateKeyPair(seed);
+    
+    let prvKey = keyPair.private.toString("hex")
+    let pubKey = keyPair.public.toString("hex")
     let address = sha256(pubKey)
 
     return {
@@ -93,7 +94,7 @@ class Account{
   }
 
   getMnemonic() {
-    return bip39.generateMnemonic();
+    return generateMnemonic()
   }
 
   privateKeyToPublicKey (prvKey) {
