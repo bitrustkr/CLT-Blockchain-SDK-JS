@@ -32,6 +32,40 @@ const createdAccount = await sdk.accounts.create();
 
 create() 메서드는 파라미터가 없으면 `PRIVATE_KEY`와 `PUBLIC_KEY` 생성
 
+* **`address 조회`**
+
+```javascript
+const account = sdk.accounts.getAccount(createdAccount.address);
+
+{ 
+  ddress: '5860EA6D8D8BD810812D43D1F44157EEB89F5F57',
+  nonce: '1234',
+  pub_key:
+   'A33519E2814109F0EF3189971E6C18A2BA05EDD91BB328DEBA2B930B8160656A',
+  balance: '999999999999990',
+  stake: '10',
+  unstaking: '0',
+  reward: '10671',
+  un_freezing_reward: '0' 
+}
+```
+
+getAccount() 메서드에 조회대상의 주소를 파라미터로 전달
+
+nonce: 트랜잭션 발생 갯수
+
+pub_key: address의 `PUBLIC_KEY`
+
+balance: 보유코인 수량
+
+state: staking 된 코인은 lock(잠김상태) 되어 사용불가
+
+unstaking: 
+
+reward: 
+
+un_freezing_reward: 
+
 
 
 * **`mnemonic 생성`**
@@ -146,6 +180,66 @@ const recoveryAddress = sdk.accounts.privateKeyToAccount(prvKey);
 
 
 ## transaction
+
+트랜잭션 발생, 조회 
+
+* **`getTransaction`**
+
+트랜잭션 조회
+
+```javascript
+const txhash = sdk.transaction.getTransaction('tx hash');
+
+{ 
+  hash: '51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F',
+  height: '11202',
+  index: 0,
+  nonce: '1',
+  time: '2019-08-23T00:34:42.6221603Z',
+  sender: '742B63B4AA18361B903E9F164E5B6873706239FB',
+  receiver: 'D99E8939133DEB1475E03AE4B21657E46C8E594F',
+  gas: '12345',
+  action: 1,
+  amount: '1',
+  pub_key: '5C8854D05667EDE74458EF3DE0DA3F50647AF4049EC258AA01EAD1E6E2C91945',
+  sig: 'BC86BC6BD1D0A0B7F8B33A0E3482AD9131FAD85DD080AC4A950BF78196FC17F5EF14BAF898796D3DEA67A5A71DF7946EC1B0A4876BCCE1E1578D20D4E7284109' 
+}
+```
+
+
+
+* **`sendTransaction`**
+
+트랜잭션 발생
+
+```javascript
+const txhash1 = sdk.transaction.sendTransaction({
+  from: '',
+  to: '',
+  value: '',
+  data: '',
+  nonce: ''
+})
+
+{ 
+  code: 0,
+  data: '',
+  log: '',
+  hash: '51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F' 
+}
+```
+
+다음 데이터를 json으로 파라미터 전달
+
+from: 송신주소
+
+to: 수신주소
+
+value: 전달코인
+
+data: 데이터
+
+nonce: `account.getAccount`로 조회한 `nonce`
 
 
 

@@ -23,6 +23,31 @@ const sdk = new SDK({
   console.log('decryptPrvKey: ', decryptPrvKey)
   console.log('recoveryAddress: ', recoveryAddress)
   
+  console.log("===========================================")
+  console.log("============= Query Account ===============")
+  console.log("===========================================")
+
+  const account = sdk.accounts.getAccount(createdAccount.address)
+
+  console.log(account)
+
+  console.log("===========================================")
+  console.log("============= Transaction ===============")
+  console.log("===========================================")
+
+  const txhash1 = sdk.transaction.getTransaction('tx hash')
+  console.log(txhash1)
+
+  const txhash2 = sdk.transaction.sendTransaction({
+    from: '',
+    to: '',
+    value: '',
+    data: '',
+    nonce: ''
+  })
+
+  console.log(txhash2)
+
   // console.log()
   // console.log("===========================================")
   // console.log("============= Recovery Account=============")

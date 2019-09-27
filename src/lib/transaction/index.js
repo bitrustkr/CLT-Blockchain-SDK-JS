@@ -22,7 +22,7 @@ class Transaction{
     }
   }
 
-  sendTransaction (hash) {
+  sendTransaction ({from, to, value, data, nonce}) {
     const id = "dontcare"
     const method = "tx_sync"
 
