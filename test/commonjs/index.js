@@ -21,8 +21,8 @@ const sdk = new SDK({
 
   const password = 'password'
   const createdAccount = await sdk.accounts.create()
-  const {enctypted} = createdAccount.encrypt(createdAccount.prvKey, password)
-  const decryptPrvKey = sdk.accounts.decrypt(enctypted, password)
+  const {encrypted} = createdAccount.encrypt(createdAccount.prvKey, password)
+  const decryptPrvKey = sdk.accounts.decrypt(encrypted, password)
   const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
 
   console.log(createdAccount)

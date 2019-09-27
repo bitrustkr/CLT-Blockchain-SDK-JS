@@ -8893,7 +8893,7 @@ class Account {
     }); // console.log("cipherText", cipherText.ciphertext.toString());
 
     return {
-      enctypted: {
+      encrypted: {
         ciphertext: cipherText.ciphertext,
         salt,
         iv

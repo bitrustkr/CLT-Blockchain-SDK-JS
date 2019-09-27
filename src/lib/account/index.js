@@ -38,7 +38,7 @@ class Account{
     let prvKey = this.decimalToHex(keyPair.private.toString("hex"))
     let pubKey = this.decimalToHex(keyPair.public.toString("hex"))
     let address = sha256(pubKey)
-
+    
     return {
       // seed: seed.toString("hex"),
       prvKey,
@@ -68,7 +68,7 @@ class Account{
     var cipherText = CryptoJS.AES.encrypt(plainText, encKey, {iv: iv});
     // console.log("cipherText", cipherText.ciphertext.toString());
     return {
-      enctypted: {
+      encrypted: {
         ciphertext: cipherText.ciphertext, 
         salt, 
         iv

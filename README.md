@@ -4,8 +4,9 @@
 
 [![npm](https://img.shields.io/badge/node-SDK-green)](https://www.npmjs.com/package/@dominantlab/clt-blockchain-sdk)
 
-* usage
-* development
+* [usage](#usage)
+* [development](#development)
+* [interface](https://github.com/bitrustkr/CLT-Blockchain-SDK/docs/API.md)
 
 ## usage
 
@@ -55,12 +56,12 @@ function App() {
       // console.log(sdk)
       const password = 'password'
       const createdAccount = await sdk.accounts.create()
-      const { enctypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
-      const decryptPrvKey = sdk.accounts.decrypt(enctypted, password)
+      const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
+      const decryptPrvKey = sdk.accounts.decrypt(encrypted, password)
       const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
       
       console.log(createdAccount)
-      console.log(enctypted)
+      console.log(encrypted)
       console.log(recoveryAddress)
     })()
   }, [])
@@ -96,12 +97,12 @@ export default App;
         let sdk = new SDK.SDK({})
         const password = 'password'
         const createdAccount = await sdk.accounts.create()
-        const { enctypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
-        const decryptPrvKey = sdk.accounts.decrypt(enctypted, password)
+        const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
+        const decryptPrvKey = sdk.accounts.decrypt(encrypted, password)
         const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
         
         console.log(createdAccount)
-        console.log(enctypted)
+        console.log(encrypted)
         console.log(recoveryAddress)
       })()
      

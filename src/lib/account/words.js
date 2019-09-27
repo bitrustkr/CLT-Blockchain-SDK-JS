@@ -15,7 +15,6 @@ const generateMnemonic = language => {
     let front = words.slice(0, randomIndex)
     let back = words.slice(randomIndex + 1, words.length)
     words = front.concat(back)
-    console.log(words.length, randomIndex)
   }
 
   return generatedMnemonic.join(', ')
