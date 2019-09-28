@@ -73,7 +73,7 @@ un_freezing_reward:
 ```javascript
 const mnemonic = sdk.accounts.getMnemonic();
 
-exclude, please, guess, vehicle, mask, apple, crush, silly, tape, wink, giant, jaguar
+exclude please guess vehicle mask apple crush silly tape wink giant jaguar
 ```
 
 
