@@ -17,7 +17,7 @@ const generateMnemonic = language => {
     words = front.concat(back)
   }
 
-  return generatedMnemonic.join(',')
+  return generatedMnemonic.join(' ')
 }
 
 module.exports = {

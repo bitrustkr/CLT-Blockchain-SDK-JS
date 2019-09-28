@@ -8805,23 +8805,23 @@ const {
 
 const {
   Network
-} = __webpack_require__(232);
-
-const {
-  Transaction
-} = __webpack_require__(233);
-
-const {
-  Block
-} = __webpack_require__(234);
-
-const {
-  Node
 } = __webpack_require__(235);
 
 const {
-  Validator
+  Transaction
 } = __webpack_require__(236);
+
+const {
+  Block
+} = __webpack_require__(237);
+
+const {
+  Node
+} = __webpack_require__(238);
+
+const {
+  Validator
+} = __webpack_require__(239);
 
 module.exports = {
   Account,
@@ -8841,17 +8841,19 @@ module.exports = {
 const sha256 = __webpack_require__(180); // const ed25519 = require('ed25519');
 
 
-const ed25519 = __webpack_require__(183);
+let ed25519 = __webpack_require__(183);
 
-const bip39 = __webpack_require__(184);
+const bip39 = __webpack_require__(185);
 
-var CryptoJS = __webpack_require__(194);
+var CryptoJS = __webpack_require__(197);
 
 const {
   generateMnemonic
-} = __webpack_require__(228);
+} = __webpack_require__(231);
 
-const validator = __webpack_require__(231);
+const validator = __webpack_require__(234);
+
+ed25519 = new ed25519();
 
 class Account {
   constructor() {}
@@ -8877,9 +8879,16 @@ class Account {
     } = await this.getSeed(mnemonic);
     seed = Buffer.from(seed, "hex");
     seed = seed.slice(0, 32);
-    let keyPair = await ed25519.generateKeyPair(seed);
-    let prvKey = this.decimalToHex(keyPair.private.toString("hex"));
-    let pubKey = this.decimalToHex(keyPair.public.toString("hex"));
+    let keyPair = await ed25519.generateKeyPair(seed.toString('hex'));
+    let prvKey = keyPair.privateKey.toString("hex");
+    /*
+      * ed25519 모듈은 pricateKey의 64~128을 잘라서 사용하지만, supercop는 아닌듯 하다
+      * ./test/test.js를 보면 pubKey는 동일하게 생성되는데 prvKey만 다름
+      * ed25519처럼 강제로 prvKey에서 64~128을 잘라서 사용하는 형태로 임시사용
+      * let pubKey = keyPair.publicKey.toString("hex")
+    */
+
+    let pubKey = keyPair.publicKey.toString('hex');
     let address = sha256(pubKey);
     return {
       // seed: seed.toString("hex"),
@@ -8959,6 +8968,7 @@ class Account {
   }
 
   privateKeyToAccount(prvKey) {
+    console.log('test: '.prvKey);
     let pubKey = prvKey.slice(64, 128);
     let address = sha256(pubKey);
     return {
@@ -26058,1678 +26068,161 @@ if ( true && module.exports) { //CommonJS
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-let _0 = new Uint8Array(16);
-let _9 = new Uint8Array(32);
-_9[0] = 9;
-function gf(init) {
-    var i, r = new Float64Array(16);
-    if (init)
-        for (i = 0; i < init.length; i++)
-            r[i] = init[i];
-    return r;
-}
-;
-const gf0 = gf(), gf1 = gf([1]), _121665 = gf([0xdb41, 1]), D = gf([
-    0x78a3,
-    0x1359,
-    0x4dca,
-    0x75eb,
-    0xd8ab,
-    0x4141,
-    0x0a4d,
-    0x0070,
-    0xe898,
-    0x7779,
-    0x4079,
-    0x8cc7,
-    0xfe73,
-    0x2b6f,
-    0x6cee,
-    0x5203,
-]), D2 = gf([
-    0xf159,
-    0x26b2,
-    0x9b94,
-    0xebd6,
-    0xb156,
-    0x8283,
-    0x149a,
-    0x00e0,
-    0xd130,
-    0xeef3,
-    0x80f2,
-    0x198e,
-    0xfce7,
-    0x56df,
-    0xd9dc,
-    0x2406,
-]), X = gf([
-    0xd51a,
-    0x8f25,
-    0x2d60,
-    0xc956,
-    0xa7b2,
-    0x9525,
-    0xc760,
-    0x692c,
-    0xdc5c,
-    0xfdd6,
-    0xe231,
-    0xc0a4,
-    0x53fe,
-    0xcd6e,
-    0x36d3,
-    0x2169,
-]), Y = gf([
-    0x6658,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-    0x6666,
-]), I = gf([
-    0xa0b0,
-    0x4a0e,
-    0x1b27,
-    0xc4ee,
-    0xe478,
-    0xad2f,
-    0x1806,
-    0x2f43,
-    0xd7a7,
-    0x3dfb,
-    0x0099,
-    0x2b4d,
-    0xdf0b,
-    0x4fc1,
-    0x2480,
-    0x2b83,
-]);
-function ts64(x, i, h, l) {
-    x[i] = (h >> 24) & 0xff;
-    x[i + 1] = (h >> 16) & 0xff;
-    x[i + 2] = (h >> 8) & 0xff;
-    x[i + 3] = h & 0xff;
-    x[i + 4] = (l >> 24) & 0xff;
-    x[i + 5] = (l >> 16) & 0xff;
-    x[i + 6] = (l >> 8) & 0xff;
-    x[i + 7] = l & 0xff;
-}
-function vn(x, xi, y, yi, n) {
-    var i, d = 0;
-    for (i = 0; i < n; i++)
-        d |= x[xi + i] ^ y[yi + i];
-    return (1 & ((d - 1) >>> 8)) - 1;
-}
-function crypto_verify_32(x, xi, y, yi) {
-    return vn(x, xi, y, yi, 32);
-}
-function set25519(r, a) {
-    var i;
-    for (i = 0; i < 16; i++)
-        r[i] = a[i] | 0;
-}
-function car25519(o) {
-    var i, v, c = 1;
-    for (i = 0; i < 16; i++) {
-        v = o[i] + c + 65535;
-        c = Math.floor(v / 65536);
-        o[i] = v - c * 65536;
-    }
-    o[0] += c - 1 + 37 * (c - 1);
-}
-function sel25519(p, q, b) {
-    var t, c = ~(b - 1);
-    for (var i = 0; i < 16; i++) {
-        t = c & (p[i] ^ q[i]);
-        p[i] ^= t;
-        q[i] ^= t;
-    }
-}
-function pack25519(o, n) {
-    var i, j, b;
-    var m = gf(), t = gf();
-    for (i = 0; i < 16; i++)
-        t[i] = n[i];
-    car25519(t);
-    car25519(t);
-    car25519(t);
-    for (j = 0; j < 2; j++) {
-        m[0] = t[0] - 0xffed;
-        for (i = 1; i < 15; i++) {
-            m[i] = t[i] - 0xffff - ((m[i - 1] >> 16) & 1);
-            m[i - 1] &= 0xffff;
-        }
-        m[15] = t[15] - 0x7fff - ((m[14] >> 16) & 1);
-        b = (m[15] >> 16) & 1;
-        m[14] &= 0xffff;
-        sel25519(t, m, 1 - b);
-    }
-    for (i = 0; i < 16; i++) {
-        o[2 * i] = t[i] & 0xff;
-        o[2 * i + 1] = t[i] >> 8;
-    }
-}
-function neq25519(a, b) {
-    var c = new Uint8Array(32), d = new Uint8Array(32);
-    pack25519(c, a);
-    pack25519(d, b);
-    return crypto_verify_32(c, 0, d, 0);
-}
-function par25519(a) {
-    var d = new Uint8Array(32);
-    pack25519(d, a);
-    return d[0] & 1;
-}
-function unpack25519(o, n) {
-    var i;
-    for (i = 0; i < 16; i++)
-        o[i] = n[2 * i] + (n[2 * i + 1] << 8);
-    o[15] &= 0x7fff;
-}
-function A(o, a, b) {
-    for (var i = 0; i < 16; i++)
-        o[i] = a[i] + b[i];
-}
-function Z(o, a, b) {
-    for (var i = 0; i < 16; i++)
-        o[i] = a[i] - b[i];
-}
-function M(o, a, b) {
-    var v, c, t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0, t24 = 0, t25 = 0, t26 = 0, t27 = 0, t28 = 0, t29 = 0, t30 = 0, b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3], b4 = b[4], b5 = b[5], b6 = b[6], b7 = b[7], b8 = b[8], b9 = b[9], b10 = b[10], b11 = b[11], b12 = b[12], b13 = b[13], b14 = b[14], b15 = b[15];
-    v = a[0];
-    t0 += v * b0;
-    t1 += v * b1;
-    t2 += v * b2;
-    t3 += v * b3;
-    t4 += v * b4;
-    t5 += v * b5;
-    t6 += v * b6;
-    t7 += v * b7;
-    t8 += v * b8;
-    t9 += v * b9;
-    t10 += v * b10;
-    t11 += v * b11;
-    t12 += v * b12;
-    t13 += v * b13;
-    t14 += v * b14;
-    t15 += v * b15;
-    v = a[1];
-    t1 += v * b0;
-    t2 += v * b1;
-    t3 += v * b2;
-    t4 += v * b3;
-    t5 += v * b4;
-    t6 += v * b5;
-    t7 += v * b6;
-    t8 += v * b7;
-    t9 += v * b8;
-    t10 += v * b9;
-    t11 += v * b10;
-    t12 += v * b11;
-    t13 += v * b12;
-    t14 += v * b13;
-    t15 += v * b14;
-    t16 += v * b15;
-    v = a[2];
-    t2 += v * b0;
-    t3 += v * b1;
-    t4 += v * b2;
-    t5 += v * b3;
-    t6 += v * b4;
-    t7 += v * b5;
-    t8 += v * b6;
-    t9 += v * b7;
-    t10 += v * b8;
-    t11 += v * b9;
-    t12 += v * b10;
-    t13 += v * b11;
-    t14 += v * b12;
-    t15 += v * b13;
-    t16 += v * b14;
-    t17 += v * b15;
-    v = a[3];
-    t3 += v * b0;
-    t4 += v * b1;
-    t5 += v * b2;
-    t6 += v * b3;
-    t7 += v * b4;
-    t8 += v * b5;
-    t9 += v * b6;
-    t10 += v * b7;
-    t11 += v * b8;
-    t12 += v * b9;
-    t13 += v * b10;
-    t14 += v * b11;
-    t15 += v * b12;
-    t16 += v * b13;
-    t17 += v * b14;
-    t18 += v * b15;
-    v = a[4];
-    t4 += v * b0;
-    t5 += v * b1;
-    t6 += v * b2;
-    t7 += v * b3;
-    t8 += v * b4;
-    t9 += v * b5;
-    t10 += v * b6;
-    t11 += v * b7;
-    t12 += v * b8;
-    t13 += v * b9;
-    t14 += v * b10;
-    t15 += v * b11;
-    t16 += v * b12;
-    t17 += v * b13;
-    t18 += v * b14;
-    t19 += v * b15;
-    v = a[5];
-    t5 += v * b0;
-    t6 += v * b1;
-    t7 += v * b2;
-    t8 += v * b3;
-    t9 += v * b4;
-    t10 += v * b5;
-    t11 += v * b6;
-    t12 += v * b7;
-    t13 += v * b8;
-    t14 += v * b9;
-    t15 += v * b10;
-    t16 += v * b11;
-    t17 += v * b12;
-    t18 += v * b13;
-    t19 += v * b14;
-    t20 += v * b15;
-    v = a[6];
-    t6 += v * b0;
-    t7 += v * b1;
-    t8 += v * b2;
-    t9 += v * b3;
-    t10 += v * b4;
-    t11 += v * b5;
-    t12 += v * b6;
-    t13 += v * b7;
-    t14 += v * b8;
-    t15 += v * b9;
-    t16 += v * b10;
-    t17 += v * b11;
-    t18 += v * b12;
-    t19 += v * b13;
-    t20 += v * b14;
-    t21 += v * b15;
-    v = a[7];
-    t7 += v * b0;
-    t8 += v * b1;
-    t9 += v * b2;
-    t10 += v * b3;
-    t11 += v * b4;
-    t12 += v * b5;
-    t13 += v * b6;
-    t14 += v * b7;
-    t15 += v * b8;
-    t16 += v * b9;
-    t17 += v * b10;
-    t18 += v * b11;
-    t19 += v * b12;
-    t20 += v * b13;
-    t21 += v * b14;
-    t22 += v * b15;
-    v = a[8];
-    t8 += v * b0;
-    t9 += v * b1;
-    t10 += v * b2;
-    t11 += v * b3;
-    t12 += v * b4;
-    t13 += v * b5;
-    t14 += v * b6;
-    t15 += v * b7;
-    t16 += v * b8;
-    t17 += v * b9;
-    t18 += v * b10;
-    t19 += v * b11;
-    t20 += v * b12;
-    t21 += v * b13;
-    t22 += v * b14;
-    t23 += v * b15;
-    v = a[9];
-    t9 += v * b0;
-    t10 += v * b1;
-    t11 += v * b2;
-    t12 += v * b3;
-    t13 += v * b4;
-    t14 += v * b5;
-    t15 += v * b6;
-    t16 += v * b7;
-    t17 += v * b8;
-    t18 += v * b9;
-    t19 += v * b10;
-    t20 += v * b11;
-    t21 += v * b12;
-    t22 += v * b13;
-    t23 += v * b14;
-    t24 += v * b15;
-    v = a[10];
-    t10 += v * b0;
-    t11 += v * b1;
-    t12 += v * b2;
-    t13 += v * b3;
-    t14 += v * b4;
-    t15 += v * b5;
-    t16 += v * b6;
-    t17 += v * b7;
-    t18 += v * b8;
-    t19 += v * b9;
-    t20 += v * b10;
-    t21 += v * b11;
-    t22 += v * b12;
-    t23 += v * b13;
-    t24 += v * b14;
-    t25 += v * b15;
-    v = a[11];
-    t11 += v * b0;
-    t12 += v * b1;
-    t13 += v * b2;
-    t14 += v * b3;
-    t15 += v * b4;
-    t16 += v * b5;
-    t17 += v * b6;
-    t18 += v * b7;
-    t19 += v * b8;
-    t20 += v * b9;
-    t21 += v * b10;
-    t22 += v * b11;
-    t23 += v * b12;
-    t24 += v * b13;
-    t25 += v * b14;
-    t26 += v * b15;
-    v = a[12];
-    t12 += v * b0;
-    t13 += v * b1;
-    t14 += v * b2;
-    t15 += v * b3;
-    t16 += v * b4;
-    t17 += v * b5;
-    t18 += v * b6;
-    t19 += v * b7;
-    t20 += v * b8;
-    t21 += v * b9;
-    t22 += v * b10;
-    t23 += v * b11;
-    t24 += v * b12;
-    t25 += v * b13;
-    t26 += v * b14;
-    t27 += v * b15;
-    v = a[13];
-    t13 += v * b0;
-    t14 += v * b1;
-    t15 += v * b2;
-    t16 += v * b3;
-    t17 += v * b4;
-    t18 += v * b5;
-    t19 += v * b6;
-    t20 += v * b7;
-    t21 += v * b8;
-    t22 += v * b9;
-    t23 += v * b10;
-    t24 += v * b11;
-    t25 += v * b12;
-    t26 += v * b13;
-    t27 += v * b14;
-    t28 += v * b15;
-    v = a[14];
-    t14 += v * b0;
-    t15 += v * b1;
-    t16 += v * b2;
-    t17 += v * b3;
-    t18 += v * b4;
-    t19 += v * b5;
-    t20 += v * b6;
-    t21 += v * b7;
-    t22 += v * b8;
-    t23 += v * b9;
-    t24 += v * b10;
-    t25 += v * b11;
-    t26 += v * b12;
-    t27 += v * b13;
-    t28 += v * b14;
-    t29 += v * b15;
-    v = a[15];
-    t15 += v * b0;
-    t16 += v * b1;
-    t17 += v * b2;
-    t18 += v * b3;
-    t19 += v * b4;
-    t20 += v * b5;
-    t21 += v * b6;
-    t22 += v * b7;
-    t23 += v * b8;
-    t24 += v * b9;
-    t25 += v * b10;
-    t26 += v * b11;
-    t27 += v * b12;
-    t28 += v * b13;
-    t29 += v * b14;
-    t30 += v * b15;
-    t0 += 38 * t16;
-    t1 += 38 * t17;
-    t2 += 38 * t18;
-    t3 += 38 * t19;
-    t4 += 38 * t20;
-    t5 += 38 * t21;
-    t6 += 38 * t22;
-    t7 += 38 * t23;
-    t8 += 38 * t24;
-    t9 += 38 * t25;
-    t10 += 38 * t26;
-    t11 += 38 * t27;
-    t12 += 38 * t28;
-    t13 += 38 * t29;
-    t14 += 38 * t30;
-    // t15 left as is
-    // first car
-    c = 1;
-    v = t0 + c + 65535;
-    c = Math.floor(v / 65536);
-    t0 = v - c * 65536;
-    v = t1 + c + 65535;
-    c = Math.floor(v / 65536);
-    t1 = v - c * 65536;
-    v = t2 + c + 65535;
-    c = Math.floor(v / 65536);
-    t2 = v - c * 65536;
-    v = t3 + c + 65535;
-    c = Math.floor(v / 65536);
-    t3 = v - c * 65536;
-    v = t4 + c + 65535;
-    c = Math.floor(v / 65536);
-    t4 = v - c * 65536;
-    v = t5 + c + 65535;
-    c = Math.floor(v / 65536);
-    t5 = v - c * 65536;
-    v = t6 + c + 65535;
-    c = Math.floor(v / 65536);
-    t6 = v - c * 65536;
-    v = t7 + c + 65535;
-    c = Math.floor(v / 65536);
-    t7 = v - c * 65536;
-    v = t8 + c + 65535;
-    c = Math.floor(v / 65536);
-    t8 = v - c * 65536;
-    v = t9 + c + 65535;
-    c = Math.floor(v / 65536);
-    t9 = v - c * 65536;
-    v = t10 + c + 65535;
-    c = Math.floor(v / 65536);
-    t10 = v - c * 65536;
-    v = t11 + c + 65535;
-    c = Math.floor(v / 65536);
-    t11 = v - c * 65536;
-    v = t12 + c + 65535;
-    c = Math.floor(v / 65536);
-    t12 = v - c * 65536;
-    v = t13 + c + 65535;
-    c = Math.floor(v / 65536);
-    t13 = v - c * 65536;
-    v = t14 + c + 65535;
-    c = Math.floor(v / 65536);
-    t14 = v - c * 65536;
-    v = t15 + c + 65535;
-    c = Math.floor(v / 65536);
-    t15 = v - c * 65536;
-    t0 += c - 1 + 37 * (c - 1);
-    // second car
-    c = 1;
-    v = t0 + c + 65535;
-    c = Math.floor(v / 65536);
-    t0 = v - c * 65536;
-    v = t1 + c + 65535;
-    c = Math.floor(v / 65536);
-    t1 = v - c * 65536;
-    v = t2 + c + 65535;
-    c = Math.floor(v / 65536);
-    t2 = v - c * 65536;
-    v = t3 + c + 65535;
-    c = Math.floor(v / 65536);
-    t3 = v - c * 65536;
-    v = t4 + c + 65535;
-    c = Math.floor(v / 65536);
-    t4 = v - c * 65536;
-    v = t5 + c + 65535;
-    c = Math.floor(v / 65536);
-    t5 = v - c * 65536;
-    v = t6 + c + 65535;
-    c = Math.floor(v / 65536);
-    t6 = v - c * 65536;
-    v = t7 + c + 65535;
-    c = Math.floor(v / 65536);
-    t7 = v - c * 65536;
-    v = t8 + c + 65535;
-    c = Math.floor(v / 65536);
-    t8 = v - c * 65536;
-    v = t9 + c + 65535;
-    c = Math.floor(v / 65536);
-    t9 = v - c * 65536;
-    v = t10 + c + 65535;
-    c = Math.floor(v / 65536);
-    t10 = v - c * 65536;
-    v = t11 + c + 65535;
-    c = Math.floor(v / 65536);
-    t11 = v - c * 65536;
-    v = t12 + c + 65535;
-    c = Math.floor(v / 65536);
-    t12 = v - c * 65536;
-    v = t13 + c + 65535;
-    c = Math.floor(v / 65536);
-    t13 = v - c * 65536;
-    v = t14 + c + 65535;
-    c = Math.floor(v / 65536);
-    t14 = v - c * 65536;
-    v = t15 + c + 65535;
-    c = Math.floor(v / 65536);
-    t15 = v - c * 65536;
-    t0 += c - 1 + 37 * (c - 1);
-    o[0] = t0;
-    o[1] = t1;
-    o[2] = t2;
-    o[3] = t3;
-    o[4] = t4;
-    o[5] = t5;
-    o[6] = t6;
-    o[7] = t7;
-    o[8] = t8;
-    o[9] = t9;
-    o[10] = t10;
-    o[11] = t11;
-    o[12] = t12;
-    o[13] = t13;
-    o[14] = t14;
-    o[15] = t15;
-}
-function S(o, a) {
-    M(o, a, a);
-}
-function inv25519(o, i) {
-    var c = gf();
-    var a;
-    for (a = 0; a < 16; a++)
-        c[a] = i[a];
-    for (a = 253; a >= 0; a--) {
-        S(c, c);
-        if (a !== 2 && a !== 4)
-            M(c, c, i);
-    }
-    for (a = 0; a < 16; a++)
-        o[a] = c[a];
-}
-function pow2523(o, i) {
-    var c = gf();
-    var a;
-    for (a = 0; a < 16; a++)
-        c[a] = i[a];
-    for (a = 250; a >= 0; a--) {
-        S(c, c);
-        if (a !== 1)
-            M(c, c, i);
-    }
-    for (a = 0; a < 16; a++)
-        o[a] = c[a];
-}
-function crypto_scalarmult(q, n, p) {
-    var z = new Uint8Array(32);
-    var x = new Float64Array(80), r, i;
-    var a = gf(), b = gf(), c = gf(), d = gf(), e = gf(), f = gf();
-    for (i = 0; i < 31; i++)
-        z[i] = n[i];
-    z[31] = (n[31] & 127) | 64;
-    z[0] &= 248;
-    unpack25519(x, p);
-    for (i = 0; i < 16; i++) {
-        b[i] = x[i];
-        d[i] = a[i] = c[i] = 0;
-    }
-    a[0] = d[0] = 1;
-    for (i = 254; i >= 0; --i) {
-        r = (z[i >>> 3] >>> (i & 7)) & 1;
-        sel25519(a, b, r);
-        sel25519(c, d, r);
-        A(e, a, c);
-        Z(a, a, c);
-        A(c, b, d);
-        Z(b, b, d);
-        S(d, e);
-        S(f, a);
-        M(a, c, a);
-        M(c, b, e);
-        A(e, a, c);
-        Z(a, a, c);
-        S(b, a);
-        Z(c, d, f);
-        M(a, c, _121665);
-        A(a, a, d);
-        M(c, c, a);
-        M(a, d, f);
-        M(d, b, x);
-        S(b, e);
-        sel25519(a, b, r);
-        sel25519(c, d, r);
-    }
-    for (i = 0; i < 16; i++) {
-        x[i + 16] = a[i];
-        x[i + 32] = c[i];
-        x[i + 48] = b[i];
-        x[i + 64] = d[i];
-    }
-    var x32 = x.subarray(32);
-    var x16 = x.subarray(16);
-    inv25519(x32, x32);
-    M(x16, x16, x32);
-    pack25519(q, x16);
-    return 0;
-}
-function crypto_scalarmult_base(q, n) {
-    return crypto_scalarmult(q, n, _9);
-}
-var K = [
-    0x428a2f98,
-    0xd728ae22,
-    0x71374491,
-    0x23ef65cd,
-    0xb5c0fbcf,
-    0xec4d3b2f,
-    0xe9b5dba5,
-    0x8189dbbc,
-    0x3956c25b,
-    0xf348b538,
-    0x59f111f1,
-    0xb605d019,
-    0x923f82a4,
-    0xaf194f9b,
-    0xab1c5ed5,
-    0xda6d8118,
-    0xd807aa98,
-    0xa3030242,
-    0x12835b01,
-    0x45706fbe,
-    0x243185be,
-    0x4ee4b28c,
-    0x550c7dc3,
-    0xd5ffb4e2,
-    0x72be5d74,
-    0xf27b896f,
-    0x80deb1fe,
-    0x3b1696b1,
-    0x9bdc06a7,
-    0x25c71235,
-    0xc19bf174,
-    0xcf692694,
-    0xe49b69c1,
-    0x9ef14ad2,
-    0xefbe4786,
-    0x384f25e3,
-    0x0fc19dc6,
-    0x8b8cd5b5,
-    0x240ca1cc,
-    0x77ac9c65,
-    0x2de92c6f,
-    0x592b0275,
-    0x4a7484aa,
-    0x6ea6e483,
-    0x5cb0a9dc,
-    0xbd41fbd4,
-    0x76f988da,
-    0x831153b5,
-    0x983e5152,
-    0xee66dfab,
-    0xa831c66d,
-    0x2db43210,
-    0xb00327c8,
-    0x98fb213f,
-    0xbf597fc7,
-    0xbeef0ee4,
-    0xc6e00bf3,
-    0x3da88fc2,
-    0xd5a79147,
-    0x930aa725,
-    0x06ca6351,
-    0xe003826f,
-    0x14292967,
-    0x0a0e6e70,
-    0x27b70a85,
-    0x46d22ffc,
-    0x2e1b2138,
-    0x5c26c926,
-    0x4d2c6dfc,
-    0x5ac42aed,
-    0x53380d13,
-    0x9d95b3df,
-    0x650a7354,
-    0x8baf63de,
-    0x766a0abb,
-    0x3c77b2a8,
-    0x81c2c92e,
-    0x47edaee6,
-    0x92722c85,
-    0x1482353b,
-    0xa2bfe8a1,
-    0x4cf10364,
-    0xa81a664b,
-    0xbc423001,
-    0xc24b8b70,
-    0xd0f89791,
-    0xc76c51a3,
-    0x0654be30,
-    0xd192e819,
-    0xd6ef5218,
-    0xd6990624,
-    0x5565a910,
-    0xf40e3585,
-    0x5771202a,
-    0x106aa070,
-    0x32bbd1b8,
-    0x19a4c116,
-    0xb8d2d0c8,
-    0x1e376c08,
-    0x5141ab53,
-    0x2748774c,
-    0xdf8eeb99,
-    0x34b0bcb5,
-    0xe19b48a8,
-    0x391c0cb3,
-    0xc5c95a63,
-    0x4ed8aa4a,
-    0xe3418acb,
-    0x5b9cca4f,
-    0x7763e373,
-    0x682e6ff3,
-    0xd6b2b8a3,
-    0x748f82ee,
-    0x5defb2fc,
-    0x78a5636f,
-    0x43172f60,
-    0x84c87814,
-    0xa1f0ab72,
-    0x8cc70208,
-    0x1a6439ec,
-    0x90befffa,
-    0x23631e28,
-    0xa4506ceb,
-    0xde82bde9,
-    0xbef9a3f7,
-    0xb2c67915,
-    0xc67178f2,
-    0xe372532b,
-    0xca273ece,
-    0xea26619c,
-    0xd186b8c7,
-    0x21c0c207,
-    0xeada7dd6,
-    0xcde0eb1e,
-    0xf57d4f7f,
-    0xee6ed178,
-    0x06f067aa,
-    0x72176fba,
-    0x0a637dc5,
-    0xa2c898a6,
-    0x113f9804,
-    0xbef90dae,
-    0x1b710b35,
-    0x131c471b,
-    0x28db77f5,
-    0x23047d84,
-    0x32caab7b,
-    0x40c72493,
-    0x3c9ebe0a,
-    0x15c9bebc,
-    0x431d67c4,
-    0x9c100d4c,
-    0x4cc5d4be,
-    0xcb3e42b6,
-    0x597f299c,
-    0xfc657e2a,
-    0x5fcb6fab,
-    0x3ad6faec,
-    0x6c44198c,
-    0x4a475817,
-];
-function crypto_hashblocks_hl(hh, hl, m, n) {
-    var wh = new Int32Array(16), wl = new Int32Array(16), bh0, bh1, bh2, bh3, bh4, bh5, bh6, bh7, bl0, bl1, bl2, bl3, bl4, bl5, bl6, bl7, th, tl, i, j, h, l, a, b, c, d;
-    var ah0 = hh[0], ah1 = hh[1], ah2 = hh[2], ah3 = hh[3], ah4 = hh[4], ah5 = hh[5], ah6 = hh[6], ah7 = hh[7], al0 = hl[0], al1 = hl[1], al2 = hl[2], al3 = hl[3], al4 = hl[4], al5 = hl[5], al6 = hl[6], al7 = hl[7];
-    var pos = 0;
-    while (n >= 128) {
-        for (i = 0; i < 16; i++) {
-            j = 8 * i + pos;
-            wh[i] = (m[j + 0] << 24) | (m[j + 1] << 16) | (m[j + 2] << 8) | m[j + 3];
-            wl[i] = (m[j + 4] << 24) | (m[j + 5] << 16) | (m[j + 6] << 8) | m[j + 7];
-        }
-        for (i = 0; i < 80; i++) {
-            bh0 = ah0;
-            bh1 = ah1;
-            bh2 = ah2;
-            bh3 = ah3;
-            bh4 = ah4;
-            bh5 = ah5;
-            bh6 = ah6;
-            bh7 = ah7;
-            bl0 = al0;
-            bl1 = al1;
-            bl2 = al2;
-            bl3 = al3;
-            bl4 = al4;
-            bl5 = al5;
-            bl6 = al6;
-            bl7 = al7;
-            // add
-            h = ah7;
-            l = al7;
-            a = l & 0xffff;
-            b = l >>> 16;
-            c = h & 0xffff;
-            d = h >>> 16;
-            // Sigma1
-            h =
-                ((ah4 >>> 14) | (al4 << (32 - 14))) ^
-                    ((ah4 >>> 18) | (al4 << (32 - 18))) ^
-                    ((al4 >>> (41 - 32)) | (ah4 << (32 - (41 - 32))));
-            l =
-                ((al4 >>> 14) | (ah4 << (32 - 14))) ^
-                    ((al4 >>> 18) | (ah4 << (32 - 18))) ^
-                    ((ah4 >>> (41 - 32)) | (al4 << (32 - (41 - 32))));
-            a += l & 0xffff;
-            b += l >>> 16;
-            c += h & 0xffff;
-            d += h >>> 16;
-            // Ch
-            h = (ah4 & ah5) ^ (~ah4 & ah6);
-            l = (al4 & al5) ^ (~al4 & al6);
-            a += l & 0xffff;
-            b += l >>> 16;
-            c += h & 0xffff;
-            d += h >>> 16;
-            // K
-            h = K[i * 2];
-            l = K[i * 2 + 1];
-            a += l & 0xffff;
-            b += l >>> 16;
-            c += h & 0xffff;
-            d += h >>> 16;
-            // w
-            h = wh[i % 16];
-            l = wl[i % 16];
-            a += l & 0xffff;
-            b += l >>> 16;
-            c += h & 0xffff;
-            d += h >>> 16;
-            b += a >>> 16;
-            c += b >>> 16;
-            d += c >>> 16;
-            th = (c & 0xffff) | (d << 16);
-            tl = (a & 0xffff) | (b << 16);
-            // add
-            h = th;
-            l = tl;
-            a = l & 0xffff;
-            b = l >>> 16;
-            c = h & 0xffff;
-            d = h >>> 16;
-            // Sigma0
-            h =
-                ((ah0 >>> 28) | (al0 << (32 - 28))) ^
-                    ((al0 >>> (34 - 32)) | (ah0 << (32 - (34 - 32)))) ^
-                    ((al0 >>> (39 - 32)) | (ah0 << (32 - (39 - 32))));
-            l =
-                ((al0 >>> 28) | (ah0 << (32 - 28))) ^
-                    ((ah0 >>> (34 - 32)) | (al0 << (32 - (34 - 32)))) ^
-                    ((ah0 >>> (39 - 32)) | (al0 << (32 - (39 - 32))));
-            a += l & 0xffff;
-            b += l >>> 16;
-            c += h & 0xffff;
-            d += h >>> 16;
-            // Maj
-            h = (ah0 & ah1) ^ (ah0 & ah2) ^ (ah1 & ah2);
-            l = (al0 & al1) ^ (al0 & al2) ^ (al1 & al2);
-            a += l & 0xffff;
-            b += l >>> 16;
-            c += h & 0xffff;
-            d += h >>> 16;
-            b += a >>> 16;
-            c += b >>> 16;
-            d += c >>> 16;
-            bh7 = (c & 0xffff) | (d << 16);
-            bl7 = (a & 0xffff) | (b << 16);
-            // add
-            h = bh3;
-            l = bl3;
-            a = l & 0xffff;
-            b = l >>> 16;
-            c = h & 0xffff;
-            d = h >>> 16;
-            h = th;
-            l = tl;
-            a += l & 0xffff;
-            b += l >>> 16;
-            c += h & 0xffff;
-            d += h >>> 16;
-            b += a >>> 16;
-            c += b >>> 16;
-            d += c >>> 16;
-            bh3 = (c & 0xffff) | (d << 16);
-            bl3 = (a & 0xffff) | (b << 16);
-            ah1 = bh0;
-            ah2 = bh1;
-            ah3 = bh2;
-            ah4 = bh3;
-            ah5 = bh4;
-            ah6 = bh5;
-            ah7 = bh6;
-            ah0 = bh7;
-            al1 = bl0;
-            al2 = bl1;
-            al3 = bl2;
-            al4 = bl3;
-            al5 = bl4;
-            al6 = bl5;
-            al7 = bl6;
-            al0 = bl7;
-            if (i % 16 === 15) {
-                for (j = 0; j < 16; j++) {
-                    // add
-                    h = wh[j];
-                    l = wl[j];
-                    a = l & 0xffff;
-                    b = l >>> 16;
-                    c = h & 0xffff;
-                    d = h >>> 16;
-                    h = wh[(j + 9) % 16];
-                    l = wl[(j + 9) % 16];
-                    a += l & 0xffff;
-                    b += l >>> 16;
-                    c += h & 0xffff;
-                    d += h >>> 16;
-                    // sigma0
-                    th = wh[(j + 1) % 16];
-                    tl = wl[(j + 1) % 16];
-                    h = ((th >>> 1) | (tl << (32 - 1))) ^ ((th >>> 8) | (tl << (32 - 8))) ^ (th >>> 7);
-                    l = ((tl >>> 1) | (th << (32 - 1))) ^ ((tl >>> 8) | (th << (32 - 8))) ^ ((tl >>> 7) | (th << (32 - 7)));
-                    a += l & 0xffff;
-                    b += l >>> 16;
-                    c += h & 0xffff;
-                    d += h >>> 16;
-                    // sigma1
-                    th = wh[(j + 14) % 16];
-                    tl = wl[(j + 14) % 16];
-                    h = ((th >>> 19) | (tl << (32 - 19))) ^ ((tl >>> (61 - 32)) | (th << (32 - (61 - 32)))) ^ (th >>> 6);
-                    l =
-                        ((tl >>> 19) | (th << (32 - 19))) ^
-                            ((th >>> (61 - 32)) | (tl << (32 - (61 - 32)))) ^
-                            ((tl >>> 6) | (th << (32 - 6)));
-                    a += l & 0xffff;
-                    b += l >>> 16;
-                    c += h & 0xffff;
-                    d += h >>> 16;
-                    b += a >>> 16;
-                    c += b >>> 16;
-                    d += c >>> 16;
-                    wh[j] = (c & 0xffff) | (d << 16);
-                    wl[j] = (a & 0xffff) | (b << 16);
-                }
-            }
-        }
-        // add
-        h = ah0;
-        l = al0;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[0];
-        l = hl[0];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[0] = ah0 = (c & 0xffff) | (d << 16);
-        hl[0] = al0 = (a & 0xffff) | (b << 16);
-        h = ah1;
-        l = al1;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[1];
-        l = hl[1];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[1] = ah1 = (c & 0xffff) | (d << 16);
-        hl[1] = al1 = (a & 0xffff) | (b << 16);
-        h = ah2;
-        l = al2;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[2];
-        l = hl[2];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[2] = ah2 = (c & 0xffff) | (d << 16);
-        hl[2] = al2 = (a & 0xffff) | (b << 16);
-        h = ah3;
-        l = al3;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[3];
-        l = hl[3];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[3] = ah3 = (c & 0xffff) | (d << 16);
-        hl[3] = al3 = (a & 0xffff) | (b << 16);
-        h = ah4;
-        l = al4;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[4];
-        l = hl[4];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[4] = ah4 = (c & 0xffff) | (d << 16);
-        hl[4] = al4 = (a & 0xffff) | (b << 16);
-        h = ah5;
-        l = al5;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[5];
-        l = hl[5];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[5] = ah5 = (c & 0xffff) | (d << 16);
-        hl[5] = al5 = (a & 0xffff) | (b << 16);
-        h = ah6;
-        l = al6;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[6];
-        l = hl[6];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[6] = ah6 = (c & 0xffff) | (d << 16);
-        hl[6] = al6 = (a & 0xffff) | (b << 16);
-        h = ah7;
-        l = al7;
-        a = l & 0xffff;
-        b = l >>> 16;
-        c = h & 0xffff;
-        d = h >>> 16;
-        h = hh[7];
-        l = hl[7];
-        a += l & 0xffff;
-        b += l >>> 16;
-        c += h & 0xffff;
-        d += h >>> 16;
-        b += a >>> 16;
-        c += b >>> 16;
-        d += c >>> 16;
-        hh[7] = ah7 = (c & 0xffff) | (d << 16);
-        hl[7] = al7 = (a & 0xffff) | (b << 16);
-        pos += 128;
-        n -= 128;
-    }
-    return n;
-}
-function crypto_hash(out, m, n) {
-    var hh = new Int32Array(8), hl = new Int32Array(8), x = new Uint8Array(256), i, b = n;
-    hh[0] = 0x6a09e667;
-    hh[1] = 0xbb67ae85;
-    hh[2] = 0x3c6ef372;
-    hh[3] = 0xa54ff53a;
-    hh[4] = 0x510e527f;
-    hh[5] = 0x9b05688c;
-    hh[6] = 0x1f83d9ab;
-    hh[7] = 0x5be0cd19;
-    hl[0] = 0xf3bcc908;
-    hl[1] = 0x84caa73b;
-    hl[2] = 0xfe94f82b;
-    hl[3] = 0x5f1d36f1;
-    hl[4] = 0xade682d1;
-    hl[5] = 0x2b3e6c1f;
-    hl[6] = 0xfb41bd6b;
-    hl[7] = 0x137e2179;
-    crypto_hashblocks_hl(hh, hl, m, n);
-    n %= 128;
-    for (i = 0; i < n; i++)
-        x[i] = m[b - n + i];
-    x[n] = 128;
-    n = 256 - 128 * (n < 112 ? 1 : 0);
-    x[n - 9] = 0;
-    ts64(x, n - 8, (b / 0x20000000) | 0, b << 3);
-    crypto_hashblocks_hl(hh, hl, x, n);
-    for (i = 0; i < 8; i++)
-        ts64(out, 8 * i, hh[i], hl[i]);
-    return 0;
-}
-function add(p, q) {
-    var a = gf(), b = gf(), c = gf(), d = gf(), e = gf(), f = gf(), g = gf(), h = gf(), t = gf();
-    Z(a, p[1], p[0]);
-    Z(t, q[1], q[0]);
-    M(a, a, t);
-    A(b, p[0], p[1]);
-    A(t, q[0], q[1]);
-    M(b, b, t);
-    M(c, p[3], q[3]);
-    M(c, c, D2);
-    M(d, p[2], q[2]);
-    A(d, d, d);
-    Z(e, b, a);
-    Z(f, d, c);
-    A(g, d, c);
-    A(h, b, a);
-    M(p[0], e, f);
-    M(p[1], h, g);
-    M(p[2], g, f);
-    M(p[3], e, h);
-}
-function cswap(p, q, b) {
-    var i;
-    for (i = 0; i < 4; i++) {
-        sel25519(p[i], q[i], b);
-    }
-}
-function pack(r, p) {
-    var tx = gf(), ty = gf(), zi = gf();
-    inv25519(zi, p[2]);
-    M(tx, p[0], zi);
-    M(ty, p[1], zi);
-    pack25519(r, ty);
-    r[31] ^= par25519(tx) << 7;
-}
-function scalarmult(p, q, s) {
-    var b, i;
-    set25519(p[0], gf0);
-    set25519(p[1], gf1);
-    set25519(p[2], gf1);
-    set25519(p[3], gf0);
-    for (i = 255; i >= 0; --i) {
-        b = (s[(i / 8) | 0] >> (i & 7)) & 1;
-        cswap(p, q, b);
-        add(q, p);
-        add(p, p);
-        cswap(p, q, b);
-    }
-}
-function scalarbase(p, s) {
-    var q = [gf(), gf(), gf(), gf()];
-    set25519(q[0], X);
-    set25519(q[1], Y);
-    set25519(q[2], gf1);
-    M(q[3], X, Y);
-    scalarmult(p, q, s);
-}
-var L = new Float64Array([
-    0xed,
-    0xd3,
-    0xf5,
-    0x5c,
-    0x1a,
-    0x63,
-    0x12,
-    0x58,
-    0xd6,
-    0x9c,
-    0xf7,
-    0xa2,
-    0xde,
-    0xf9,
-    0xde,
-    0x14,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0x10,
-]);
-function modL(r, x) {
-    var carry, i, j, k;
-    for (i = 63; i >= 32; --i) {
-        carry = 0;
-        for (j = i - 32, k = i - 12; j < k; ++j) {
-            x[j] += carry - 16 * x[i] * L[j - (i - 32)];
-            carry = (x[j] + 128) >> 8;
-            x[j] -= carry * 256;
-        }
-        x[j] += carry;
-        x[i] = 0;
-    }
-    carry = 0;
-    for (j = 0; j < 32; j++) {
-        x[j] += carry - (x[31] >> 4) * L[j];
-        carry = x[j] >> 8;
-        x[j] &= 255;
-    }
-    for (j = 0; j < 32; j++)
-        x[j] -= carry * L[j];
-    for (i = 0; i < 32; i++) {
-        x[i + 1] += x[i] >> 8;
-        r[i] = x[i] & 255;
-    }
-}
-function reduce(r) {
-    var x = new Float64Array(64), i;
-    for (i = 0; i < 64; i++)
-        x[i] = r[i];
-    for (i = 0; i < 64; i++)
-        r[i] = 0;
-    modL(r, x);
-}
-// Like crypto_sign, but uses secret key directly in hash.
-function crypto_sign_direct(sm, m, n, sk) {
-    var h = new Uint8Array(64), r = new Uint8Array(64);
-    var i, j, x = new Float64Array(64);
-    var p = [gf(), gf(), gf(), gf()];
-    for (i = 0; i < n; i++)
-        sm[64 + i] = m[i];
-    for (i = 0; i < 32; i++)
-        sm[32 + i] = sk[i];
-    crypto_hash(r, sm.subarray(32), n + 32);
-    reduce(r);
-    scalarbase(p, r);
-    pack(sm, p);
-    for (i = 0; i < 32; i++)
-        sm[i + 32] = sk[32 + i];
-    crypto_hash(h, sm, n + 64);
-    reduce(h);
-    for (i = 0; i < 64; i++)
-        x[i] = 0;
-    for (i = 0; i < 32; i++)
-        x[i] = r[i];
-    for (i = 0; i < 32; i++) {
-        for (j = 0; j < 32; j++) {
-            x[i + j] += h[i] * sk[j];
-        }
-    }
-    modL(sm.subarray(32), x);
-    return n + 64;
-}
-// Note: sm must be n+128.
-function crypto_sign_direct_rnd(sm, m, n, sk, rnd) {
-    var h = new Uint8Array(64), r = new Uint8Array(64);
-    var i, j, x = new Float64Array(64);
-    var p = [gf(), gf(), gf(), gf()];
-    // Hash separation.
-    sm[0] = 0xfe;
-    for (i = 1; i < 32; i++)
-        sm[i] = 0xff;
-    // Secret key.
-    for (i = 0; i < 32; i++)
-        sm[32 + i] = sk[i];
-    // Message.
-    for (i = 0; i < n; i++)
-        sm[64 + i] = m[i];
-    // Random suffix.
-    for (i = 0; i < 64; i++)
-        sm[n + 64 + i] = rnd[i];
-    crypto_hash(r, sm, n + 128);
-    reduce(r);
-    scalarbase(p, r);
-    pack(sm, p);
-    for (i = 0; i < 32; i++)
-        sm[i + 32] = sk[32 + i];
-    crypto_hash(h, sm, n + 64);
-    reduce(h);
-    // Wipe out random suffix.
-    for (i = 0; i < 64; i++)
-        sm[n + 64 + i] = 0;
-    for (i = 0; i < 64; i++)
-        x[i] = 0;
-    for (i = 0; i < 32; i++)
-        x[i] = r[i];
-    for (i = 0; i < 32; i++) {
-        for (j = 0; j < 32; j++) {
-            x[i + j] += h[i] * sk[j];
-        }
-    }
-    modL(sm.subarray(32, n + 64), x);
-    return n + 64;
-}
-function curve25519_sign(sm, m, n, sk, opt_rnd) {
-    // If opt_rnd is provided, sm must have n + 128,
-    // otherwise it must have n + 64 bytes.
-    // Convert Curve25519 secret key into Ed25519 secret key (includes pub key).
-    var edsk = new Uint8Array(64);
-    var p = [gf(), gf(), gf(), gf()];
-    for (var i = 0; i < 32; i++)
-        edsk[i] = sk[i];
-    // Ensure private key is in the correct format.
-    edsk[0] &= 248;
-    edsk[31] &= 127;
-    edsk[31] |= 64;
-    scalarbase(p, edsk);
-    pack(edsk.subarray(32), p);
-    // Remember sign bit.
-    var signBit = edsk[63] & 128;
-    var smlen;
-    if (opt_rnd) {
-        smlen = crypto_sign_direct_rnd(sm, m, n, edsk, opt_rnd);
-    }
-    else {
-        smlen = crypto_sign_direct(sm, m, n, edsk);
-    }
-    // Copy sign bit from public key into signature.
-    sm[63] |= signBit;
-    return smlen;
-}
-function unpackneg(r, p) {
-    var t = gf(), chk = gf(), num = gf(), den = gf(), den2 = gf(), den4 = gf(), den6 = gf();
-    set25519(r[2], gf1);
-    unpack25519(r[1], p);
-    S(num, r[1]);
-    M(den, num, D);
-    Z(num, num, r[2]);
-    A(den, r[2], den);
-    S(den2, den);
-    S(den4, den2);
-    M(den6, den4, den2);
-    M(t, den6, num);
-    M(t, t, den);
-    pow2523(t, t);
-    M(t, t, num);
-    M(t, t, den);
-    M(t, t, den);
-    M(r[0], t, den);
-    S(chk, r[0]);
-    M(chk, chk, den);
-    if (neq25519(chk, num))
-        M(r[0], r[0], I);
-    S(chk, r[0]);
-    M(chk, chk, den);
-    if (neq25519(chk, num))
-        return -1;
-    if (par25519(r[0]) === p[31] >> 7)
-        Z(r[0], gf0, r[0]);
-    M(r[3], r[0], r[1]);
-    return 0;
-}
-function crypto_sign_open(m, sm, n, pk) {
-    var i, mlen;
-    var t = new Uint8Array(32), h = new Uint8Array(64);
-    var p = [gf(), gf(), gf(), gf()], q = [gf(), gf(), gf(), gf()];
-    mlen = -1;
-    if (n < 64)
-        return -1;
-    if (unpackneg(q, pk))
-        return -1;
-    for (i = 0; i < n; i++)
-        m[i] = sm[i];
-    for (i = 0; i < 32; i++)
-        m[i + 32] = pk[i];
-    crypto_hash(h, m, n);
-    reduce(h);
-    scalarmult(p, q, h);
-    scalarbase(q, sm.subarray(32));
-    add(p, q);
-    pack(t, p);
-    n -= 64;
-    if (crypto_verify_32(sm, 0, t, 0)) {
-        for (i = 0; i < n; i++)
-            m[i] = 0;
-        return -1;
-    }
-    for (i = 0; i < n; i++)
-        m[i] = sm[i + 64];
-    mlen = n;
-    return mlen;
-}
-// Converts Curve25519 public key back to Ed25519 public key.
-// edwardsY = (montgomeryX - 1) / (montgomeryX + 1)
-function convertPublicKey(pk) {
-    var z = new Uint8Array(32), x = gf(), a = gf(), b = gf();
-    unpack25519(x, pk);
-    A(a, x, gf1);
-    Z(b, x, gf1);
-    inv25519(a, a);
-    M(a, a, b);
-    pack25519(z, a);
-    return z;
-}
-function curve25519_sign_open(m, sm, n, pk) {
-    // Convert Curve25519 public key into Ed25519 public key.
-    var edpk = convertPublicKey(pk);
-    // Restore sign bit from signature.
-    edpk[31] |= sm[63] & 128;
-    // Remove sign bit from signature.
-    sm[63] &= 127;
-    // Verify signed message.
-    return crypto_sign_open(m, sm, n, edpk);
-}
-/* High-level API */
-function checkArrayTypes(...args) {
-    var t, i;
-    for (i = 0; i < arguments.length; i++) {
-        if ((t = Object.prototype.toString.call(arguments[i])) !== '[object Uint8Array]')
-            throw new TypeError('unexpected type ' + t + ', use Uint8Array');
-    }
-}
-/**
- * Returns a raw shared key between own private key and peer's public key (in other words, this is an ECC Diffie-Hellman function X25519, performing scalar multiplication).
- *
- * The result should not be used directly as a key, but should be processed with a one-way function (e.g. HSalsa20 as in NaCl, or any secure cryptographic hash function, such as SHA-256, or key derivation function, such as HKDF).
- *
- * @export
- * @param {Uint8Array} secretKey
- * @param {Uint8Array} publicKey
- * @returns Uint8Array
- */
-function sharedKey(secretKey, publicKey) {
-    checkArrayTypes(publicKey, secretKey);
-    if (publicKey.length !== 32)
-        throw new Error('wrong public key length');
-    if (secretKey.length !== 32)
-        throw new Error('wrong secret key length');
-    var sharedKey = new Uint8Array(32);
-    crypto_scalarmult(sharedKey, secretKey, publicKey);
-    return sharedKey;
-}
-exports.sharedKey = sharedKey;
-/**
- * Signs the given message using the private key and returns a signed message (signature concatenated with the message copy).
- *
- * Optional random data argument (which must have 64 random bytes) turns on hash separation and randomization to make signatures non-deterministic.
- *
- * @export
- * @param {Uint8Array} secretKey
- * @param {*} msg
- * @param {Uint8Array} opt_random
- * @returns
- */
-function signMessage(secretKey, msg, opt_random) {
-    checkArrayTypes(msg, secretKey);
-    if (secretKey.length !== 32)
-        throw new Error('wrong secret key length');
-    if (opt_random) {
-        checkArrayTypes(opt_random);
-        if (opt_random.length !== 64)
-            throw new Error('wrong random data length');
-        var buf = new Uint8Array(128 + msg.length);
-        curve25519_sign(buf, msg, msg.length, secretKey, opt_random);
-        return new Uint8Array(buf.subarray(0, 64 + msg.length));
-    }
-    else {
-        var signedMsg = new Uint8Array(64 + msg.length);
-        curve25519_sign(signedMsg, msg, msg.length, secretKey);
-        return signedMsg;
-    }
-}
-exports.signMessage = signMessage;
-/**
- * Verifies signed message with the public key and returns the original message without signature if it's correct or null if verification fails.
- *
- * @export
- * @param {Uint8Array} publicKey
- * @param {*} signedMsg
- * @returns Message
- */
-function openMessage(publicKey, signedMsg) {
-    checkArrayTypes(signedMsg, publicKey);
-    if (publicKey.length !== 32)
-        throw new Error('wrong public key length');
-    var tmp = new Uint8Array(signedMsg.length);
-    var mlen = curve25519_sign_open(tmp, signedMsg, signedMsg.length, publicKey);
-    if (mlen < 0)
-        return null;
-    var m = new Uint8Array(mlen);
-    for (var i = 0; i < m.length; i++)
-        m[i] = tmp[i];
-    return m;
-}
-exports.openMessage = openMessage;
-/**
- * Signs the given message using the private key and returns signature.
- *
- * Optional random data argument (which must have 64 random bytes) turns on hash separation and randomization to make signatures non-deterministic.
- *
- * @export
- * @param {Uint8Array} secretKey
- * @param {*} msg
- * @param {Uint8Array} opt_random
- * @returns
- */
-function sign(secretKey, msg, opt_random) {
-    checkArrayTypes(secretKey, msg);
-    if (secretKey.length !== 32)
-        throw new Error('wrong secret key length');
-    if (opt_random) {
-        checkArrayTypes(opt_random);
-        if (opt_random.length !== 64)
-            throw new Error('wrong random data length');
-    }
-    var buf = new Uint8Array((opt_random ? 128 : 64) + msg.length);
-    curve25519_sign(buf, msg, msg.length, secretKey, opt_random);
-    var signature = new Uint8Array(64);
-    for (var i = 0; i < signature.length; i++)
-        signature[i] = buf[i];
-    return signature;
-}
-exports.sign = sign;
-/**
- * Verifies the given signature for the message using the given private key. Returns true if the signature is valid, false otherwise.
- *
- * @export
- * @param {Uint8Array} publicKey
- * @param {*} msg
- * @param {*} signature
- * @returns
- */
-function verify(publicKey, msg, signature) {
-    checkArrayTypes(msg, signature, publicKey);
-    if (signature.length !== 64)
-        throw new Error('wrong signature length');
-    if (publicKey.length !== 32)
-        throw new Error('wrong public key length');
-    var sm = new Uint8Array(64 + msg.length);
-    var m = new Uint8Array(64 + msg.length);
-    var i;
-    for (i = 0; i < 64; i++)
-        sm[i] = signature[i];
-    for (i = 0; i < msg.length; i++)
-        sm[i + 64] = msg[i];
-    return curve25519_sign_open(m, sm, sm.length, publicKey) >= 0;
-}
-exports.verify = verify;
-/**
- * Generates a new key pair from the given 32-byte secret seed (which should be generated with a CSPRNG) and returns it as object.
- *
- * The returned keys can be used for signing and key agreement.
- *
- * @export
- * @param {Uint8Array} seed required
- * @returns
- */
-function generateKeyPair(seed) {
-    checkArrayTypes(seed);
-    if (seed.length !== 32)
-        throw new Error('wrong seed length');
-    var sk = new Uint8Array(32);
-    var pk = new Uint8Array(32);
-    for (var i = 0; i < 32; i++)
-        sk[i] = seed[i];
-    crypto_scalarmult_base(pk, sk);
-    // Turn secret key into the correct format.
-    sk[0] &= 248;
-    sk[31] &= 127;
-    sk[31] |= 64;
-    // Remove sign bit from public key.
-    pk[31] &= 127;
-    return {
-        public: pk,
-        private: sk,
-    };
-}
-exports.generateKeyPair = generateKeyPair;
-exports.default = {};
 
+module.exports = __webpack_require__(184);
 
 /***/ }),
 /* 184 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(Buffer) {
+
+var crypto = __webpack_require__(48);
+
+var bip39 = __webpack_require__(185); // var ed25519   = require("ed25519");
+
+
+var ed25519 = __webpack_require__(195);
+
+var RIPEMD160 = __webpack_require__(59);
+
+const TYPE_ED25519 = '01';
+const PUBKEY_PREFIX = '0120'; //0x01   0x20 = 32 
+
+const PUBKEY_LENGTH = 64; // 32 bytes
+
+const SEED_LENGTH = 64; // 32 bytes
+
+const PRIVKEY_LENGTH = 128; // 64 bytes
+
+const ADDRESS_LENGTH = 40; //20 bytes
+
+const PUBKEY_NAME = 'PublicKey';
+const SEED_NAME = 'Seed';
+const PRIVKEY_NAME = 'PrivateKey';
+const ADDRESS_NAME = 'Address';
+var crypto_sign_PUBLICKEYBYTES = 32;
+var crypto_sign_SECRETKEYBYTES = 64;
+
+function ed25519keypar(seed) {
+  console.log('seed', seed);
+  var pk = new Uint8Array(crypto_sign_PUBLICKEYBYTES);
+  var sk = new Uint8Array(crypto_sign_SECRETKEYBYTES);
+
+  for (var i = 0; i < 32; i++) {
+    sk[i] = seed[i];
+  } // crypto_sign_keypair(publicKeyData, privateKeyData);
+
+
+  ed25519.lowlevel.crypto_sign_keypair(pk, sk, true);
+  return {
+    publicKey: pk,
+    secretKey: sk
+  };
+}
+
+module.exports = class TenderKeys {
+  generateKeyPair(seed) {
+    this._isHexString(seed, SEED_NAME, SEED_LENGTH);
+
+    let buffer = new Buffer(seed, "hex");
+    let keyPair = ed25519keypar(buffer);
+    return {
+      publicKey: Buffer.from(keyPair.publicKey),
+      privateKey: Buffer.from(keyPair.secretKey)
+    };
+  }
+
+  generateRandomMnemonic() {
+    return bip39.generateMnemonic();
+  }
+
+  generateSeed(mnemonic) {
+    let hash = crypto.createHash('sha256');
+    hash.update(mnemonic);
+    return hash.digest('hex').toUpperCase();
+  }
+
+  getAddressFromPubKey(publicKey) {
+    this._isHexString(publicKey, PUBKEY_NAME, PUBKEY_LENGTH);
+
+    let hash = crypto.createHash('sha256');
+    hash.update(Buffer.from(publicKey, 'hex'));
+    var address = hash.digest().slice(0, 20).toString('hex').toUpperCase();
+    return address;
+  }
+
+  getAddressFromPrivKey(privateKey) {
+    this._isHexString(privateKey, PRIVKEY_NAME, PRIVKEY_LENGTH);
+
+    let publicKey = privateKey.substring(64, 128);
+    return this.getAddressFromPubKey(publicKey);
+  }
+
+  getPubKeyFromPrivKey(privateKey) {
+    this._isHexString(privateKey, PRIVKEY_NAME, PRIVKEY_LENGTH);
+
+    return privateKey.substring(64, 128);
+  }
+
+  validateMnemonic(mnemonic) {
+    return bip39.validateMnemonic(mnemonic);
+  }
+
+  validateAddress(publicKey, address) {
+    this._isHexString(publicKey, PUBKEY_NAME, PUBKEY_LENGTH);
+
+    this._isHexString(address, ADDRESS_NAME, ADDRESS_LENGTH);
+
+    if (this.generateAddress(publicKey.toUpperCase() == address.toUpperCase())) return true;
+    return false;
+  }
+
+  sign(privKeyStr, txStr) {
+    let buffer = new Buffer(txStr);
+    let privKey = new Buffer(privKeyStr, "hex");
+    let signature = Buffer.from(ed25519.sign(buffer, privKey));
+    return signature.slice(0, 64);
+  }
+
+  signBuffer(privKeyStr, txStrBuffer) {
+    let buffer = txStrBuffer;
+    let privKey = new Buffer(privKeyStr, "hex");
+    let signature = Buffer.from(ed25519.sign(buffer, privKey));
+    return signature.slice(0, 64);
+  }
+
+  _isHexString(hexString, name, length) {
+    if (typeof hexString != 'string') {
+      throw new Error('\nError : The type of' + name + ' must be string!');
+    }
+
+    if (hexString.length != length) {
+      throw new Error('\nError : The length of' + name + ' must be ' + length);
+    }
+
+    let arr = hexString.split();
+
+    for (let i = 0; i < arr.length; i++) if (!arr[i].match(/[0-9A-Fa-f]/)) throw new Error("Error : unexpected junk in  " + name);
+  }
+
+  _hexStringToBytes(hexStr) {
+    let result = [];
+
+    while (hexStr.length >= 2) {
+      result.push(parseInt(hexStr.substring(0, 2), 16));
+      hexStr = hexStr.substring(2, hexStr.length);
+    }
+
+    return result;
+  }
+
+};
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7).Buffer))
+
+/***/ }),
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27738,7 +26231,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const createHash = __webpack_require__(51);
 const pbkdf2_1 = __webpack_require__(74);
 const randomBytes = __webpack_require__(49);
-const _wordlists_1 = __webpack_require__(185);
+const _wordlists_1 = __webpack_require__(186);
 let DEFAULT_WORDLIST = _wordlists_1._default;
 const INVALID_MNEMONIC = 'Invalid mnemonic';
 const INVALID_ENTROPY = 'Invalid entropy';
@@ -27890,13 +26383,13 @@ function getDefaultWordlist() {
     })[0];
 }
 exports.getDefaultWordlist = getDefaultWordlist;
-var _wordlists_2 = __webpack_require__(185);
+var _wordlists_2 = __webpack_require__(186);
 exports.wordlists = _wordlists_2.wordlists;
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7).Buffer))
 
 /***/ }),
-/* 185 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27910,43 +26403,43 @@ exports.wordlists = wordlists;
 let _default;
 exports._default = _default;
 try {
-    exports._default = _default = __webpack_require__(186);
+    exports._default = _default = __webpack_require__(187);
     wordlists.chinese_simplified = _default;
 }
 catch (err) { }
 try {
-    exports._default = _default = __webpack_require__(187);
+    exports._default = _default = __webpack_require__(188);
     wordlists.chinese_traditional = _default;
 }
 catch (err) { }
 try {
-    exports._default = _default = __webpack_require__(188);
+    exports._default = _default = __webpack_require__(189);
     wordlists.korean = _default;
 }
 catch (err) { }
 try {
-    exports._default = _default = __webpack_require__(189);
+    exports._default = _default = __webpack_require__(190);
     wordlists.french = _default;
 }
 catch (err) { }
 try {
-    exports._default = _default = __webpack_require__(190);
+    exports._default = _default = __webpack_require__(191);
     wordlists.italian = _default;
 }
 catch (err) { }
 try {
-    exports._default = _default = __webpack_require__(191);
+    exports._default = _default = __webpack_require__(192);
     wordlists.spanish = _default;
 }
 catch (err) { }
 try {
-    exports._default = _default = __webpack_require__(192);
+    exports._default = _default = __webpack_require__(193);
     wordlists.japanese = _default;
     wordlists.JA = _default;
 }
 catch (err) { }
 try {
-    exports._default = _default = __webpack_require__(193);
+    exports._default = _default = __webpack_require__(194);
     wordlists.english = _default;
     wordlists.EN = _default;
 }
@@ -27954,61 +26447,2450 @@ catch (err) { }
 
 
 /***/ }),
-/* 186 */
+/* 187 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"的\",\"一\",\"是\",\"在\",\"不\",\"了\",\"有\",\"和\",\"人\",\"这\",\"中\",\"大\",\"为\",\"上\",\"个\",\"国\",\"我\",\"以\",\"要\",\"他\",\"时\",\"来\",\"用\",\"们\",\"生\",\"到\",\"作\",\"地\",\"于\",\"出\",\"就\",\"分\",\"对\",\"成\",\"会\",\"可\",\"主\",\"发\",\"年\",\"动\",\"同\",\"工\",\"也\",\"能\",\"下\",\"过\",\"子\",\"说\",\"产\",\"种\",\"面\",\"而\",\"方\",\"后\",\"多\",\"定\",\"行\",\"学\",\"法\",\"所\",\"民\",\"得\",\"经\",\"十\",\"三\",\"之\",\"进\",\"着\",\"等\",\"部\",\"度\",\"家\",\"电\",\"力\",\"里\",\"如\",\"水\",\"化\",\"高\",\"自\",\"二\",\"理\",\"起\",\"小\",\"物\",\"现\",\"实\",\"加\",\"量\",\"都\",\"两\",\"体\",\"制\",\"机\",\"当\",\"使\",\"点\",\"从\",\"业\",\"本\",\"去\",\"把\",\"性\",\"好\",\"应\",\"开\",\"它\",\"合\",\"还\",\"因\",\"由\",\"其\",\"些\",\"然\",\"前\",\"外\",\"天\",\"政\",\"四\",\"日\",\"那\",\"社\",\"义\",\"事\",\"平\",\"形\",\"相\",\"全\",\"表\",\"间\",\"样\",\"与\",\"关\",\"各\",\"重\",\"新\",\"线\",\"内\",\"数\",\"正\",\"心\",\"反\",\"你\",\"明\",\"看\",\"原\",\"又\",\"么\",\"利\",\"比\",\"或\",\"但\",\"质\",\"气\",\"第\",\"向\",\"道\",\"命\",\"此\",\"变\",\"条\",\"只\",\"没\",\"结\",\"解\",\"问\",\"意\",\"建\",\"月\",\"公\",\"无\",\"系\",\"军\",\"很\",\"情\",\"者\",\"最\",\"立\",\"代\",\"想\",\"已\",\"通\",\"并\",\"提\",\"直\",\"题\",\"党\",\"程\",\"展\",\"五\",\"果\",\"料\",\"象\",\"员\",\"革\",\"位\",\"入\",\"常\",\"文\",\"总\",\"次\",\"品\",\"式\",\"活\",\"设\",\"及\",\"管\",\"特\",\"件\",\"长\",\"求\",\"老\",\"头\",\"基\",\"资\",\"边\",\"流\",\"路\",\"级\",\"少\",\"图\",\"山\",\"统\",\"接\",\"知\",\"较\",\"将\",\"组\",\"见\",\"计\",\"别\",\"她\",\"手\",\"角\",\"期\",\"根\",\"论\",\"运\",\"农\",\"指\",\"几\",\"九\",\"区\",\"强\",\"放\",\"决\",\"西\",\"被\",\"干\",\"做\",\"必\",\"战\",\"先\",\"回\",\"则\",\"任\",\"取\",\"据\",\"处\",\"队\",\"南\",\"给\",\"色\",\"光\",\"门\",\"即\",\"保\",\"治\",\"北\",\"造\",\"百\",\"规\",\"热\",\"领\",\"七\",\"海\",\"口\",\"东\",\"导\",\"器\",\"压\",\"志\",\"世\",\"金\",\"增\",\"争\",\"济\",\"阶\",\"油\",\"思\",\"术\",\"极\",\"交\",\"受\",\"联\",\"什\",\"认\",\"六\",\"共\",\"权\",\"收\",\"证\",\"改\",\"清\",\"美\",\"再\",\"采\",\"转\",\"更\",\"单\",\"风\",\"切\",\"打\",\"白\",\"教\",\"速\",\"花\",\"带\",\"安\",\"场\",\"身\",\"车\",\"例\",\"真\",\"务\",\"具\",\"万\",\"每\",\"目\",\"至\",\"达\",\"走\",\"积\",\"示\",\"议\",\"声\",\"报\",\"斗\",\"完\",\"类\",\"八\",\"离\",\"华\",\"名\",\"确\",\"才\",\"科\",\"张\",\"信\",\"马\",\"节\",\"话\",\"米\",\"整\",\"空\",\"元\",\"况\",\"今\",\"集\",\"温\",\"传\",\"土\",\"许\",\"步\",\"群\",\"广\",\"石\",\"记\",\"需\",\"段\",\"研\",\"界\",\"拉\",\"林\",\"律\",\"叫\",\"且\",\"究\",\"观\",\"越\",\"织\",\"装\",\"影\",\"算\",\"低\",\"持\",\"音\",\"众\",\"书\",\"布\",\"复\",\"容\",\"儿\",\"须\",\"际\",\"商\",\"非\",\"验\",\"连\",\"断\",\"深\",\"难\",\"近\",\"矿\",\"千\",\"周\",\"委\",\"素\",\"技\",\"备\",\"半\",\"办\",\"青\",\"省\",\"列\",\"习\",\"响\",\"约\",\"支\",\"般\",\"史\",\"感\",\"劳\",\"便\",\"团\",\"往\",\"酸\",\"历\",\"市\",\"克\",\"何\",\"除\",\"消\",\"构\",\"府\",\"称\",\"太\",\"准\",\"精\",\"值\",\"号\",\"率\",\"族\",\"维\",\"划\",\"选\",\"标\",\"写\",\"存\",\"候\",\"毛\",\"亲\",\"快\",\"效\",\"斯\",\"院\",\"查\",\"江\",\"型\",\"眼\",\"王\",\"按\",\"格\",\"养\",\"易\",\"置\",\"派\",\"层\",\"片\",\"始\",\"却\",\"专\",\"状\",\"育\",\"厂\",\"京\",\"识\",\"适\",\"属\",\"圆\",\"包\",\"火\",\"住\",\"调\",\"满\",\"县\",\"局\",\"照\",\"参\",\"红\",\"细\",\"引\",\"听\",\"该\",\"铁\",\"价\",\"严\",\"首\",\"底\",\"液\",\"官\",\"德\",\"随\",\"病\",\"苏\",\"失\",\"尔\",\"死\",\"讲\",\"配\",\"女\",\"黄\",\"推\",\"显\",\"谈\",\"罪\",\"神\",\"艺\",\"呢\",\"席\",\"含\",\"企\",\"望\",\"密\",\"批\",\"营\",\"项\",\"防\",\"举\",\"球\",\"英\",\"氧\",\"势\",\"告\",\"李\",\"台\",\"落\",\"木\",\"帮\",\"轮\",\"破\",\"亚\",\"师\",\"围\",\"注\",\"远\",\"字\",\"材\",\"排\",\"供\",\"河\",\"态\",\"封\",\"另\",\"施\",\"减\",\"树\",\"溶\",\"怎\",\"止\",\"案\",\"言\",\"士\",\"均\",\"武\",\"固\",\"叶\",\"鱼\",\"波\",\"视\",\"仅\",\"费\",\"紧\",\"爱\",\"左\",\"章\",\"早\",\"朝\",\"害\",\"续\",\"轻\",\"服\",\"试\",\"食\",\"充\",\"兵\",\"源\",\"判\",\"护\",\"司\",\"足\",\"某\",\"练\",\"差\",\"致\",\"板\",\"田\",\"降\",\"黑\",\"犯\",\"负\",\"击\",\"范\",\"继\",\"兴\",\"似\",\"余\",\"坚\",\"曲\",\"输\",\"修\",\"故\",\"城\",\"夫\",\"够\",\"送\",\"笔\",\"船\",\"占\",\"右\",\"财\",\"吃\",\"富\",\"春\",\"职\",\"觉\",\"汉\",\"画\",\"功\",\"巴\",\"跟\",\"虽\",\"杂\",\"飞\",\"检\",\"吸\",\"助\",\"升\",\"阳\",\"互\",\"初\",\"创\",\"抗\",\"考\",\"投\",\"坏\",\"策\",\"古\",\"径\",\"换\",\"未\",\"跑\",\"留\",\"钢\",\"曾\",\"端\",\"责\",\"站\",\"简\",\"述\",\"钱\",\"副\",\"尽\",\"帝\",\"射\",\"草\",\"冲\",\"承\",\"独\",\"令\",\"限\",\"阿\",\"宣\",\"环\",\"双\",\"请\",\"超\",\"微\",\"让\",\"控\",\"州\",\"良\",\"轴\",\"找\",\"否\",\"纪\",\"益\",\"依\",\"优\",\"顶\",\"础\",\"载\",\"倒\",\"房\",\"突\",\"坐\",\"粉\",\"敌\",\"略\",\"客\",\"袁\",\"冷\",\"胜\",\"绝\",\"析\",\"块\",\"剂\",\"测\",\"丝\",\"协\",\"诉\",\"念\",\"陈\",\"仍\",\"罗\",\"盐\",\"友\",\"洋\",\"错\",\"苦\",\"夜\",\"刑\",\"移\",\"频\",\"逐\",\"靠\",\"混\",\"母\",\"短\",\"皮\",\"终\",\"聚\",\"汽\",\"村\",\"云\",\"哪\",\"既\",\"距\",\"卫\",\"停\",\"烈\",\"央\",\"察\",\"烧\",\"迅\",\"境\",\"若\",\"印\",\"洲\",\"刻\",\"括\",\"激\",\"孔\",\"搞\",\"甚\",\"室\",\"待\",\"核\",\"校\",\"散\",\"侵\",\"吧\",\"甲\",\"游\",\"久\",\"菜\",\"味\",\"旧\",\"模\",\"湖\",\"货\",\"损\",\"预\",\"阻\",\"毫\",\"普\",\"稳\",\"乙\",\"妈\",\"植\",\"息\",\"扩\",\"银\",\"语\",\"挥\",\"酒\",\"守\",\"拿\",\"序\",\"纸\",\"医\",\"缺\",\"雨\",\"吗\",\"针\",\"刘\",\"啊\",\"急\",\"唱\",\"误\",\"训\",\"愿\",\"审\",\"附\",\"获\",\"茶\",\"鲜\",\"粮\",\"斤\",\"孩\",\"脱\",\"硫\",\"肥\",\"善\",\"龙\",\"演\",\"父\",\"渐\",\"血\",\"欢\",\"械\",\"掌\",\"歌\",\"沙\",\"刚\",\"攻\",\"谓\",\"盾\",\"讨\",\"晚\",\"粒\",\"乱\",\"燃\",\"矛\",\"乎\",\"杀\",\"药\",\"宁\",\"鲁\",\"贵\",\"钟\",\"煤\",\"读\",\"班\",\"伯\",\"香\",\"介\",\"迫\",\"句\",\"丰\",\"培\",\"握\",\"兰\",\"担\",\"弦\",\"蛋\",\"沉\",\"假\",\"穿\",\"执\",\"答\",\"乐\",\"谁\",\"顺\",\"烟\",\"缩\",\"征\",\"脸\",\"喜\",\"松\",\"脚\",\"困\",\"异\",\"免\",\"背\",\"星\",\"福\",\"买\",\"染\",\"井\",\"概\",\"慢\",\"怕\",\"磁\",\"倍\",\"祖\",\"皇\",\"促\",\"静\",\"补\",\"评\",\"翻\",\"肉\",\"践\",\"尼\",\"衣\",\"宽\",\"扬\",\"棉\",\"希\",\"伤\",\"操\",\"垂\",\"秋\",\"宜\",\"氢\",\"套\",\"督\",\"振\",\"架\",\"亮\",\"末\",\"宪\",\"庆\",\"编\",\"牛\",\"触\",\"映\",\"雷\",\"销\",\"诗\",\"座\",\"居\",\"抓\",\"裂\",\"胞\",\"呼\",\"娘\",\"景\",\"威\",\"绿\",\"晶\",\"厚\",\"盟\",\"衡\",\"鸡\",\"孙\",\"延\",\"危\",\"胶\",\"屋\",\"乡\",\"临\",\"陆\",\"顾\",\"掉\",\"呀\",\"灯\",\"岁\",\"措\",\"束\",\"耐\",\"剧\",\"玉\",\"赵\",\"跳\",\"哥\",\"季\",\"课\",\"凯\",\"胡\",\"额\",\"款\",\"绍\",\"卷\",\"齐\",\"伟\",\"蒸\",\"殖\",\"永\",\"宗\",\"苗\",\"川\",\"炉\",\"岩\",\"弱\",\"零\",\"杨\",\"奏\",\"沿\",\"露\",\"杆\",\"探\",\"滑\",\"镇\",\"饭\",\"浓\",\"航\",\"怀\",\"赶\",\"库\",\"夺\",\"伊\",\"灵\",\"税\",\"途\",\"灭\",\"赛\",\"归\",\"召\",\"鼓\",\"播\",\"盘\",\"裁\",\"险\",\"康\",\"唯\",\"录\",\"菌\",\"纯\",\"借\",\"糖\",\"盖\",\"横\",\"符\",\"私\",\"努\",\"堂\",\"域\",\"枪\",\"润\",\"幅\",\"哈\",\"竟\",\"熟\",\"虫\",\"泽\",\"脑\",\"壤\",\"碳\",\"欧\",\"遍\",\"侧\",\"寨\",\"敢\",\"彻\",\"虑\",\"斜\",\"薄\",\"庭\",\"纳\",\"弹\",\"饲\",\"伸\",\"折\",\"麦\",\"湿\",\"暗\",\"荷\",\"瓦\",\"塞\",\"床\",\"筑\",\"恶\",\"户\",\"访\",\"塔\",\"奇\",\"透\",\"梁\",\"刀\",\"旋\",\"迹\",\"卡\",\"氯\",\"遇\",\"份\",\"毒\",\"泥\",\"退\",\"洗\",\"摆\",\"灰\",\"彩\",\"卖\",\"耗\",\"夏\",\"择\",\"忙\",\"铜\",\"献\",\"硬\",\"予\",\"繁\",\"圈\",\"雪\",\"函\",\"亦\",\"抽\",\"篇\",\"阵\",\"阴\",\"丁\",\"尺\",\"追\",\"堆\",\"雄\",\"迎\",\"泛\",\"爸\",\"楼\",\"避\",\"谋\",\"吨\",\"野\",\"猪\",\"旗\",\"累\",\"偏\",\"典\",\"馆\",\"索\",\"秦\",\"脂\",\"潮\",\"爷\",\"豆\",\"忽\",\"托\",\"惊\",\"塑\",\"遗\",\"愈\",\"朱\",\"替\",\"纤\",\"粗\",\"倾\",\"尚\",\"痛\",\"楚\",\"谢\",\"奋\",\"购\",\"磨\",\"君\",\"池\",\"旁\",\"碎\",\"骨\",\"监\",\"捕\",\"弟\",\"暴\",\"割\",\"贯\",\"殊\",\"释\",\"词\",\"亡\",\"壁\",\"顿\",\"宝\",\"午\",\"尘\",\"闻\",\"揭\",\"炮\",\"残\",\"冬\",\"桥\",\"妇\",\"警\",\"综\",\"招\",\"吴\",\"付\",\"浮\",\"遭\",\"徐\",\"您\",\"摇\",\"谷\",\"赞\",\"箱\",\"隔\",\"订\",\"男\",\"吹\",\"园\",\"纷\",\"唐\",\"败\",\"宋\",\"玻\",\"巨\",\"耕\",\"坦\",\"荣\",\"闭\",\"湾\",\"键\",\"凡\",\"驻\",\"锅\",\"救\",\"恩\",\"剥\",\"凝\",\"碱\",\"齿\",\"截\",\"炼\",\"麻\",\"纺\",\"禁\",\"废\",\"盛\",\"版\",\"缓\",\"净\",\"睛\",\"昌\",\"婚\",\"涉\",\"筒\",\"嘴\",\"插\",\"岸\",\"朗\",\"庄\",\"街\",\"藏\",\"姑\",\"贸\",\"腐\",\"奴\",\"啦\",\"惯\",\"乘\",\"伙\",\"恢\",\"匀\",\"纱\",\"扎\",\"辩\",\"耳\",\"彪\",\"臣\",\"亿\",\"璃\",\"抵\",\"脉\",\"秀\",\"萨\",\"俄\",\"网\",\"舞\",\"店\",\"喷\",\"纵\",\"寸\",\"汗\",\"挂\",\"洪\",\"贺\",\"闪\",\"柬\",\"爆\",\"烯\",\"津\",\"稻\",\"墙\",\"软\",\"勇\",\"像\",\"滚\",\"厘\",\"蒙\",\"芳\",\"肯\",\"坡\",\"柱\",\"荡\",\"腿\",\"仪\",\"旅\",\"尾\",\"轧\",\"冰\",\"贡\",\"登\",\"黎\",\"削\",\"钻\",\"勒\",\"逃\",\"障\",\"氨\",\"郭\",\"峰\",\"币\",\"港\",\"伏\",\"轨\",\"亩\",\"毕\",\"擦\",\"莫\",\"刺\",\"浪\",\"秘\",\"援\",\"株\",\"健\",\"售\",\"股\",\"岛\",\"甘\",\"泡\",\"睡\",\"童\",\"铸\",\"汤\",\"阀\",\"休\",\"汇\",\"舍\",\"牧\",\"绕\",\"炸\",\"哲\",\"磷\",\"绩\",\"朋\",\"淡\",\"尖\",\"启\",\"陷\",\"柴\",\"呈\",\"徒\",\"颜\",\"泪\",\"稍\",\"忘\",\"泵\",\"蓝\",\"拖\",\"洞\",\"授\",\"镜\",\"辛\",\"壮\",\"锋\",\"贫\",\"虚\",\"弯\",\"摩\",\"泰\",\"幼\",\"廷\",\"尊\",\"窗\",\"纲\",\"弄\",\"隶\",\"疑\",\"氏\",\"宫\",\"姐\",\"震\",\"瑞\",\"怪\",\"尤\",\"琴\",\"循\",\"描\",\"膜\",\"违\",\"夹\",\"腰\",\"缘\",\"珠\",\"穷\",\"森\",\"枝\",\"竹\",\"沟\",\"催\",\"绳\",\"忆\",\"邦\",\"剩\",\"幸\",\"浆\",\"栏\",\"拥\",\"牙\",\"贮\",\"礼\",\"滤\",\"钠\",\"纹\",\"罢\",\"拍\",\"咱\",\"喊\",\"袖\",\"埃\",\"勤\",\"罚\",\"焦\",\"潜\",\"伍\",\"墨\",\"欲\",\"缝\",\"姓\",\"刊\",\"饱\",\"仿\",\"奖\",\"铝\",\"鬼\",\"丽\",\"跨\",\"默\",\"挖\",\"链\",\"扫\",\"喝\",\"袋\",\"炭\",\"污\",\"幕\",\"诸\",\"弧\",\"励\",\"梅\",\"奶\",\"洁\",\"灾\",\"舟\",\"鉴\",\"苯\",\"讼\",\"抱\",\"毁\",\"懂\",\"寒\",\"智\",\"埔\",\"寄\",\"届\",\"跃\",\"渡\",\"挑\",\"丹\",\"艰\",\"贝\",\"碰\",\"拔\",\"爹\",\"戴\",\"码\",\"梦\",\"芽\",\"熔\",\"赤\",\"渔\",\"哭\",\"敬\",\"颗\",\"奔\",\"铅\",\"仲\",\"虎\",\"稀\",\"妹\",\"乏\",\"珍\",\"申\",\"桌\",\"遵\",\"允\",\"隆\",\"螺\",\"仓\",\"魏\",\"锐\",\"晓\",\"氮\",\"兼\",\"隐\",\"碍\",\"赫\",\"拨\",\"忠\",\"肃\",\"缸\",\"牵\",\"抢\",\"博\",\"巧\",\"壳\",\"兄\",\"杜\",\"讯\",\"诚\",\"碧\",\"祥\",\"柯\",\"页\",\"巡\",\"矩\",\"悲\",\"灌\",\"龄\",\"伦\",\"票\",\"寻\",\"桂\",\"铺\",\"圣\",\"恐\",\"恰\",\"郑\",\"趣\",\"抬\",\"荒\",\"腾\",\"贴\",\"柔\",\"滴\",\"猛\",\"阔\",\"辆\",\"妻\",\"填\",\"撤\",\"储\",\"签\",\"闹\",\"扰\",\"紫\",\"砂\",\"递\",\"戏\",\"吊\",\"陶\",\"伐\",\"喂\",\"疗\",\"瓶\",\"婆\",\"抚\",\"臂\",\"摸\",\"忍\",\"虾\",\"蜡\",\"邻\",\"胸\",\"巩\",\"挤\",\"偶\",\"弃\",\"槽\",\"劲\",\"乳\",\"邓\",\"吉\",\"仁\",\"烂\",\"砖\",\"租\",\"乌\",\"舰\",\"伴\",\"瓜\",\"浅\",\"丙\",\"暂\",\"燥\",\"橡\",\"柳\",\"迷\",\"暖\",\"牌\",\"秧\",\"胆\",\"详\",\"簧\",\"踏\",\"瓷\",\"谱\",\"呆\",\"宾\",\"糊\",\"洛\",\"辉\",\"愤\",\"竞\",\"隙\",\"怒\",\"粘\",\"乃\",\"绪\",\"肩\",\"籍\",\"敏\",\"涂\",\"熙\",\"皆\",\"侦\",\"悬\",\"掘\",\"享\",\"纠\",\"醒\",\"狂\",\"锁\",\"淀\",\"恨\",\"牲\",\"霸\",\"爬\",\"赏\",\"逆\",\"玩\",\"陵\",\"祝\",\"秒\",\"浙\",\"貌\",\"役\",\"彼\",\"悉\",\"鸭\",\"趋\",\"凤\",\"晨\",\"畜\",\"辈\",\"秩\",\"卵\",\"署\",\"梯\",\"炎\",\"滩\",\"棋\",\"驱\",\"筛\",\"峡\",\"冒\",\"啥\",\"寿\",\"译\",\"浸\",\"泉\",\"帽\",\"迟\",\"硅\",\"疆\",\"贷\",\"漏\",\"稿\",\"冠\",\"嫩\",\"胁\",\"芯\",\"牢\",\"叛\",\"蚀\",\"奥\",\"鸣\",\"岭\",\"羊\",\"凭\",\"串\",\"塘\",\"绘\",\"酵\",\"融\",\"盆\",\"锡\",\"庙\",\"筹\",\"冻\",\"辅\",\"摄\",\"袭\",\"筋\",\"拒\",\"僚\",\"旱\",\"钾\",\"鸟\",\"漆\",\"沈\",\"眉\",\"疏\",\"添\",\"棒\",\"穗\",\"硝\",\"韩\",\"逼\",\"扭\",\"侨\",\"凉\",\"挺\",\"碗\",\"栽\",\"炒\",\"杯\",\"患\",\"馏\",\"劝\",\"豪\",\"辽\",\"勃\",\"鸿\",\"旦\",\"吏\",\"拜\",\"狗\",\"埋\",\"辊\",\"掩\",\"饮\",\"搬\",\"骂\",\"辞\",\"勾\",\"扣\",\"估\",\"蒋\",\"绒\",\"雾\",\"丈\",\"朵\",\"姆\",\"拟\",\"宇\",\"辑\",\"陕\",\"雕\",\"偿\",\"蓄\",\"崇\",\"剪\",\"倡\",\"厅\",\"咬\",\"驶\",\"薯\",\"刷\",\"斥\",\"番\",\"赋\",\"奉\",\"佛\",\"浇\",\"漫\",\"曼\",\"扇\",\"钙\",\"桃\",\"扶\",\"仔\",\"返\",\"俗\",\"亏\",\"腔\",\"鞋\",\"棱\",\"覆\",\"框\",\"悄\",\"叔\",\"撞\",\"骗\",\"勘\",\"旺\",\"沸\",\"孤\",\"吐\",\"孟\",\"渠\",\"屈\",\"疾\",\"妙\",\"惜\",\"仰\",\"狠\",\"胀\",\"谐\",\"抛\",\"霉\",\"桑\",\"岗\",\"嘛\",\"衰\",\"盗\",\"渗\",\"脏\",\"赖\",\"涌\",\"甜\",\"曹\",\"阅\",\"肌\",\"哩\",\"厉\",\"烃\",\"纬\",\"毅\",\"昨\",\"伪\",\"症\",\"煮\",\"叹\",\"钉\",\"搭\",\"茎\",\"笼\",\"酷\",\"偷\",\"弓\",\"锥\",\"恒\",\"杰\",\"坑\",\"鼻\",\"翼\",\"纶\",\"叙\",\"狱\",\"逮\",\"罐\",\"络\",\"棚\",\"抑\",\"膨\",\"蔬\",\"寺\",\"骤\",\"穆\",\"冶\",\"枯\",\"册\",\"尸\",\"凸\",\"绅\",\"坯\",\"牺\",\"焰\",\"轰\",\"欣\",\"晋\",\"瘦\",\"御\",\"锭\",\"锦\",\"丧\",\"旬\",\"锻\",\"垄\",\"搜\",\"扑\",\"邀\",\"亭\",\"酯\",\"迈\",\"舒\",\"脆\",\"酶\",\"闲\",\"忧\",\"酚\",\"顽\",\"羽\",\"涨\",\"卸\",\"仗\",\"陪\",\"辟\",\"惩\",\"杭\",\"姚\",\"肚\",\"捉\",\"飘\",\"漂\",\"昆\",\"欺\",\"吾\",\"郎\",\"烷\",\"汁\",\"呵\",\"饰\",\"萧\",\"雅\",\"邮\",\"迁\",\"燕\",\"撒\",\"姻\",\"赴\",\"宴\",\"烦\",\"债\",\"帐\",\"斑\",\"铃\",\"旨\",\"醇\",\"董\",\"饼\",\"雏\",\"姿\",\"拌\",\"傅\",\"腹\",\"妥\",\"揉\",\"贤\",\"拆\",\"歪\",\"葡\",\"胺\",\"丢\",\"浩\",\"徽\",\"昂\",\"垫\",\"挡\",\"览\",\"贪\",\"慰\",\"缴\",\"汪\",\"慌\",\"冯\",\"诺\",\"姜\",\"谊\",\"凶\",\"劣\",\"诬\",\"耀\",\"昏\",\"躺\",\"盈\",\"骑\",\"乔\",\"溪\",\"丛\",\"卢\",\"抹\",\"闷\",\"咨\",\"刮\",\"驾\",\"缆\",\"悟\",\"摘\",\"铒\",\"掷\",\"颇\",\"幻\",\"柄\",\"惠\",\"惨\",\"佳\",\"仇\",\"腊\",\"窝\",\"涤\",\"剑\",\"瞧\",\"堡\",\"泼\",\"葱\",\"罩\",\"霍\",\"捞\",\"胎\",\"苍\",\"滨\",\"俩\",\"捅\",\"湘\",\"砍\",\"霞\",\"邵\",\"萄\",\"疯\",\"淮\",\"遂\",\"熊\",\"粪\",\"烘\",\"宿\",\"档\",\"戈\",\"驳\",\"嫂\",\"裕\",\"徙\",\"箭\",\"捐\",\"肠\",\"撑\",\"晒\",\"辨\",\"殿\",\"莲\",\"摊\",\"搅\",\"酱\",\"屏\",\"疫\",\"哀\",\"蔡\",\"堵\",\"沫\",\"皱\",\"畅\",\"叠\",\"阁\",\"莱\",\"敲\",\"辖\",\"钩\",\"痕\",\"坝\",\"巷\",\"饿\",\"祸\",\"丘\",\"玄\",\"溜\",\"曰\",\"逻\",\"彭\",\"尝\",\"卿\",\"妨\",\"艇\",\"吞\",\"韦\",\"怨\",\"矮\",\"歇\"]");
 
 /***/ }),
-/* 187 */
+/* 188 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"的\",\"一\",\"是\",\"在\",\"不\",\"了\",\"有\",\"和\",\"人\",\"這\",\"中\",\"大\",\"為\",\"上\",\"個\",\"國\",\"我\",\"以\",\"要\",\"他\",\"時\",\"來\",\"用\",\"們\",\"生\",\"到\",\"作\",\"地\",\"於\",\"出\",\"就\",\"分\",\"對\",\"成\",\"會\",\"可\",\"主\",\"發\",\"年\",\"動\",\"同\",\"工\",\"也\",\"能\",\"下\",\"過\",\"子\",\"說\",\"產\",\"種\",\"面\",\"而\",\"方\",\"後\",\"多\",\"定\",\"行\",\"學\",\"法\",\"所\",\"民\",\"得\",\"經\",\"十\",\"三\",\"之\",\"進\",\"著\",\"等\",\"部\",\"度\",\"家\",\"電\",\"力\",\"裡\",\"如\",\"水\",\"化\",\"高\",\"自\",\"二\",\"理\",\"起\",\"小\",\"物\",\"現\",\"實\",\"加\",\"量\",\"都\",\"兩\",\"體\",\"制\",\"機\",\"當\",\"使\",\"點\",\"從\",\"業\",\"本\",\"去\",\"把\",\"性\",\"好\",\"應\",\"開\",\"它\",\"合\",\"還\",\"因\",\"由\",\"其\",\"些\",\"然\",\"前\",\"外\",\"天\",\"政\",\"四\",\"日\",\"那\",\"社\",\"義\",\"事\",\"平\",\"形\",\"相\",\"全\",\"表\",\"間\",\"樣\",\"與\",\"關\",\"各\",\"重\",\"新\",\"線\",\"內\",\"數\",\"正\",\"心\",\"反\",\"你\",\"明\",\"看\",\"原\",\"又\",\"麼\",\"利\",\"比\",\"或\",\"但\",\"質\",\"氣\",\"第\",\"向\",\"道\",\"命\",\"此\",\"變\",\"條\",\"只\",\"沒\",\"結\",\"解\",\"問\",\"意\",\"建\",\"月\",\"公\",\"無\",\"系\",\"軍\",\"很\",\"情\",\"者\",\"最\",\"立\",\"代\",\"想\",\"已\",\"通\",\"並\",\"提\",\"直\",\"題\",\"黨\",\"程\",\"展\",\"五\",\"果\",\"料\",\"象\",\"員\",\"革\",\"位\",\"入\",\"常\",\"文\",\"總\",\"次\",\"品\",\"式\",\"活\",\"設\",\"及\",\"管\",\"特\",\"件\",\"長\",\"求\",\"老\",\"頭\",\"基\",\"資\",\"邊\",\"流\",\"路\",\"級\",\"少\",\"圖\",\"山\",\"統\",\"接\",\"知\",\"較\",\"將\",\"組\",\"見\",\"計\",\"別\",\"她\",\"手\",\"角\",\"期\",\"根\",\"論\",\"運\",\"農\",\"指\",\"幾\",\"九\",\"區\",\"強\",\"放\",\"決\",\"西\",\"被\",\"幹\",\"做\",\"必\",\"戰\",\"先\",\"回\",\"則\",\"任\",\"取\",\"據\",\"處\",\"隊\",\"南\",\"給\",\"色\",\"光\",\"門\",\"即\",\"保\",\"治\",\"北\",\"造\",\"百\",\"規\",\"熱\",\"領\",\"七\",\"海\",\"口\",\"東\",\"導\",\"器\",\"壓\",\"志\",\"世\",\"金\",\"增\",\"爭\",\"濟\",\"階\",\"油\",\"思\",\"術\",\"極\",\"交\",\"受\",\"聯\",\"什\",\"認\",\"六\",\"共\",\"權\",\"收\",\"證\",\"改\",\"清\",\"美\",\"再\",\"採\",\"轉\",\"更\",\"單\",\"風\",\"切\",\"打\",\"白\",\"教\",\"速\",\"花\",\"帶\",\"安\",\"場\",\"身\",\"車\",\"例\",\"真\",\"務\",\"具\",\"萬\",\"每\",\"目\",\"至\",\"達\",\"走\",\"積\",\"示\",\"議\",\"聲\",\"報\",\"鬥\",\"完\",\"類\",\"八\",\"離\",\"華\",\"名\",\"確\",\"才\",\"科\",\"張\",\"信\",\"馬\",\"節\",\"話\",\"米\",\"整\",\"空\",\"元\",\"況\",\"今\",\"集\",\"溫\",\"傳\",\"土\",\"許\",\"步\",\"群\",\"廣\",\"石\",\"記\",\"需\",\"段\",\"研\",\"界\",\"拉\",\"林\",\"律\",\"叫\",\"且\",\"究\",\"觀\",\"越\",\"織\",\"裝\",\"影\",\"算\",\"低\",\"持\",\"音\",\"眾\",\"書\",\"布\",\"复\",\"容\",\"兒\",\"須\",\"際\",\"商\",\"非\",\"驗\",\"連\",\"斷\",\"深\",\"難\",\"近\",\"礦\",\"千\",\"週\",\"委\",\"素\",\"技\",\"備\",\"半\",\"辦\",\"青\",\"省\",\"列\",\"習\",\"響\",\"約\",\"支\",\"般\",\"史\",\"感\",\"勞\",\"便\",\"團\",\"往\",\"酸\",\"歷\",\"市\",\"克\",\"何\",\"除\",\"消\",\"構\",\"府\",\"稱\",\"太\",\"準\",\"精\",\"值\",\"號\",\"率\",\"族\",\"維\",\"劃\",\"選\",\"標\",\"寫\",\"存\",\"候\",\"毛\",\"親\",\"快\",\"效\",\"斯\",\"院\",\"查\",\"江\",\"型\",\"眼\",\"王\",\"按\",\"格\",\"養\",\"易\",\"置\",\"派\",\"層\",\"片\",\"始\",\"卻\",\"專\",\"狀\",\"育\",\"廠\",\"京\",\"識\",\"適\",\"屬\",\"圓\",\"包\",\"火\",\"住\",\"調\",\"滿\",\"縣\",\"局\",\"照\",\"參\",\"紅\",\"細\",\"引\",\"聽\",\"該\",\"鐵\",\"價\",\"嚴\",\"首\",\"底\",\"液\",\"官\",\"德\",\"隨\",\"病\",\"蘇\",\"失\",\"爾\",\"死\",\"講\",\"配\",\"女\",\"黃\",\"推\",\"顯\",\"談\",\"罪\",\"神\",\"藝\",\"呢\",\"席\",\"含\",\"企\",\"望\",\"密\",\"批\",\"營\",\"項\",\"防\",\"舉\",\"球\",\"英\",\"氧\",\"勢\",\"告\",\"李\",\"台\",\"落\",\"木\",\"幫\",\"輪\",\"破\",\"亞\",\"師\",\"圍\",\"注\",\"遠\",\"字\",\"材\",\"排\",\"供\",\"河\",\"態\",\"封\",\"另\",\"施\",\"減\",\"樹\",\"溶\",\"怎\",\"止\",\"案\",\"言\",\"士\",\"均\",\"武\",\"固\",\"葉\",\"魚\",\"波\",\"視\",\"僅\",\"費\",\"緊\",\"愛\",\"左\",\"章\",\"早\",\"朝\",\"害\",\"續\",\"輕\",\"服\",\"試\",\"食\",\"充\",\"兵\",\"源\",\"判\",\"護\",\"司\",\"足\",\"某\",\"練\",\"差\",\"致\",\"板\",\"田\",\"降\",\"黑\",\"犯\",\"負\",\"擊\",\"范\",\"繼\",\"興\",\"似\",\"餘\",\"堅\",\"曲\",\"輸\",\"修\",\"故\",\"城\",\"夫\",\"夠\",\"送\",\"筆\",\"船\",\"佔\",\"右\",\"財\",\"吃\",\"富\",\"春\",\"職\",\"覺\",\"漢\",\"畫\",\"功\",\"巴\",\"跟\",\"雖\",\"雜\",\"飛\",\"檢\",\"吸\",\"助\",\"昇\",\"陽\",\"互\",\"初\",\"創\",\"抗\",\"考\",\"投\",\"壞\",\"策\",\"古\",\"徑\",\"換\",\"未\",\"跑\",\"留\",\"鋼\",\"曾\",\"端\",\"責\",\"站\",\"簡\",\"述\",\"錢\",\"副\",\"盡\",\"帝\",\"射\",\"草\",\"衝\",\"承\",\"獨\",\"令\",\"限\",\"阿\",\"宣\",\"環\",\"雙\",\"請\",\"超\",\"微\",\"讓\",\"控\",\"州\",\"良\",\"軸\",\"找\",\"否\",\"紀\",\"益\",\"依\",\"優\",\"頂\",\"礎\",\"載\",\"倒\",\"房\",\"突\",\"坐\",\"粉\",\"敵\",\"略\",\"客\",\"袁\",\"冷\",\"勝\",\"絕\",\"析\",\"塊\",\"劑\",\"測\",\"絲\",\"協\",\"訴\",\"念\",\"陳\",\"仍\",\"羅\",\"鹽\",\"友\",\"洋\",\"錯\",\"苦\",\"夜\",\"刑\",\"移\",\"頻\",\"逐\",\"靠\",\"混\",\"母\",\"短\",\"皮\",\"終\",\"聚\",\"汽\",\"村\",\"雲\",\"哪\",\"既\",\"距\",\"衛\",\"停\",\"烈\",\"央\",\"察\",\"燒\",\"迅\",\"境\",\"若\",\"印\",\"洲\",\"刻\",\"括\",\"激\",\"孔\",\"搞\",\"甚\",\"室\",\"待\",\"核\",\"校\",\"散\",\"侵\",\"吧\",\"甲\",\"遊\",\"久\",\"菜\",\"味\",\"舊\",\"模\",\"湖\",\"貨\",\"損\",\"預\",\"阻\",\"毫\",\"普\",\"穩\",\"乙\",\"媽\",\"植\",\"息\",\"擴\",\"銀\",\"語\",\"揮\",\"酒\",\"守\",\"拿\",\"序\",\"紙\",\"醫\",\"缺\",\"雨\",\"嗎\",\"針\",\"劉\",\"啊\",\"急\",\"唱\",\"誤\",\"訓\",\"願\",\"審\",\"附\",\"獲\",\"茶\",\"鮮\",\"糧\",\"斤\",\"孩\",\"脫\",\"硫\",\"肥\",\"善\",\"龍\",\"演\",\"父\",\"漸\",\"血\",\"歡\",\"械\",\"掌\",\"歌\",\"沙\",\"剛\",\"攻\",\"謂\",\"盾\",\"討\",\"晚\",\"粒\",\"亂\",\"燃\",\"矛\",\"乎\",\"殺\",\"藥\",\"寧\",\"魯\",\"貴\",\"鐘\",\"煤\",\"讀\",\"班\",\"伯\",\"香\",\"介\",\"迫\",\"句\",\"豐\",\"培\",\"握\",\"蘭\",\"擔\",\"弦\",\"蛋\",\"沉\",\"假\",\"穿\",\"執\",\"答\",\"樂\",\"誰\",\"順\",\"煙\",\"縮\",\"徵\",\"臉\",\"喜\",\"松\",\"腳\",\"困\",\"異\",\"免\",\"背\",\"星\",\"福\",\"買\",\"染\",\"井\",\"概\",\"慢\",\"怕\",\"磁\",\"倍\",\"祖\",\"皇\",\"促\",\"靜\",\"補\",\"評\",\"翻\",\"肉\",\"踐\",\"尼\",\"衣\",\"寬\",\"揚\",\"棉\",\"希\",\"傷\",\"操\",\"垂\",\"秋\",\"宜\",\"氫\",\"套\",\"督\",\"振\",\"架\",\"亮\",\"末\",\"憲\",\"慶\",\"編\",\"牛\",\"觸\",\"映\",\"雷\",\"銷\",\"詩\",\"座\",\"居\",\"抓\",\"裂\",\"胞\",\"呼\",\"娘\",\"景\",\"威\",\"綠\",\"晶\",\"厚\",\"盟\",\"衡\",\"雞\",\"孫\",\"延\",\"危\",\"膠\",\"屋\",\"鄉\",\"臨\",\"陸\",\"顧\",\"掉\",\"呀\",\"燈\",\"歲\",\"措\",\"束\",\"耐\",\"劇\",\"玉\",\"趙\",\"跳\",\"哥\",\"季\",\"課\",\"凱\",\"胡\",\"額\",\"款\",\"紹\",\"卷\",\"齊\",\"偉\",\"蒸\",\"殖\",\"永\",\"宗\",\"苗\",\"川\",\"爐\",\"岩\",\"弱\",\"零\",\"楊\",\"奏\",\"沿\",\"露\",\"桿\",\"探\",\"滑\",\"鎮\",\"飯\",\"濃\",\"航\",\"懷\",\"趕\",\"庫\",\"奪\",\"伊\",\"靈\",\"稅\",\"途\",\"滅\",\"賽\",\"歸\",\"召\",\"鼓\",\"播\",\"盤\",\"裁\",\"險\",\"康\",\"唯\",\"錄\",\"菌\",\"純\",\"借\",\"糖\",\"蓋\",\"橫\",\"符\",\"私\",\"努\",\"堂\",\"域\",\"槍\",\"潤\",\"幅\",\"哈\",\"竟\",\"熟\",\"蟲\",\"澤\",\"腦\",\"壤\",\"碳\",\"歐\",\"遍\",\"側\",\"寨\",\"敢\",\"徹\",\"慮\",\"斜\",\"薄\",\"庭\",\"納\",\"彈\",\"飼\",\"伸\",\"折\",\"麥\",\"濕\",\"暗\",\"荷\",\"瓦\",\"塞\",\"床\",\"築\",\"惡\",\"戶\",\"訪\",\"塔\",\"奇\",\"透\",\"梁\",\"刀\",\"旋\",\"跡\",\"卡\",\"氯\",\"遇\",\"份\",\"毒\",\"泥\",\"退\",\"洗\",\"擺\",\"灰\",\"彩\",\"賣\",\"耗\",\"夏\",\"擇\",\"忙\",\"銅\",\"獻\",\"硬\",\"予\",\"繁\",\"圈\",\"雪\",\"函\",\"亦\",\"抽\",\"篇\",\"陣\",\"陰\",\"丁\",\"尺\",\"追\",\"堆\",\"雄\",\"迎\",\"泛\",\"爸\",\"樓\",\"避\",\"謀\",\"噸\",\"野\",\"豬\",\"旗\",\"累\",\"偏\",\"典\",\"館\",\"索\",\"秦\",\"脂\",\"潮\",\"爺\",\"豆\",\"忽\",\"托\",\"驚\",\"塑\",\"遺\",\"愈\",\"朱\",\"替\",\"纖\",\"粗\",\"傾\",\"尚\",\"痛\",\"楚\",\"謝\",\"奮\",\"購\",\"磨\",\"君\",\"池\",\"旁\",\"碎\",\"骨\",\"監\",\"捕\",\"弟\",\"暴\",\"割\",\"貫\",\"殊\",\"釋\",\"詞\",\"亡\",\"壁\",\"頓\",\"寶\",\"午\",\"塵\",\"聞\",\"揭\",\"炮\",\"殘\",\"冬\",\"橋\",\"婦\",\"警\",\"綜\",\"招\",\"吳\",\"付\",\"浮\",\"遭\",\"徐\",\"您\",\"搖\",\"谷\",\"贊\",\"箱\",\"隔\",\"訂\",\"男\",\"吹\",\"園\",\"紛\",\"唐\",\"敗\",\"宋\",\"玻\",\"巨\",\"耕\",\"坦\",\"榮\",\"閉\",\"灣\",\"鍵\",\"凡\",\"駐\",\"鍋\",\"救\",\"恩\",\"剝\",\"凝\",\"鹼\",\"齒\",\"截\",\"煉\",\"麻\",\"紡\",\"禁\",\"廢\",\"盛\",\"版\",\"緩\",\"淨\",\"睛\",\"昌\",\"婚\",\"涉\",\"筒\",\"嘴\",\"插\",\"岸\",\"朗\",\"莊\",\"街\",\"藏\",\"姑\",\"貿\",\"腐\",\"奴\",\"啦\",\"慣\",\"乘\",\"夥\",\"恢\",\"勻\",\"紗\",\"扎\",\"辯\",\"耳\",\"彪\",\"臣\",\"億\",\"璃\",\"抵\",\"脈\",\"秀\",\"薩\",\"俄\",\"網\",\"舞\",\"店\",\"噴\",\"縱\",\"寸\",\"汗\",\"掛\",\"洪\",\"賀\",\"閃\",\"柬\",\"爆\",\"烯\",\"津\",\"稻\",\"牆\",\"軟\",\"勇\",\"像\",\"滾\",\"厘\",\"蒙\",\"芳\",\"肯\",\"坡\",\"柱\",\"盪\",\"腿\",\"儀\",\"旅\",\"尾\",\"軋\",\"冰\",\"貢\",\"登\",\"黎\",\"削\",\"鑽\",\"勒\",\"逃\",\"障\",\"氨\",\"郭\",\"峰\",\"幣\",\"港\",\"伏\",\"軌\",\"畝\",\"畢\",\"擦\",\"莫\",\"刺\",\"浪\",\"秘\",\"援\",\"株\",\"健\",\"售\",\"股\",\"島\",\"甘\",\"泡\",\"睡\",\"童\",\"鑄\",\"湯\",\"閥\",\"休\",\"匯\",\"舍\",\"牧\",\"繞\",\"炸\",\"哲\",\"磷\",\"績\",\"朋\",\"淡\",\"尖\",\"啟\",\"陷\",\"柴\",\"呈\",\"徒\",\"顏\",\"淚\",\"稍\",\"忘\",\"泵\",\"藍\",\"拖\",\"洞\",\"授\",\"鏡\",\"辛\",\"壯\",\"鋒\",\"貧\",\"虛\",\"彎\",\"摩\",\"泰\",\"幼\",\"廷\",\"尊\",\"窗\",\"綱\",\"弄\",\"隸\",\"疑\",\"氏\",\"宮\",\"姐\",\"震\",\"瑞\",\"怪\",\"尤\",\"琴\",\"循\",\"描\",\"膜\",\"違\",\"夾\",\"腰\",\"緣\",\"珠\",\"窮\",\"森\",\"枝\",\"竹\",\"溝\",\"催\",\"繩\",\"憶\",\"邦\",\"剩\",\"幸\",\"漿\",\"欄\",\"擁\",\"牙\",\"貯\",\"禮\",\"濾\",\"鈉\",\"紋\",\"罷\",\"拍\",\"咱\",\"喊\",\"袖\",\"埃\",\"勤\",\"罰\",\"焦\",\"潛\",\"伍\",\"墨\",\"欲\",\"縫\",\"姓\",\"刊\",\"飽\",\"仿\",\"獎\",\"鋁\",\"鬼\",\"麗\",\"跨\",\"默\",\"挖\",\"鏈\",\"掃\",\"喝\",\"袋\",\"炭\",\"污\",\"幕\",\"諸\",\"弧\",\"勵\",\"梅\",\"奶\",\"潔\",\"災\",\"舟\",\"鑑\",\"苯\",\"訟\",\"抱\",\"毀\",\"懂\",\"寒\",\"智\",\"埔\",\"寄\",\"屆\",\"躍\",\"渡\",\"挑\",\"丹\",\"艱\",\"貝\",\"碰\",\"拔\",\"爹\",\"戴\",\"碼\",\"夢\",\"芽\",\"熔\",\"赤\",\"漁\",\"哭\",\"敬\",\"顆\",\"奔\",\"鉛\",\"仲\",\"虎\",\"稀\",\"妹\",\"乏\",\"珍\",\"申\",\"桌\",\"遵\",\"允\",\"隆\",\"螺\",\"倉\",\"魏\",\"銳\",\"曉\",\"氮\",\"兼\",\"隱\",\"礙\",\"赫\",\"撥\",\"忠\",\"肅\",\"缸\",\"牽\",\"搶\",\"博\",\"巧\",\"殼\",\"兄\",\"杜\",\"訊\",\"誠\",\"碧\",\"祥\",\"柯\",\"頁\",\"巡\",\"矩\",\"悲\",\"灌\",\"齡\",\"倫\",\"票\",\"尋\",\"桂\",\"鋪\",\"聖\",\"恐\",\"恰\",\"鄭\",\"趣\",\"抬\",\"荒\",\"騰\",\"貼\",\"柔\",\"滴\",\"猛\",\"闊\",\"輛\",\"妻\",\"填\",\"撤\",\"儲\",\"簽\",\"鬧\",\"擾\",\"紫\",\"砂\",\"遞\",\"戲\",\"吊\",\"陶\",\"伐\",\"餵\",\"療\",\"瓶\",\"婆\",\"撫\",\"臂\",\"摸\",\"忍\",\"蝦\",\"蠟\",\"鄰\",\"胸\",\"鞏\",\"擠\",\"偶\",\"棄\",\"槽\",\"勁\",\"乳\",\"鄧\",\"吉\",\"仁\",\"爛\",\"磚\",\"租\",\"烏\",\"艦\",\"伴\",\"瓜\",\"淺\",\"丙\",\"暫\",\"燥\",\"橡\",\"柳\",\"迷\",\"暖\",\"牌\",\"秧\",\"膽\",\"詳\",\"簧\",\"踏\",\"瓷\",\"譜\",\"呆\",\"賓\",\"糊\",\"洛\",\"輝\",\"憤\",\"競\",\"隙\",\"怒\",\"粘\",\"乃\",\"緒\",\"肩\",\"籍\",\"敏\",\"塗\",\"熙\",\"皆\",\"偵\",\"懸\",\"掘\",\"享\",\"糾\",\"醒\",\"狂\",\"鎖\",\"淀\",\"恨\",\"牲\",\"霸\",\"爬\",\"賞\",\"逆\",\"玩\",\"陵\",\"祝\",\"秒\",\"浙\",\"貌\",\"役\",\"彼\",\"悉\",\"鴨\",\"趨\",\"鳳\",\"晨\",\"畜\",\"輩\",\"秩\",\"卵\",\"署\",\"梯\",\"炎\",\"灘\",\"棋\",\"驅\",\"篩\",\"峽\",\"冒\",\"啥\",\"壽\",\"譯\",\"浸\",\"泉\",\"帽\",\"遲\",\"矽\",\"疆\",\"貸\",\"漏\",\"稿\",\"冠\",\"嫩\",\"脅\",\"芯\",\"牢\",\"叛\",\"蝕\",\"奧\",\"鳴\",\"嶺\",\"羊\",\"憑\",\"串\",\"塘\",\"繪\",\"酵\",\"融\",\"盆\",\"錫\",\"廟\",\"籌\",\"凍\",\"輔\",\"攝\",\"襲\",\"筋\",\"拒\",\"僚\",\"旱\",\"鉀\",\"鳥\",\"漆\",\"沈\",\"眉\",\"疏\",\"添\",\"棒\",\"穗\",\"硝\",\"韓\",\"逼\",\"扭\",\"僑\",\"涼\",\"挺\",\"碗\",\"栽\",\"炒\",\"杯\",\"患\",\"餾\",\"勸\",\"豪\",\"遼\",\"勃\",\"鴻\",\"旦\",\"吏\",\"拜\",\"狗\",\"埋\",\"輥\",\"掩\",\"飲\",\"搬\",\"罵\",\"辭\",\"勾\",\"扣\",\"估\",\"蔣\",\"絨\",\"霧\",\"丈\",\"朵\",\"姆\",\"擬\",\"宇\",\"輯\",\"陝\",\"雕\",\"償\",\"蓄\",\"崇\",\"剪\",\"倡\",\"廳\",\"咬\",\"駛\",\"薯\",\"刷\",\"斥\",\"番\",\"賦\",\"奉\",\"佛\",\"澆\",\"漫\",\"曼\",\"扇\",\"鈣\",\"桃\",\"扶\",\"仔\",\"返\",\"俗\",\"虧\",\"腔\",\"鞋\",\"棱\",\"覆\",\"框\",\"悄\",\"叔\",\"撞\",\"騙\",\"勘\",\"旺\",\"沸\",\"孤\",\"吐\",\"孟\",\"渠\",\"屈\",\"疾\",\"妙\",\"惜\",\"仰\",\"狠\",\"脹\",\"諧\",\"拋\",\"黴\",\"桑\",\"崗\",\"嘛\",\"衰\",\"盜\",\"滲\",\"臟\",\"賴\",\"湧\",\"甜\",\"曹\",\"閱\",\"肌\",\"哩\",\"厲\",\"烴\",\"緯\",\"毅\",\"昨\",\"偽\",\"症\",\"煮\",\"嘆\",\"釘\",\"搭\",\"莖\",\"籠\",\"酷\",\"偷\",\"弓\",\"錐\",\"恆\",\"傑\",\"坑\",\"鼻\",\"翼\",\"綸\",\"敘\",\"獄\",\"逮\",\"罐\",\"絡\",\"棚\",\"抑\",\"膨\",\"蔬\",\"寺\",\"驟\",\"穆\",\"冶\",\"枯\",\"冊\",\"屍\",\"凸\",\"紳\",\"坯\",\"犧\",\"焰\",\"轟\",\"欣\",\"晉\",\"瘦\",\"禦\",\"錠\",\"錦\",\"喪\",\"旬\",\"鍛\",\"壟\",\"搜\",\"撲\",\"邀\",\"亭\",\"酯\",\"邁\",\"舒\",\"脆\",\"酶\",\"閒\",\"憂\",\"酚\",\"頑\",\"羽\",\"漲\",\"卸\",\"仗\",\"陪\",\"闢\",\"懲\",\"杭\",\"姚\",\"肚\",\"捉\",\"飄\",\"漂\",\"昆\",\"欺\",\"吾\",\"郎\",\"烷\",\"汁\",\"呵\",\"飾\",\"蕭\",\"雅\",\"郵\",\"遷\",\"燕\",\"撒\",\"姻\",\"赴\",\"宴\",\"煩\",\"債\",\"帳\",\"斑\",\"鈴\",\"旨\",\"醇\",\"董\",\"餅\",\"雛\",\"姿\",\"拌\",\"傅\",\"腹\",\"妥\",\"揉\",\"賢\",\"拆\",\"歪\",\"葡\",\"胺\",\"丟\",\"浩\",\"徽\",\"昂\",\"墊\",\"擋\",\"覽\",\"貪\",\"慰\",\"繳\",\"汪\",\"慌\",\"馮\",\"諾\",\"姜\",\"誼\",\"兇\",\"劣\",\"誣\",\"耀\",\"昏\",\"躺\",\"盈\",\"騎\",\"喬\",\"溪\",\"叢\",\"盧\",\"抹\",\"悶\",\"諮\",\"刮\",\"駕\",\"纜\",\"悟\",\"摘\",\"鉺\",\"擲\",\"頗\",\"幻\",\"柄\",\"惠\",\"慘\",\"佳\",\"仇\",\"臘\",\"窩\",\"滌\",\"劍\",\"瞧\",\"堡\",\"潑\",\"蔥\",\"罩\",\"霍\",\"撈\",\"胎\",\"蒼\",\"濱\",\"倆\",\"捅\",\"湘\",\"砍\",\"霞\",\"邵\",\"萄\",\"瘋\",\"淮\",\"遂\",\"熊\",\"糞\",\"烘\",\"宿\",\"檔\",\"戈\",\"駁\",\"嫂\",\"裕\",\"徙\",\"箭\",\"捐\",\"腸\",\"撐\",\"曬\",\"辨\",\"殿\",\"蓮\",\"攤\",\"攪\",\"醬\",\"屏\",\"疫\",\"哀\",\"蔡\",\"堵\",\"沫\",\"皺\",\"暢\",\"疊\",\"閣\",\"萊\",\"敲\",\"轄\",\"鉤\",\"痕\",\"壩\",\"巷\",\"餓\",\"禍\",\"丘\",\"玄\",\"溜\",\"曰\",\"邏\",\"彭\",\"嘗\",\"卿\",\"妨\",\"艇\",\"吞\",\"韋\",\"怨\",\"矮\",\"歇\"]");
 
 /***/ }),
-/* 188 */
+/* 189 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"가격\",\"가끔\",\"가난\",\"가능\",\"가득\",\"가르침\",\"가뭄\",\"가방\",\"가상\",\"가슴\",\"가운데\",\"가을\",\"가이드\",\"가입\",\"가장\",\"가정\",\"가족\",\"가죽\",\"각오\",\"각자\",\"간격\",\"간부\",\"간섭\",\"간장\",\"간접\",\"간판\",\"갈등\",\"갈비\",\"갈색\",\"갈증\",\"감각\",\"감기\",\"감소\",\"감수성\",\"감자\",\"감정\",\"갑자기\",\"강남\",\"강당\",\"강도\",\"강력히\",\"강변\",\"강북\",\"강사\",\"강수량\",\"강아지\",\"강원도\",\"강의\",\"강제\",\"강조\",\"같이\",\"개구리\",\"개나리\",\"개방\",\"개별\",\"개선\",\"개성\",\"개인\",\"객관적\",\"거실\",\"거액\",\"거울\",\"거짓\",\"거품\",\"걱정\",\"건강\",\"건물\",\"건설\",\"건조\",\"건축\",\"걸음\",\"검사\",\"검토\",\"게시판\",\"게임\",\"겨울\",\"견해\",\"결과\",\"결국\",\"결론\",\"결석\",\"결승\",\"결심\",\"결정\",\"결혼\",\"경계\",\"경고\",\"경기\",\"경력\",\"경복궁\",\"경비\",\"경상도\",\"경영\",\"경우\",\"경쟁\",\"경제\",\"경주\",\"경찰\",\"경치\",\"경향\",\"경험\",\"계곡\",\"계단\",\"계란\",\"계산\",\"계속\",\"계약\",\"계절\",\"계층\",\"계획\",\"고객\",\"고구려\",\"고궁\",\"고급\",\"고등학생\",\"고무신\",\"고민\",\"고양이\",\"고장\",\"고전\",\"고집\",\"고춧가루\",\"고통\",\"고향\",\"곡식\",\"골목\",\"골짜기\",\"골프\",\"공간\",\"공개\",\"공격\",\"공군\",\"공급\",\"공기\",\"공동\",\"공무원\",\"공부\",\"공사\",\"공식\",\"공업\",\"공연\",\"공원\",\"공장\",\"공짜\",\"공책\",\"공통\",\"공포\",\"공항\",\"공휴일\",\"과목\",\"과일\",\"과장\",\"과정\",\"과학\",\"관객\",\"관계\",\"관광\",\"관념\",\"관람\",\"관련\",\"관리\",\"관습\",\"관심\",\"관점\",\"관찰\",\"광경\",\"광고\",\"광장\",\"광주\",\"괴로움\",\"굉장히\",\"교과서\",\"교문\",\"교복\",\"교실\",\"교양\",\"교육\",\"교장\",\"교직\",\"교통\",\"교환\",\"교훈\",\"구경\",\"구름\",\"구멍\",\"구별\",\"구분\",\"구석\",\"구성\",\"구속\",\"구역\",\"구입\",\"구청\",\"구체적\",\"국가\",\"국기\",\"국내\",\"국립\",\"국물\",\"국민\",\"국수\",\"국어\",\"국왕\",\"국적\",\"국제\",\"국회\",\"군대\",\"군사\",\"군인\",\"궁극적\",\"권리\",\"권위\",\"권투\",\"귀국\",\"귀신\",\"규정\",\"규칙\",\"균형\",\"그날\",\"그냥\",\"그늘\",\"그러나\",\"그룹\",\"그릇\",\"그림\",\"그제서야\",\"그토록\",\"극복\",\"극히\",\"근거\",\"근교\",\"근래\",\"근로\",\"근무\",\"근본\",\"근원\",\"근육\",\"근처\",\"글씨\",\"글자\",\"금강산\",\"금고\",\"금년\",\"금메달\",\"금액\",\"금연\",\"금요일\",\"금지\",\"긍정적\",\"기간\",\"기관\",\"기념\",\"기능\",\"기독교\",\"기둥\",\"기록\",\"기름\",\"기법\",\"기본\",\"기분\",\"기쁨\",\"기숙사\",\"기술\",\"기억\",\"기업\",\"기온\",\"기운\",\"기원\",\"기적\",\"기준\",\"기침\",\"기혼\",\"기획\",\"긴급\",\"긴장\",\"길이\",\"김밥\",\"김치\",\"김포공항\",\"깍두기\",\"깜빡\",\"깨달음\",\"깨소금\",\"껍질\",\"꼭대기\",\"꽃잎\",\"나들이\",\"나란히\",\"나머지\",\"나물\",\"나침반\",\"나흘\",\"낙엽\",\"난방\",\"날개\",\"날씨\",\"날짜\",\"남녀\",\"남대문\",\"남매\",\"남산\",\"남자\",\"남편\",\"남학생\",\"낭비\",\"낱말\",\"내년\",\"내용\",\"내일\",\"냄비\",\"냄새\",\"냇물\",\"냉동\",\"냉면\",\"냉방\",\"냉장고\",\"넥타이\",\"넷째\",\"노동\",\"노란색\",\"노력\",\"노인\",\"녹음\",\"녹차\",\"녹화\",\"논리\",\"논문\",\"논쟁\",\"놀이\",\"농구\",\"농담\",\"농민\",\"농부\",\"농업\",\"농장\",\"농촌\",\"높이\",\"눈동자\",\"눈물\",\"눈썹\",\"뉴욕\",\"느낌\",\"늑대\",\"능동적\",\"능력\",\"다방\",\"다양성\",\"다음\",\"다이어트\",\"다행\",\"단계\",\"단골\",\"단독\",\"단맛\",\"단순\",\"단어\",\"단위\",\"단점\",\"단체\",\"단추\",\"단편\",\"단풍\",\"달걀\",\"달러\",\"달력\",\"달리\",\"닭고기\",\"담당\",\"담배\",\"담요\",\"담임\",\"답변\",\"답장\",\"당근\",\"당분간\",\"당연히\",\"당장\",\"대규모\",\"대낮\",\"대단히\",\"대답\",\"대도시\",\"대략\",\"대량\",\"대륙\",\"대문\",\"대부분\",\"대신\",\"대응\",\"대장\",\"대전\",\"대접\",\"대중\",\"대책\",\"대출\",\"대충\",\"대통령\",\"대학\",\"대한민국\",\"대합실\",\"대형\",\"덩어리\",\"데이트\",\"도대체\",\"도덕\",\"도둑\",\"도망\",\"도서관\",\"도심\",\"도움\",\"도입\",\"도자기\",\"도저히\",\"도전\",\"도중\",\"도착\",\"독감\",\"독립\",\"독서\",\"독일\",\"독창적\",\"동화책\",\"뒷모습\",\"뒷산\",\"딸아이\",\"마누라\",\"마늘\",\"마당\",\"마라톤\",\"마련\",\"마무리\",\"마사지\",\"마약\",\"마요네즈\",\"마을\",\"마음\",\"마이크\",\"마중\",\"마지막\",\"마찬가지\",\"마찰\",\"마흔\",\"막걸리\",\"막내\",\"막상\",\"만남\",\"만두\",\"만세\",\"만약\",\"만일\",\"만점\",\"만족\",\"만화\",\"많이\",\"말기\",\"말씀\",\"말투\",\"맘대로\",\"망원경\",\"매년\",\"매달\",\"매력\",\"매번\",\"매스컴\",\"매일\",\"매장\",\"맥주\",\"먹이\",\"먼저\",\"먼지\",\"멀리\",\"메일\",\"며느리\",\"며칠\",\"면담\",\"멸치\",\"명단\",\"명령\",\"명예\",\"명의\",\"명절\",\"명칭\",\"명함\",\"모금\",\"모니터\",\"모델\",\"모든\",\"모범\",\"모습\",\"모양\",\"모임\",\"모조리\",\"모집\",\"모퉁이\",\"목걸이\",\"목록\",\"목사\",\"목소리\",\"목숨\",\"목적\",\"목표\",\"몰래\",\"몸매\",\"몸무게\",\"몸살\",\"몸속\",\"몸짓\",\"몸통\",\"몹시\",\"무관심\",\"무궁화\",\"무더위\",\"무덤\",\"무릎\",\"무슨\",\"무엇\",\"무역\",\"무용\",\"무조건\",\"무지개\",\"무척\",\"문구\",\"문득\",\"문법\",\"문서\",\"문제\",\"문학\",\"문화\",\"물가\",\"물건\",\"물결\",\"물고기\",\"물론\",\"물리학\",\"물음\",\"물질\",\"물체\",\"미국\",\"미디어\",\"미사일\",\"미술\",\"미역\",\"미용실\",\"미움\",\"미인\",\"미팅\",\"미혼\",\"민간\",\"민족\",\"민주\",\"믿음\",\"밀가루\",\"밀리미터\",\"밑바닥\",\"바가지\",\"바구니\",\"바나나\",\"바늘\",\"바닥\",\"바닷가\",\"바람\",\"바이러스\",\"바탕\",\"박물관\",\"박사\",\"박수\",\"반대\",\"반드시\",\"반말\",\"반발\",\"반성\",\"반응\",\"반장\",\"반죽\",\"반지\",\"반찬\",\"받침\",\"발가락\",\"발걸음\",\"발견\",\"발달\",\"발레\",\"발목\",\"발바닥\",\"발생\",\"발음\",\"발자국\",\"발전\",\"발톱\",\"발표\",\"밤하늘\",\"밥그릇\",\"밥맛\",\"밥상\",\"밥솥\",\"방금\",\"방면\",\"방문\",\"방바닥\",\"방법\",\"방송\",\"방식\",\"방안\",\"방울\",\"방지\",\"방학\",\"방해\",\"방향\",\"배경\",\"배꼽\",\"배달\",\"배드민턴\",\"백두산\",\"백색\",\"백성\",\"백인\",\"백제\",\"백화점\",\"버릇\",\"버섯\",\"버튼\",\"번개\",\"번역\",\"번지\",\"번호\",\"벌금\",\"벌레\",\"벌써\",\"범위\",\"범인\",\"범죄\",\"법률\",\"법원\",\"법적\",\"법칙\",\"베이징\",\"벨트\",\"변경\",\"변동\",\"변명\",\"변신\",\"변호사\",\"변화\",\"별도\",\"별명\",\"별일\",\"병실\",\"병아리\",\"병원\",\"보관\",\"보너스\",\"보라색\",\"보람\",\"보름\",\"보상\",\"보안\",\"보자기\",\"보장\",\"보전\",\"보존\",\"보통\",\"보편적\",\"보험\",\"복도\",\"복사\",\"복숭아\",\"복습\",\"볶음\",\"본격적\",\"본래\",\"본부\",\"본사\",\"본성\",\"본인\",\"본질\",\"볼펜\",\"봉사\",\"봉지\",\"봉투\",\"부근\",\"부끄러움\",\"부담\",\"부동산\",\"부문\",\"부분\",\"부산\",\"부상\",\"부엌\",\"부인\",\"부작용\",\"부장\",\"부정\",\"부족\",\"부지런히\",\"부친\",\"부탁\",\"부품\",\"부회장\",\"북부\",\"북한\",\"분노\",\"분량\",\"분리\",\"분명\",\"분석\",\"분야\",\"분위기\",\"분필\",\"분홍색\",\"불고기\",\"불과\",\"불교\",\"불꽃\",\"불만\",\"불법\",\"불빛\",\"불안\",\"불이익\",\"불행\",\"브랜드\",\"비극\",\"비난\",\"비닐\",\"비둘기\",\"비디오\",\"비로소\",\"비만\",\"비명\",\"비밀\",\"비바람\",\"비빔밥\",\"비상\",\"비용\",\"비율\",\"비중\",\"비타민\",\"비판\",\"빌딩\",\"빗물\",\"빗방울\",\"빗줄기\",\"빛깔\",\"빨간색\",\"빨래\",\"빨리\",\"사건\",\"사계절\",\"사나이\",\"사냥\",\"사람\",\"사랑\",\"사립\",\"사모님\",\"사물\",\"사방\",\"사상\",\"사생활\",\"사설\",\"사슴\",\"사실\",\"사업\",\"사용\",\"사월\",\"사장\",\"사전\",\"사진\",\"사촌\",\"사춘기\",\"사탕\",\"사투리\",\"사흘\",\"산길\",\"산부인과\",\"산업\",\"산책\",\"살림\",\"살인\",\"살짝\",\"삼계탕\",\"삼국\",\"삼십\",\"삼월\",\"삼촌\",\"상관\",\"상금\",\"상대\",\"상류\",\"상반기\",\"상상\",\"상식\",\"상업\",\"상인\",\"상자\",\"상점\",\"상처\",\"상추\",\"상태\",\"상표\",\"상품\",\"상황\",\"새벽\",\"색깔\",\"색연필\",\"생각\",\"생명\",\"생물\",\"생방송\",\"생산\",\"생선\",\"생신\",\"생일\",\"생활\",\"서랍\",\"서른\",\"서명\",\"서민\",\"서비스\",\"서양\",\"서울\",\"서적\",\"서점\",\"서쪽\",\"서클\",\"석사\",\"석유\",\"선거\",\"선물\",\"선배\",\"선생\",\"선수\",\"선원\",\"선장\",\"선전\",\"선택\",\"선풍기\",\"설거지\",\"설날\",\"설렁탕\",\"설명\",\"설문\",\"설사\",\"설악산\",\"설치\",\"설탕\",\"섭씨\",\"성공\",\"성당\",\"성명\",\"성별\",\"성인\",\"성장\",\"성적\",\"성질\",\"성함\",\"세금\",\"세미나\",\"세상\",\"세월\",\"세종대왕\",\"세탁\",\"센터\",\"센티미터\",\"셋째\",\"소규모\",\"소극적\",\"소금\",\"소나기\",\"소년\",\"소득\",\"소망\",\"소문\",\"소설\",\"소속\",\"소아과\",\"소용\",\"소원\",\"소음\",\"소중히\",\"소지품\",\"소질\",\"소풍\",\"소형\",\"속담\",\"속도\",\"속옷\",\"손가락\",\"손길\",\"손녀\",\"손님\",\"손등\",\"손목\",\"손뼉\",\"손실\",\"손질\",\"손톱\",\"손해\",\"솔직히\",\"솜씨\",\"송아지\",\"송이\",\"송편\",\"쇠고기\",\"쇼핑\",\"수건\",\"수년\",\"수단\",\"수돗물\",\"수동적\",\"수면\",\"수명\",\"수박\",\"수상\",\"수석\",\"수술\",\"수시로\",\"수업\",\"수염\",\"수영\",\"수입\",\"수준\",\"수집\",\"수출\",\"수컷\",\"수필\",\"수학\",\"수험생\",\"수화기\",\"숙녀\",\"숙소\",\"숙제\",\"순간\",\"순서\",\"순수\",\"순식간\",\"순위\",\"숟가락\",\"술병\",\"술집\",\"숫자\",\"스님\",\"스물\",\"스스로\",\"스승\",\"스웨터\",\"스위치\",\"스케이트\",\"스튜디오\",\"스트레스\",\"스포츠\",\"슬쩍\",\"슬픔\",\"습관\",\"습기\",\"승객\",\"승리\",\"승부\",\"승용차\",\"승진\",\"시각\",\"시간\",\"시골\",\"시금치\",\"시나리오\",\"시댁\",\"시리즈\",\"시멘트\",\"시민\",\"시부모\",\"시선\",\"시설\",\"시스템\",\"시아버지\",\"시어머니\",\"시월\",\"시인\",\"시일\",\"시작\",\"시장\",\"시절\",\"시점\",\"시중\",\"시즌\",\"시집\",\"시청\",\"시합\",\"시험\",\"식구\",\"식기\",\"식당\",\"식량\",\"식료품\",\"식물\",\"식빵\",\"식사\",\"식생활\",\"식초\",\"식탁\",\"식품\",\"신고\",\"신규\",\"신념\",\"신문\",\"신발\",\"신비\",\"신사\",\"신세\",\"신용\",\"신제품\",\"신청\",\"신체\",\"신화\",\"실감\",\"실내\",\"실력\",\"실례\",\"실망\",\"실수\",\"실습\",\"실시\",\"실장\",\"실정\",\"실질적\",\"실천\",\"실체\",\"실컷\",\"실태\",\"실패\",\"실험\",\"실현\",\"심리\",\"심부름\",\"심사\",\"심장\",\"심정\",\"심판\",\"쌍둥이\",\"씨름\",\"씨앗\",\"아가씨\",\"아나운서\",\"아드님\",\"아들\",\"아쉬움\",\"아스팔트\",\"아시아\",\"아울러\",\"아저씨\",\"아줌마\",\"아직\",\"아침\",\"아파트\",\"아프리카\",\"아픔\",\"아홉\",\"아흔\",\"악기\",\"악몽\",\"악수\",\"안개\",\"안경\",\"안과\",\"안내\",\"안녕\",\"안동\",\"안방\",\"안부\",\"안주\",\"알루미늄\",\"알코올\",\"암시\",\"암컷\",\"압력\",\"앞날\",\"앞문\",\"애인\",\"애정\",\"액수\",\"앨범\",\"야간\",\"야단\",\"야옹\",\"약간\",\"약국\",\"약속\",\"약수\",\"약점\",\"약품\",\"약혼녀\",\"양념\",\"양력\",\"양말\",\"양배추\",\"양주\",\"양파\",\"어둠\",\"어려움\",\"어른\",\"어젯밤\",\"어쨌든\",\"어쩌다가\",\"어쩐지\",\"언니\",\"언덕\",\"언론\",\"언어\",\"얼굴\",\"얼른\",\"얼음\",\"얼핏\",\"엄마\",\"업무\",\"업종\",\"업체\",\"엉덩이\",\"엉망\",\"엉터리\",\"엊그제\",\"에너지\",\"에어컨\",\"엔진\",\"여건\",\"여고생\",\"여관\",\"여군\",\"여권\",\"여대생\",\"여덟\",\"여동생\",\"여든\",\"여론\",\"여름\",\"여섯\",\"여성\",\"여왕\",\"여인\",\"여전히\",\"여직원\",\"여학생\",\"여행\",\"역사\",\"역시\",\"역할\",\"연결\",\"연구\",\"연극\",\"연기\",\"연락\",\"연설\",\"연세\",\"연속\",\"연습\",\"연애\",\"연예인\",\"연인\",\"연장\",\"연주\",\"연출\",\"연필\",\"연합\",\"연휴\",\"열기\",\"열매\",\"열쇠\",\"열심히\",\"열정\",\"열차\",\"열흘\",\"염려\",\"엽서\",\"영국\",\"영남\",\"영상\",\"영양\",\"영역\",\"영웅\",\"영원히\",\"영하\",\"영향\",\"영혼\",\"영화\",\"옆구리\",\"옆방\",\"옆집\",\"예감\",\"예금\",\"예방\",\"예산\",\"예상\",\"예선\",\"예술\",\"예습\",\"예식장\",\"예약\",\"예전\",\"예절\",\"예정\",\"예컨대\",\"옛날\",\"오늘\",\"오락\",\"오랫동안\",\"오렌지\",\"오로지\",\"오른발\",\"오븐\",\"오십\",\"오염\",\"오월\",\"오전\",\"오직\",\"오징어\",\"오페라\",\"오피스텔\",\"오히려\",\"옥상\",\"옥수수\",\"온갖\",\"온라인\",\"온몸\",\"온종일\",\"온통\",\"올가을\",\"올림픽\",\"올해\",\"옷차림\",\"와이셔츠\",\"와인\",\"완성\",\"완전\",\"왕비\",\"왕자\",\"왜냐하면\",\"왠지\",\"외갓집\",\"외국\",\"외로움\",\"외삼촌\",\"외출\",\"외침\",\"외할머니\",\"왼발\",\"왼손\",\"왼쪽\",\"요금\",\"요일\",\"요즘\",\"요청\",\"용기\",\"용서\",\"용어\",\"우산\",\"우선\",\"우승\",\"우연히\",\"우정\",\"우체국\",\"우편\",\"운동\",\"운명\",\"운반\",\"운전\",\"운행\",\"울산\",\"울음\",\"움직임\",\"웃어른\",\"웃음\",\"워낙\",\"원고\",\"원래\",\"원서\",\"원숭이\",\"원인\",\"원장\",\"원피스\",\"월급\",\"월드컵\",\"월세\",\"월요일\",\"웨이터\",\"위반\",\"위법\",\"위성\",\"위원\",\"위험\",\"위협\",\"윗사람\",\"유난히\",\"유럽\",\"유명\",\"유물\",\"유산\",\"유적\",\"유치원\",\"유학\",\"유행\",\"유형\",\"육군\",\"육상\",\"육십\",\"육체\",\"은행\",\"음력\",\"음료\",\"음반\",\"음성\",\"음식\",\"음악\",\"음주\",\"의견\",\"의논\",\"의문\",\"의복\",\"의식\",\"의심\",\"의외로\",\"의욕\",\"의원\",\"의학\",\"이것\",\"이곳\",\"이념\",\"이놈\",\"이달\",\"이대로\",\"이동\",\"이렇게\",\"이력서\",\"이론적\",\"이름\",\"이민\",\"이발소\",\"이별\",\"이불\",\"이빨\",\"이상\",\"이성\",\"이슬\",\"이야기\",\"이용\",\"이웃\",\"이월\",\"이윽고\",\"이익\",\"이전\",\"이중\",\"이튿날\",\"이틀\",\"이혼\",\"인간\",\"인격\",\"인공\",\"인구\",\"인근\",\"인기\",\"인도\",\"인류\",\"인물\",\"인생\",\"인쇄\",\"인연\",\"인원\",\"인재\",\"인종\",\"인천\",\"인체\",\"인터넷\",\"인하\",\"인형\",\"일곱\",\"일기\",\"일단\",\"일대\",\"일등\",\"일반\",\"일본\",\"일부\",\"일상\",\"일생\",\"일손\",\"일요일\",\"일월\",\"일정\",\"일종\",\"일주일\",\"일찍\",\"일체\",\"일치\",\"일행\",\"일회용\",\"임금\",\"임무\",\"입대\",\"입력\",\"입맛\",\"입사\",\"입술\",\"입시\",\"입원\",\"입장\",\"입학\",\"자가용\",\"자격\",\"자극\",\"자동\",\"자랑\",\"자부심\",\"자식\",\"자신\",\"자연\",\"자원\",\"자율\",\"자전거\",\"자정\",\"자존심\",\"자판\",\"작가\",\"작년\",\"작성\",\"작업\",\"작용\",\"작은딸\",\"작품\",\"잔디\",\"잔뜩\",\"잔치\",\"잘못\",\"잠깐\",\"잠수함\",\"잠시\",\"잠옷\",\"잠자리\",\"잡지\",\"장관\",\"장군\",\"장기간\",\"장래\",\"장례\",\"장르\",\"장마\",\"장면\",\"장모\",\"장미\",\"장비\",\"장사\",\"장소\",\"장식\",\"장애인\",\"장인\",\"장점\",\"장차\",\"장학금\",\"재능\",\"재빨리\",\"재산\",\"재생\",\"재작년\",\"재정\",\"재채기\",\"재판\",\"재학\",\"재활용\",\"저것\",\"저고리\",\"저곳\",\"저녁\",\"저런\",\"저렇게\",\"저번\",\"저울\",\"저절로\",\"저축\",\"적극\",\"적당히\",\"적성\",\"적용\",\"적응\",\"전개\",\"전공\",\"전기\",\"전달\",\"전라도\",\"전망\",\"전문\",\"전반\",\"전부\",\"전세\",\"전시\",\"전용\",\"전자\",\"전쟁\",\"전주\",\"전철\",\"전체\",\"전통\",\"전혀\",\"전후\",\"절대\",\"절망\",\"절반\",\"절약\",\"절차\",\"점검\",\"점수\",\"점심\",\"점원\",\"점점\",\"점차\",\"접근\",\"접시\",\"접촉\",\"젓가락\",\"정거장\",\"정도\",\"정류장\",\"정리\",\"정말\",\"정면\",\"정문\",\"정반대\",\"정보\",\"정부\",\"정비\",\"정상\",\"정성\",\"정오\",\"정원\",\"정장\",\"정지\",\"정치\",\"정확히\",\"제공\",\"제과점\",\"제대로\",\"제목\",\"제발\",\"제법\",\"제삿날\",\"제안\",\"제일\",\"제작\",\"제주도\",\"제출\",\"제품\",\"제한\",\"조각\",\"조건\",\"조금\",\"조깅\",\"조명\",\"조미료\",\"조상\",\"조선\",\"조용히\",\"조절\",\"조정\",\"조직\",\"존댓말\",\"존재\",\"졸업\",\"졸음\",\"종교\",\"종로\",\"종류\",\"종소리\",\"종업원\",\"종종\",\"종합\",\"좌석\",\"죄인\",\"주관적\",\"주름\",\"주말\",\"주머니\",\"주먹\",\"주문\",\"주민\",\"주방\",\"주변\",\"주식\",\"주인\",\"주일\",\"주장\",\"주전자\",\"주택\",\"준비\",\"줄거리\",\"줄기\",\"줄무늬\",\"중간\",\"중계방송\",\"중국\",\"중년\",\"중단\",\"중독\",\"중반\",\"중부\",\"중세\",\"중소기업\",\"중순\",\"중앙\",\"중요\",\"중학교\",\"즉석\",\"즉시\",\"즐거움\",\"증가\",\"증거\",\"증권\",\"증상\",\"증세\",\"지각\",\"지갑\",\"지경\",\"지극히\",\"지금\",\"지급\",\"지능\",\"지름길\",\"지리산\",\"지방\",\"지붕\",\"지식\",\"지역\",\"지우개\",\"지원\",\"지적\",\"지점\",\"지진\",\"지출\",\"직선\",\"직업\",\"직원\",\"직장\",\"진급\",\"진동\",\"진로\",\"진료\",\"진리\",\"진짜\",\"진찰\",\"진출\",\"진통\",\"진행\",\"질문\",\"질병\",\"질서\",\"짐작\",\"집단\",\"집안\",\"집중\",\"짜증\",\"찌꺼기\",\"차남\",\"차라리\",\"차량\",\"차림\",\"차별\",\"차선\",\"차츰\",\"착각\",\"찬물\",\"찬성\",\"참가\",\"참기름\",\"참새\",\"참석\",\"참여\",\"참외\",\"참조\",\"찻잔\",\"창가\",\"창고\",\"창구\",\"창문\",\"창밖\",\"창작\",\"창조\",\"채널\",\"채점\",\"책가방\",\"책방\",\"책상\",\"책임\",\"챔피언\",\"처벌\",\"처음\",\"천국\",\"천둥\",\"천장\",\"천재\",\"천천히\",\"철도\",\"철저히\",\"철학\",\"첫날\",\"첫째\",\"청년\",\"청바지\",\"청소\",\"청춘\",\"체계\",\"체력\",\"체온\",\"체육\",\"체중\",\"체험\",\"초등학생\",\"초반\",\"초밥\",\"초상화\",\"초순\",\"초여름\",\"초원\",\"초저녁\",\"초점\",\"초청\",\"초콜릿\",\"촛불\",\"총각\",\"총리\",\"총장\",\"촬영\",\"최근\",\"최상\",\"최선\",\"최신\",\"최악\",\"최종\",\"추석\",\"추억\",\"추진\",\"추천\",\"추측\",\"축구\",\"축소\",\"축제\",\"축하\",\"출근\",\"출발\",\"출산\",\"출신\",\"출연\",\"출입\",\"출장\",\"출판\",\"충격\",\"충고\",\"충돌\",\"충분히\",\"충청도\",\"취업\",\"취직\",\"취향\",\"치약\",\"친구\",\"친척\",\"칠십\",\"칠월\",\"칠판\",\"침대\",\"침묵\",\"침실\",\"칫솔\",\"칭찬\",\"카메라\",\"카운터\",\"칼국수\",\"캐릭터\",\"캠퍼스\",\"캠페인\",\"커튼\",\"컨디션\",\"컬러\",\"컴퓨터\",\"코끼리\",\"코미디\",\"콘서트\",\"콜라\",\"콤플렉스\",\"콩나물\",\"쾌감\",\"쿠데타\",\"크림\",\"큰길\",\"큰딸\",\"큰소리\",\"큰아들\",\"큰어머니\",\"큰일\",\"큰절\",\"클래식\",\"클럽\",\"킬로\",\"타입\",\"타자기\",\"탁구\",\"탁자\",\"탄생\",\"태권도\",\"태양\",\"태풍\",\"택시\",\"탤런트\",\"터널\",\"터미널\",\"테니스\",\"테스트\",\"테이블\",\"텔레비전\",\"토론\",\"토마토\",\"토요일\",\"통계\",\"통과\",\"통로\",\"통신\",\"통역\",\"통일\",\"통장\",\"통제\",\"통증\",\"통합\",\"통화\",\"퇴근\",\"퇴원\",\"퇴직금\",\"튀김\",\"트럭\",\"특급\",\"특별\",\"특성\",\"특수\",\"특징\",\"특히\",\"튼튼히\",\"티셔츠\",\"파란색\",\"파일\",\"파출소\",\"판결\",\"판단\",\"판매\",\"판사\",\"팔십\",\"팔월\",\"팝송\",\"패션\",\"팩스\",\"팩시밀리\",\"팬티\",\"퍼센트\",\"페인트\",\"편견\",\"편의\",\"편지\",\"편히\",\"평가\",\"평균\",\"평생\",\"평소\",\"평양\",\"평일\",\"평화\",\"포스터\",\"포인트\",\"포장\",\"포함\",\"표면\",\"표정\",\"표준\",\"표현\",\"품목\",\"품질\",\"풍경\",\"풍속\",\"풍습\",\"프랑스\",\"프린터\",\"플라스틱\",\"피곤\",\"피망\",\"피아노\",\"필름\",\"필수\",\"필요\",\"필자\",\"필통\",\"핑계\",\"하느님\",\"하늘\",\"하드웨어\",\"하룻밤\",\"하반기\",\"하숙집\",\"하순\",\"하여튼\",\"하지만\",\"하천\",\"하품\",\"하필\",\"학과\",\"학교\",\"학급\",\"학기\",\"학년\",\"학력\",\"학번\",\"학부모\",\"학비\",\"학생\",\"학술\",\"학습\",\"학용품\",\"학원\",\"학위\",\"학자\",\"학점\",\"한계\",\"한글\",\"한꺼번에\",\"한낮\",\"한눈\",\"한동안\",\"한때\",\"한라산\",\"한마디\",\"한문\",\"한번\",\"한복\",\"한식\",\"한여름\",\"한쪽\",\"할머니\",\"할아버지\",\"할인\",\"함께\",\"함부로\",\"합격\",\"합리적\",\"항공\",\"항구\",\"항상\",\"항의\",\"해결\",\"해군\",\"해답\",\"해당\",\"해물\",\"해석\",\"해설\",\"해수욕장\",\"해안\",\"핵심\",\"핸드백\",\"햄버거\",\"햇볕\",\"햇살\",\"행동\",\"행복\",\"행사\",\"행운\",\"행위\",\"향기\",\"향상\",\"향수\",\"허락\",\"허용\",\"헬기\",\"현관\",\"현금\",\"현대\",\"현상\",\"현실\",\"현장\",\"현재\",\"현지\",\"혈액\",\"협력\",\"형부\",\"형사\",\"형수\",\"형식\",\"형제\",\"형태\",\"형편\",\"혜택\",\"호기심\",\"호남\",\"호랑이\",\"호박\",\"호텔\",\"호흡\",\"혹시\",\"홀로\",\"홈페이지\",\"홍보\",\"홍수\",\"홍차\",\"화면\",\"화분\",\"화살\",\"화요일\",\"화장\",\"화학\",\"확보\",\"확인\",\"확장\",\"확정\",\"환갑\",\"환경\",\"환영\",\"환율\",\"환자\",\"활기\",\"활동\",\"활발히\",\"활용\",\"활짝\",\"회견\",\"회관\",\"회복\",\"회색\",\"회원\",\"회장\",\"회전\",\"횟수\",\"횡단보도\",\"효율적\",\"후반\",\"후춧가루\",\"훈련\",\"훨씬\",\"휴식\",\"휴일\",\"흉내\",\"흐름\",\"흑백\",\"흑인\",\"흔적\",\"흔히\",\"흥미\",\"흥분\",\"희곡\",\"희망\",\"희생\",\"흰색\",\"힘껏\"]");
 
 /***/ }),
-/* 189 */
+/* 190 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"abaisser\",\"abandon\",\"abdiquer\",\"abeille\",\"abolir\",\"aborder\",\"aboutir\",\"aboyer\",\"abrasif\",\"abreuver\",\"abriter\",\"abroger\",\"abrupt\",\"absence\",\"absolu\",\"absurde\",\"abusif\",\"abyssal\",\"académie\",\"acajou\",\"acarien\",\"accabler\",\"accepter\",\"acclamer\",\"accolade\",\"accroche\",\"accuser\",\"acerbe\",\"achat\",\"acheter\",\"aciduler\",\"acier\",\"acompte\",\"acquérir\",\"acronyme\",\"acteur\",\"actif\",\"actuel\",\"adepte\",\"adéquat\",\"adhésif\",\"adjectif\",\"adjuger\",\"admettre\",\"admirer\",\"adopter\",\"adorer\",\"adoucir\",\"adresse\",\"adroit\",\"adulte\",\"adverbe\",\"aérer\",\"aéronef\",\"affaire\",\"affecter\",\"affiche\",\"affreux\",\"affubler\",\"agacer\",\"agencer\",\"agile\",\"agiter\",\"agrafer\",\"agréable\",\"agrume\",\"aider\",\"aiguille\",\"ailier\",\"aimable\",\"aisance\",\"ajouter\",\"ajuster\",\"alarmer\",\"alchimie\",\"alerte\",\"algèbre\",\"algue\",\"aliéner\",\"aliment\",\"alléger\",\"alliage\",\"allouer\",\"allumer\",\"alourdir\",\"alpaga\",\"altesse\",\"alvéole\",\"amateur\",\"ambigu\",\"ambre\",\"aménager\",\"amertume\",\"amidon\",\"amiral\",\"amorcer\",\"amour\",\"amovible\",\"amphibie\",\"ampleur\",\"amusant\",\"analyse\",\"anaphore\",\"anarchie\",\"anatomie\",\"ancien\",\"anéantir\",\"angle\",\"angoisse\",\"anguleux\",\"animal\",\"annexer\",\"annonce\",\"annuel\",\"anodin\",\"anomalie\",\"anonyme\",\"anormal\",\"antenne\",\"antidote\",\"anxieux\",\"apaiser\",\"apéritif\",\"aplanir\",\"apologie\",\"appareil\",\"appeler\",\"apporter\",\"appuyer\",\"aquarium\",\"aqueduc\",\"arbitre\",\"arbuste\",\"ardeur\",\"ardoise\",\"argent\",\"arlequin\",\"armature\",\"armement\",\"armoire\",\"armure\",\"arpenter\",\"arracher\",\"arriver\",\"arroser\",\"arsenic\",\"artériel\",\"article\",\"aspect\",\"asphalte\",\"aspirer\",\"assaut\",\"asservir\",\"assiette\",\"associer\",\"assurer\",\"asticot\",\"astre\",\"astuce\",\"atelier\",\"atome\",\"atrium\",\"atroce\",\"attaque\",\"attentif\",\"attirer\",\"attraper\",\"aubaine\",\"auberge\",\"audace\",\"audible\",\"augurer\",\"aurore\",\"automne\",\"autruche\",\"avaler\",\"avancer\",\"avarice\",\"avenir\",\"averse\",\"aveugle\",\"aviateur\",\"avide\",\"avion\",\"aviser\",\"avoine\",\"avouer\",\"avril\",\"axial\",\"axiome\",\"badge\",\"bafouer\",\"bagage\",\"baguette\",\"baignade\",\"balancer\",\"balcon\",\"baleine\",\"balisage\",\"bambin\",\"bancaire\",\"bandage\",\"banlieue\",\"bannière\",\"banquier\",\"barbier\",\"baril\",\"baron\",\"barque\",\"barrage\",\"bassin\",\"bastion\",\"bataille\",\"bateau\",\"batterie\",\"baudrier\",\"bavarder\",\"belette\",\"bélier\",\"belote\",\"bénéfice\",\"berceau\",\"berger\",\"berline\",\"bermuda\",\"besace\",\"besogne\",\"bétail\",\"beurre\",\"biberon\",\"bicycle\",\"bidule\",\"bijou\",\"bilan\",\"bilingue\",\"billard\",\"binaire\",\"biologie\",\"biopsie\",\"biotype\",\"biscuit\",\"bison\",\"bistouri\",\"bitume\",\"bizarre\",\"blafard\",\"blague\",\"blanchir\",\"blessant\",\"blinder\",\"blond\",\"bloquer\",\"blouson\",\"bobard\",\"bobine\",\"boire\",\"boiser\",\"bolide\",\"bonbon\",\"bondir\",\"bonheur\",\"bonifier\",\"bonus\",\"bordure\",\"borne\",\"botte\",\"boucle\",\"boueux\",\"bougie\",\"boulon\",\"bouquin\",\"bourse\",\"boussole\",\"boutique\",\"boxeur\",\"branche\",\"brasier\",\"brave\",\"brebis\",\"brèche\",\"breuvage\",\"bricoler\",\"brigade\",\"brillant\",\"brioche\",\"brique\",\"brochure\",\"broder\",\"bronzer\",\"brousse\",\"broyeur\",\"brume\",\"brusque\",\"brutal\",\"bruyant\",\"buffle\",\"buisson\",\"bulletin\",\"bureau\",\"burin\",\"bustier\",\"butiner\",\"butoir\",\"buvable\",\"buvette\",\"cabanon\",\"cabine\",\"cachette\",\"cadeau\",\"cadre\",\"caféine\",\"caillou\",\"caisson\",\"calculer\",\"calepin\",\"calibre\",\"calmer\",\"calomnie\",\"calvaire\",\"camarade\",\"caméra\",\"camion\",\"campagne\",\"canal\",\"caneton\",\"canon\",\"cantine\",\"canular\",\"capable\",\"caporal\",\"caprice\",\"capsule\",\"capter\",\"capuche\",\"carabine\",\"carbone\",\"caresser\",\"caribou\",\"carnage\",\"carotte\",\"carreau\",\"carton\",\"cascade\",\"casier\",\"casque\",\"cassure\",\"causer\",\"caution\",\"cavalier\",\"caverne\",\"caviar\",\"cédille\",\"ceinture\",\"céleste\",\"cellule\",\"cendrier\",\"censurer\",\"central\",\"cercle\",\"cérébral\",\"cerise\",\"cerner\",\"cerveau\",\"cesser\",\"chagrin\",\"chaise\",\"chaleur\",\"chambre\",\"chance\",\"chapitre\",\"charbon\",\"chasseur\",\"chaton\",\"chausson\",\"chavirer\",\"chemise\",\"chenille\",\"chéquier\",\"chercher\",\"cheval\",\"chien\",\"chiffre\",\"chignon\",\"chimère\",\"chiot\",\"chlorure\",\"chocolat\",\"choisir\",\"chose\",\"chouette\",\"chrome\",\"chute\",\"cigare\",\"cigogne\",\"cimenter\",\"cinéma\",\"cintrer\",\"circuler\",\"cirer\",\"cirque\",\"citerne\",\"citoyen\",\"citron\",\"civil\",\"clairon\",\"clameur\",\"claquer\",\"classe\",\"clavier\",\"client\",\"cligner\",\"climat\",\"clivage\",\"cloche\",\"clonage\",\"cloporte\",\"cobalt\",\"cobra\",\"cocasse\",\"cocotier\",\"coder\",\"codifier\",\"coffre\",\"cogner\",\"cohésion\",\"coiffer\",\"coincer\",\"colère\",\"colibri\",\"colline\",\"colmater\",\"colonel\",\"combat\",\"comédie\",\"commande\",\"compact\",\"concert\",\"conduire\",\"confier\",\"congeler\",\"connoter\",\"consonne\",\"contact\",\"convexe\",\"copain\",\"copie\",\"corail\",\"corbeau\",\"cordage\",\"corniche\",\"corpus\",\"correct\",\"cortège\",\"cosmique\",\"costume\",\"coton\",\"coude\",\"coupure\",\"courage\",\"couteau\",\"couvrir\",\"coyote\",\"crabe\",\"crainte\",\"cravate\",\"crayon\",\"créature\",\"créditer\",\"crémeux\",\"creuser\",\"crevette\",\"cribler\",\"crier\",\"cristal\",\"critère\",\"croire\",\"croquer\",\"crotale\",\"crucial\",\"cruel\",\"crypter\",\"cubique\",\"cueillir\",\"cuillère\",\"cuisine\",\"cuivre\",\"culminer\",\"cultiver\",\"cumuler\",\"cupide\",\"curatif\",\"curseur\",\"cyanure\",\"cycle\",\"cylindre\",\"cynique\",\"daigner\",\"damier\",\"danger\",\"danseur\",\"dauphin\",\"débattre\",\"débiter\",\"déborder\",\"débrider\",\"débutant\",\"décaler\",\"décembre\",\"déchirer\",\"décider\",\"déclarer\",\"décorer\",\"décrire\",\"décupler\",\"dédale\",\"déductif\",\"déesse\",\"défensif\",\"défiler\",\"défrayer\",\"dégager\",\"dégivrer\",\"déglutir\",\"dégrafer\",\"déjeuner\",\"délice\",\"déloger\",\"demander\",\"demeurer\",\"démolir\",\"dénicher\",\"dénouer\",\"dentelle\",\"dénuder\",\"départ\",\"dépenser\",\"déphaser\",\"déplacer\",\"déposer\",\"déranger\",\"dérober\",\"désastre\",\"descente\",\"désert\",\"désigner\",\"désobéir\",\"dessiner\",\"destrier\",\"détacher\",\"détester\",\"détourer\",\"détresse\",\"devancer\",\"devenir\",\"deviner\",\"devoir\",\"diable\",\"dialogue\",\"diamant\",\"dicter\",\"différer\",\"digérer\",\"digital\",\"digne\",\"diluer\",\"dimanche\",\"diminuer\",\"dioxyde\",\"directif\",\"diriger\",\"discuter\",\"disposer\",\"dissiper\",\"distance\",\"divertir\",\"diviser\",\"docile\",\"docteur\",\"dogme\",\"doigt\",\"domaine\",\"domicile\",\"dompter\",\"donateur\",\"donjon\",\"donner\",\"dopamine\",\"dortoir\",\"dorure\",\"dosage\",\"doseur\",\"dossier\",\"dotation\",\"douanier\",\"double\",\"douceur\",\"douter\",\"doyen\",\"dragon\",\"draper\",\"dresser\",\"dribbler\",\"droiture\",\"duperie\",\"duplexe\",\"durable\",\"durcir\",\"dynastie\",\"éblouir\",\"écarter\",\"écharpe\",\"échelle\",\"éclairer\",\"éclipse\",\"éclore\",\"écluse\",\"école\",\"économie\",\"écorce\",\"écouter\",\"écraser\",\"écrémer\",\"écrivain\",\"écrou\",\"écume\",\"écureuil\",\"édifier\",\"éduquer\",\"effacer\",\"effectif\",\"effigie\",\"effort\",\"effrayer\",\"effusion\",\"égaliser\",\"égarer\",\"éjecter\",\"élaborer\",\"élargir\",\"électron\",\"élégant\",\"éléphant\",\"élève\",\"éligible\",\"élitisme\",\"éloge\",\"élucider\",\"éluder\",\"emballer\",\"embellir\",\"embryon\",\"émeraude\",\"émission\",\"emmener\",\"émotion\",\"émouvoir\",\"empereur\",\"employer\",\"emporter\",\"emprise\",\"émulsion\",\"encadrer\",\"enchère\",\"enclave\",\"encoche\",\"endiguer\",\"endosser\",\"endroit\",\"enduire\",\"énergie\",\"enfance\",\"enfermer\",\"enfouir\",\"engager\",\"engin\",\"englober\",\"énigme\",\"enjamber\",\"enjeu\",\"enlever\",\"ennemi\",\"ennuyeux\",\"enrichir\",\"enrobage\",\"enseigne\",\"entasser\",\"entendre\",\"entier\",\"entourer\",\"entraver\",\"énumérer\",\"envahir\",\"enviable\",\"envoyer\",\"enzyme\",\"éolien\",\"épaissir\",\"épargne\",\"épatant\",\"épaule\",\"épicerie\",\"épidémie\",\"épier\",\"épilogue\",\"épine\",\"épisode\",\"épitaphe\",\"époque\",\"épreuve\",\"éprouver\",\"épuisant\",\"équerre\",\"équipe\",\"ériger\",\"érosion\",\"erreur\",\"éruption\",\"escalier\",\"espadon\",\"espèce\",\"espiègle\",\"espoir\",\"esprit\",\"esquiver\",\"essayer\",\"essence\",\"essieu\",\"essorer\",\"estime\",\"estomac\",\"estrade\",\"étagère\",\"étaler\",\"étanche\",\"étatique\",\"éteindre\",\"étendoir\",\"éternel\",\"éthanol\",\"éthique\",\"ethnie\",\"étirer\",\"étoffer\",\"étoile\",\"étonnant\",\"étourdir\",\"étrange\",\"étroit\",\"étude\",\"euphorie\",\"évaluer\",\"évasion\",\"éventail\",\"évidence\",\"éviter\",\"évolutif\",\"évoquer\",\"exact\",\"exagérer\",\"exaucer\",\"exceller\",\"excitant\",\"exclusif\",\"excuse\",\"exécuter\",\"exemple\",\"exercer\",\"exhaler\",\"exhorter\",\"exigence\",\"exiler\",\"exister\",\"exotique\",\"expédier\",\"explorer\",\"exposer\",\"exprimer\",\"exquis\",\"extensif\",\"extraire\",\"exulter\",\"fable\",\"fabuleux\",\"facette\",\"facile\",\"facture\",\"faiblir\",\"falaise\",\"fameux\",\"famille\",\"farceur\",\"farfelu\",\"farine\",\"farouche\",\"fasciner\",\"fatal\",\"fatigue\",\"faucon\",\"fautif\",\"faveur\",\"favori\",\"fébrile\",\"féconder\",\"fédérer\",\"félin\",\"femme\",\"fémur\",\"fendoir\",\"féodal\",\"fermer\",\"féroce\",\"ferveur\",\"festival\",\"feuille\",\"feutre\",\"février\",\"fiasco\",\"ficeler\",\"fictif\",\"fidèle\",\"figure\",\"filature\",\"filetage\",\"filière\",\"filleul\",\"filmer\",\"filou\",\"filtrer\",\"financer\",\"finir\",\"fiole\",\"firme\",\"fissure\",\"fixer\",\"flairer\",\"flamme\",\"flasque\",\"flatteur\",\"fléau\",\"flèche\",\"fleur\",\"flexion\",\"flocon\",\"flore\",\"fluctuer\",\"fluide\",\"fluvial\",\"folie\",\"fonderie\",\"fongible\",\"fontaine\",\"forcer\",\"forgeron\",\"formuler\",\"fortune\",\"fossile\",\"foudre\",\"fougère\",\"fouiller\",\"foulure\",\"fourmi\",\"fragile\",\"fraise\",\"franchir\",\"frapper\",\"frayeur\",\"frégate\",\"freiner\",\"frelon\",\"frémir\",\"frénésie\",\"frère\",\"friable\",\"friction\",\"frisson\",\"frivole\",\"froid\",\"fromage\",\"frontal\",\"frotter\",\"fruit\",\"fugitif\",\"fuite\",\"fureur\",\"furieux\",\"furtif\",\"fusion\",\"futur\",\"gagner\",\"galaxie\",\"galerie\",\"gambader\",\"garantir\",\"gardien\",\"garnir\",\"garrigue\",\"gazelle\",\"gazon\",\"géant\",\"gélatine\",\"gélule\",\"gendarme\",\"général\",\"génie\",\"genou\",\"gentil\",\"géologie\",\"géomètre\",\"géranium\",\"germe\",\"gestuel\",\"geyser\",\"gibier\",\"gicler\",\"girafe\",\"givre\",\"glace\",\"glaive\",\"glisser\",\"globe\",\"gloire\",\"glorieux\",\"golfeur\",\"gomme\",\"gonfler\",\"gorge\",\"gorille\",\"goudron\",\"gouffre\",\"goulot\",\"goupille\",\"gourmand\",\"goutte\",\"graduel\",\"graffiti\",\"graine\",\"grand\",\"grappin\",\"gratuit\",\"gravir\",\"grenat\",\"griffure\",\"griller\",\"grimper\",\"grogner\",\"gronder\",\"grotte\",\"groupe\",\"gruger\",\"grutier\",\"gruyère\",\"guépard\",\"guerrier\",\"guide\",\"guimauve\",\"guitare\",\"gustatif\",\"gymnaste\",\"gyrostat\",\"habitude\",\"hachoir\",\"halte\",\"hameau\",\"hangar\",\"hanneton\",\"haricot\",\"harmonie\",\"harpon\",\"hasard\",\"hélium\",\"hématome\",\"herbe\",\"hérisson\",\"hermine\",\"héron\",\"hésiter\",\"heureux\",\"hiberner\",\"hibou\",\"hilarant\",\"histoire\",\"hiver\",\"homard\",\"hommage\",\"homogène\",\"honneur\",\"honorer\",\"honteux\",\"horde\",\"horizon\",\"horloge\",\"hormone\",\"horrible\",\"houleux\",\"housse\",\"hublot\",\"huileux\",\"humain\",\"humble\",\"humide\",\"humour\",\"hurler\",\"hydromel\",\"hygiène\",\"hymne\",\"hypnose\",\"idylle\",\"ignorer\",\"iguane\",\"illicite\",\"illusion\",\"image\",\"imbiber\",\"imiter\",\"immense\",\"immobile\",\"immuable\",\"impact\",\"impérial\",\"implorer\",\"imposer\",\"imprimer\",\"imputer\",\"incarner\",\"incendie\",\"incident\",\"incliner\",\"incolore\",\"indexer\",\"indice\",\"inductif\",\"inédit\",\"ineptie\",\"inexact\",\"infini\",\"infliger\",\"informer\",\"infusion\",\"ingérer\",\"inhaler\",\"inhiber\",\"injecter\",\"injure\",\"innocent\",\"inoculer\",\"inonder\",\"inscrire\",\"insecte\",\"insigne\",\"insolite\",\"inspirer\",\"instinct\",\"insulter\",\"intact\",\"intense\",\"intime\",\"intrigue\",\"intuitif\",\"inutile\",\"invasion\",\"inventer\",\"inviter\",\"invoquer\",\"ironique\",\"irradier\",\"irréel\",\"irriter\",\"isoler\",\"ivoire\",\"ivresse\",\"jaguar\",\"jaillir\",\"jambe\",\"janvier\",\"jardin\",\"jauger\",\"jaune\",\"javelot\",\"jetable\",\"jeton\",\"jeudi\",\"jeunesse\",\"joindre\",\"joncher\",\"jongler\",\"joueur\",\"jouissif\",\"journal\",\"jovial\",\"joyau\",\"joyeux\",\"jubiler\",\"jugement\",\"junior\",\"jupon\",\"juriste\",\"justice\",\"juteux\",\"juvénile\",\"kayak\",\"kimono\",\"kiosque\",\"label\",\"labial\",\"labourer\",\"lacérer\",\"lactose\",\"lagune\",\"laine\",\"laisser\",\"laitier\",\"lambeau\",\"lamelle\",\"lampe\",\"lanceur\",\"langage\",\"lanterne\",\"lapin\",\"largeur\",\"larme\",\"laurier\",\"lavabo\",\"lavoir\",\"lecture\",\"légal\",\"léger\",\"légume\",\"lessive\",\"lettre\",\"levier\",\"lexique\",\"lézard\",\"liasse\",\"libérer\",\"libre\",\"licence\",\"licorne\",\"liège\",\"lièvre\",\"ligature\",\"ligoter\",\"ligue\",\"limer\",\"limite\",\"limonade\",\"limpide\",\"linéaire\",\"lingot\",\"lionceau\",\"liquide\",\"lisière\",\"lister\",\"lithium\",\"litige\",\"littoral\",\"livreur\",\"logique\",\"lointain\",\"loisir\",\"lombric\",\"loterie\",\"louer\",\"lourd\",\"loutre\",\"louve\",\"loyal\",\"lubie\",\"lucide\",\"lucratif\",\"lueur\",\"lugubre\",\"luisant\",\"lumière\",\"lunaire\",\"lundi\",\"luron\",\"lutter\",\"luxueux\",\"machine\",\"magasin\",\"magenta\",\"magique\",\"maigre\",\"maillon\",\"maintien\",\"mairie\",\"maison\",\"majorer\",\"malaxer\",\"maléfice\",\"malheur\",\"malice\",\"mallette\",\"mammouth\",\"mandater\",\"maniable\",\"manquant\",\"manteau\",\"manuel\",\"marathon\",\"marbre\",\"marchand\",\"mardi\",\"maritime\",\"marqueur\",\"marron\",\"marteler\",\"mascotte\",\"massif\",\"matériel\",\"matière\",\"matraque\",\"maudire\",\"maussade\",\"mauve\",\"maximal\",\"méchant\",\"méconnu\",\"médaille\",\"médecin\",\"méditer\",\"méduse\",\"meilleur\",\"mélange\",\"mélodie\",\"membre\",\"mémoire\",\"menacer\",\"mener\",\"menhir\",\"mensonge\",\"mentor\",\"mercredi\",\"mérite\",\"merle\",\"messager\",\"mesure\",\"métal\",\"météore\",\"méthode\",\"métier\",\"meuble\",\"miauler\",\"microbe\",\"miette\",\"mignon\",\"migrer\",\"milieu\",\"million\",\"mimique\",\"mince\",\"minéral\",\"minimal\",\"minorer\",\"minute\",\"miracle\",\"miroiter\",\"missile\",\"mixte\",\"mobile\",\"moderne\",\"moelleux\",\"mondial\",\"moniteur\",\"monnaie\",\"monotone\",\"monstre\",\"montagne\",\"monument\",\"moqueur\",\"morceau\",\"morsure\",\"mortier\",\"moteur\",\"motif\",\"mouche\",\"moufle\",\"moulin\",\"mousson\",\"mouton\",\"mouvant\",\"multiple\",\"munition\",\"muraille\",\"murène\",\"murmure\",\"muscle\",\"muséum\",\"musicien\",\"mutation\",\"muter\",\"mutuel\",\"myriade\",\"myrtille\",\"mystère\",\"mythique\",\"nageur\",\"nappe\",\"narquois\",\"narrer\",\"natation\",\"nation\",\"nature\",\"naufrage\",\"nautique\",\"navire\",\"nébuleux\",\"nectar\",\"néfaste\",\"négation\",\"négliger\",\"négocier\",\"neige\",\"nerveux\",\"nettoyer\",\"neurone\",\"neutron\",\"neveu\",\"niche\",\"nickel\",\"nitrate\",\"niveau\",\"noble\",\"nocif\",\"nocturne\",\"noirceur\",\"noisette\",\"nomade\",\"nombreux\",\"nommer\",\"normatif\",\"notable\",\"notifier\",\"notoire\",\"nourrir\",\"nouveau\",\"novateur\",\"novembre\",\"novice\",\"nuage\",\"nuancer\",\"nuire\",\"nuisible\",\"numéro\",\"nuptial\",\"nuque\",\"nutritif\",\"obéir\",\"objectif\",\"obliger\",\"obscur\",\"observer\",\"obstacle\",\"obtenir\",\"obturer\",\"occasion\",\"occuper\",\"océan\",\"octobre\",\"octroyer\",\"octupler\",\"oculaire\",\"odeur\",\"odorant\",\"offenser\",\"officier\",\"offrir\",\"ogive\",\"oiseau\",\"oisillon\",\"olfactif\",\"olivier\",\"ombrage\",\"omettre\",\"onctueux\",\"onduler\",\"onéreux\",\"onirique\",\"opale\",\"opaque\",\"opérer\",\"opinion\",\"opportun\",\"opprimer\",\"opter\",\"optique\",\"orageux\",\"orange\",\"orbite\",\"ordonner\",\"oreille\",\"organe\",\"orgueil\",\"orifice\",\"ornement\",\"orque\",\"ortie\",\"osciller\",\"osmose\",\"ossature\",\"otarie\",\"ouragan\",\"ourson\",\"outil\",\"outrager\",\"ouvrage\",\"ovation\",\"oxyde\",\"oxygène\",\"ozone\",\"paisible\",\"palace\",\"palmarès\",\"palourde\",\"palper\",\"panache\",\"panda\",\"pangolin\",\"paniquer\",\"panneau\",\"panorama\",\"pantalon\",\"papaye\",\"papier\",\"papoter\",\"papyrus\",\"paradoxe\",\"parcelle\",\"paresse\",\"parfumer\",\"parler\",\"parole\",\"parrain\",\"parsemer\",\"partager\",\"parure\",\"parvenir\",\"passion\",\"pastèque\",\"paternel\",\"patience\",\"patron\",\"pavillon\",\"pavoiser\",\"payer\",\"paysage\",\"peigne\",\"peintre\",\"pelage\",\"pélican\",\"pelle\",\"pelouse\",\"peluche\",\"pendule\",\"pénétrer\",\"pénible\",\"pensif\",\"pénurie\",\"pépite\",\"péplum\",\"perdrix\",\"perforer\",\"période\",\"permuter\",\"perplexe\",\"persil\",\"perte\",\"peser\",\"pétale\",\"petit\",\"pétrir\",\"peuple\",\"pharaon\",\"phobie\",\"phoque\",\"photon\",\"phrase\",\"physique\",\"piano\",\"pictural\",\"pièce\",\"pierre\",\"pieuvre\",\"pilote\",\"pinceau\",\"pipette\",\"piquer\",\"pirogue\",\"piscine\",\"piston\",\"pivoter\",\"pixel\",\"pizza\",\"placard\",\"plafond\",\"plaisir\",\"planer\",\"plaque\",\"plastron\",\"plateau\",\"pleurer\",\"plexus\",\"pliage\",\"plomb\",\"plonger\",\"pluie\",\"plumage\",\"pochette\",\"poésie\",\"poète\",\"pointe\",\"poirier\",\"poisson\",\"poivre\",\"polaire\",\"policier\",\"pollen\",\"polygone\",\"pommade\",\"pompier\",\"ponctuel\",\"pondérer\",\"poney\",\"portique\",\"position\",\"posséder\",\"posture\",\"potager\",\"poteau\",\"potion\",\"pouce\",\"poulain\",\"poumon\",\"pourpre\",\"poussin\",\"pouvoir\",\"prairie\",\"pratique\",\"précieux\",\"prédire\",\"préfixe\",\"prélude\",\"prénom\",\"présence\",\"prétexte\",\"prévoir\",\"primitif\",\"prince\",\"prison\",\"priver\",\"problème\",\"procéder\",\"prodige\",\"profond\",\"progrès\",\"proie\",\"projeter\",\"prologue\",\"promener\",\"propre\",\"prospère\",\"protéger\",\"prouesse\",\"proverbe\",\"prudence\",\"pruneau\",\"psychose\",\"public\",\"puceron\",\"puiser\",\"pulpe\",\"pulsar\",\"punaise\",\"punitif\",\"pupitre\",\"purifier\",\"puzzle\",\"pyramide\",\"quasar\",\"querelle\",\"question\",\"quiétude\",\"quitter\",\"quotient\",\"racine\",\"raconter\",\"radieux\",\"ragondin\",\"raideur\",\"raisin\",\"ralentir\",\"rallonge\",\"ramasser\",\"rapide\",\"rasage\",\"ratisser\",\"ravager\",\"ravin\",\"rayonner\",\"réactif\",\"réagir\",\"réaliser\",\"réanimer\",\"recevoir\",\"réciter\",\"réclamer\",\"récolter\",\"recruter\",\"reculer\",\"recycler\",\"rédiger\",\"redouter\",\"refaire\",\"réflexe\",\"réformer\",\"refrain\",\"refuge\",\"régalien\",\"région\",\"réglage\",\"régulier\",\"réitérer\",\"rejeter\",\"rejouer\",\"relatif\",\"relever\",\"relief\",\"remarque\",\"remède\",\"remise\",\"remonter\",\"remplir\",\"remuer\",\"renard\",\"renfort\",\"renifler\",\"renoncer\",\"rentrer\",\"renvoi\",\"replier\",\"reporter\",\"reprise\",\"reptile\",\"requin\",\"réserve\",\"résineux\",\"résoudre\",\"respect\",\"rester\",\"résultat\",\"rétablir\",\"retenir\",\"réticule\",\"retomber\",\"retracer\",\"réunion\",\"réussir\",\"revanche\",\"revivre\",\"révolte\",\"révulsif\",\"richesse\",\"rideau\",\"rieur\",\"rigide\",\"rigoler\",\"rincer\",\"riposter\",\"risible\",\"risque\",\"rituel\",\"rival\",\"rivière\",\"rocheux\",\"romance\",\"rompre\",\"ronce\",\"rondin\",\"roseau\",\"rosier\",\"rotatif\",\"rotor\",\"rotule\",\"rouge\",\"rouille\",\"rouleau\",\"routine\",\"royaume\",\"ruban\",\"rubis\",\"ruche\",\"ruelle\",\"rugueux\",\"ruiner\",\"ruisseau\",\"ruser\",\"rustique\",\"rythme\",\"sabler\",\"saboter\",\"sabre\",\"sacoche\",\"safari\",\"sagesse\",\"saisir\",\"salade\",\"salive\",\"salon\",\"saluer\",\"samedi\",\"sanction\",\"sanglier\",\"sarcasme\",\"sardine\",\"saturer\",\"saugrenu\",\"saumon\",\"sauter\",\"sauvage\",\"savant\",\"savonner\",\"scalpel\",\"scandale\",\"scélérat\",\"scénario\",\"sceptre\",\"schéma\",\"science\",\"scinder\",\"score\",\"scrutin\",\"sculpter\",\"séance\",\"sécable\",\"sécher\",\"secouer\",\"sécréter\",\"sédatif\",\"séduire\",\"seigneur\",\"séjour\",\"sélectif\",\"semaine\",\"sembler\",\"semence\",\"séminal\",\"sénateur\",\"sensible\",\"sentence\",\"séparer\",\"séquence\",\"serein\",\"sergent\",\"sérieux\",\"serrure\",\"sérum\",\"service\",\"sésame\",\"sévir\",\"sevrage\",\"sextuple\",\"sidéral\",\"siècle\",\"siéger\",\"siffler\",\"sigle\",\"signal\",\"silence\",\"silicium\",\"simple\",\"sincère\",\"sinistre\",\"siphon\",\"sirop\",\"sismique\",\"situer\",\"skier\",\"social\",\"socle\",\"sodium\",\"soigneux\",\"soldat\",\"soleil\",\"solitude\",\"soluble\",\"sombre\",\"sommeil\",\"somnoler\",\"sonde\",\"songeur\",\"sonnette\",\"sonore\",\"sorcier\",\"sortir\",\"sosie\",\"sottise\",\"soucieux\",\"soudure\",\"souffle\",\"soulever\",\"soupape\",\"source\",\"soutirer\",\"souvenir\",\"spacieux\",\"spatial\",\"spécial\",\"sphère\",\"spiral\",\"stable\",\"station\",\"sternum\",\"stimulus\",\"stipuler\",\"strict\",\"studieux\",\"stupeur\",\"styliste\",\"sublime\",\"substrat\",\"subtil\",\"subvenir\",\"succès\",\"sucre\",\"suffixe\",\"suggérer\",\"suiveur\",\"sulfate\",\"superbe\",\"supplier\",\"surface\",\"suricate\",\"surmener\",\"surprise\",\"sursaut\",\"survie\",\"suspect\",\"syllabe\",\"symbole\",\"symétrie\",\"synapse\",\"syntaxe\",\"système\",\"tabac\",\"tablier\",\"tactile\",\"tailler\",\"talent\",\"talisman\",\"talonner\",\"tambour\",\"tamiser\",\"tangible\",\"tapis\",\"taquiner\",\"tarder\",\"tarif\",\"tartine\",\"tasse\",\"tatami\",\"tatouage\",\"taupe\",\"taureau\",\"taxer\",\"témoin\",\"temporel\",\"tenaille\",\"tendre\",\"teneur\",\"tenir\",\"tension\",\"terminer\",\"terne\",\"terrible\",\"tétine\",\"texte\",\"thème\",\"théorie\",\"thérapie\",\"thorax\",\"tibia\",\"tiède\",\"timide\",\"tirelire\",\"tiroir\",\"tissu\",\"titane\",\"titre\",\"tituber\",\"toboggan\",\"tolérant\",\"tomate\",\"tonique\",\"tonneau\",\"toponyme\",\"torche\",\"tordre\",\"tornade\",\"torpille\",\"torrent\",\"torse\",\"tortue\",\"totem\",\"toucher\",\"tournage\",\"tousser\",\"toxine\",\"traction\",\"trafic\",\"tragique\",\"trahir\",\"train\",\"trancher\",\"travail\",\"trèfle\",\"tremper\",\"trésor\",\"treuil\",\"triage\",\"tribunal\",\"tricoter\",\"trilogie\",\"triomphe\",\"tripler\",\"triturer\",\"trivial\",\"trombone\",\"tronc\",\"tropical\",\"troupeau\",\"tuile\",\"tulipe\",\"tumulte\",\"tunnel\",\"turbine\",\"tuteur\",\"tutoyer\",\"tuyau\",\"tympan\",\"typhon\",\"typique\",\"tyran\",\"ubuesque\",\"ultime\",\"ultrason\",\"unanime\",\"unifier\",\"union\",\"unique\",\"unitaire\",\"univers\",\"uranium\",\"urbain\",\"urticant\",\"usage\",\"usine\",\"usuel\",\"usure\",\"utile\",\"utopie\",\"vacarme\",\"vaccin\",\"vagabond\",\"vague\",\"vaillant\",\"vaincre\",\"vaisseau\",\"valable\",\"valise\",\"vallon\",\"valve\",\"vampire\",\"vanille\",\"vapeur\",\"varier\",\"vaseux\",\"vassal\",\"vaste\",\"vecteur\",\"vedette\",\"végétal\",\"véhicule\",\"veinard\",\"véloce\",\"vendredi\",\"vénérer\",\"venger\",\"venimeux\",\"ventouse\",\"verdure\",\"vérin\",\"vernir\",\"verrou\",\"verser\",\"vertu\",\"veston\",\"vétéran\",\"vétuste\",\"vexant\",\"vexer\",\"viaduc\",\"viande\",\"victoire\",\"vidange\",\"vidéo\",\"vignette\",\"vigueur\",\"vilain\",\"village\",\"vinaigre\",\"violon\",\"vipère\",\"virement\",\"virtuose\",\"virus\",\"visage\",\"viseur\",\"vision\",\"visqueux\",\"visuel\",\"vital\",\"vitesse\",\"viticole\",\"vitrine\",\"vivace\",\"vivipare\",\"vocation\",\"voguer\",\"voile\",\"voisin\",\"voiture\",\"volaille\",\"volcan\",\"voltiger\",\"volume\",\"vorace\",\"vortex\",\"voter\",\"vouloir\",\"voyage\",\"voyelle\",\"wagon\",\"xénon\",\"yacht\",\"zèbre\",\"zénith\",\"zeste\",\"zoologie\"]");
 
 /***/ }),
-/* 190 */
+/* 191 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"abaco\",\"abbaglio\",\"abbinato\",\"abete\",\"abisso\",\"abolire\",\"abrasivo\",\"abrogato\",\"accadere\",\"accenno\",\"accusato\",\"acetone\",\"achille\",\"acido\",\"acqua\",\"acre\",\"acrilico\",\"acrobata\",\"acuto\",\"adagio\",\"addebito\",\"addome\",\"adeguato\",\"aderire\",\"adipe\",\"adottare\",\"adulare\",\"affabile\",\"affetto\",\"affisso\",\"affranto\",\"aforisma\",\"afoso\",\"africano\",\"agave\",\"agente\",\"agevole\",\"aggancio\",\"agire\",\"agitare\",\"agonismo\",\"agricolo\",\"agrumeto\",\"aguzzo\",\"alabarda\",\"alato\",\"albatro\",\"alberato\",\"albo\",\"albume\",\"alce\",\"alcolico\",\"alettone\",\"alfa\",\"algebra\",\"aliante\",\"alibi\",\"alimento\",\"allagato\",\"allegro\",\"allievo\",\"allodola\",\"allusivo\",\"almeno\",\"alogeno\",\"alpaca\",\"alpestre\",\"altalena\",\"alterno\",\"alticcio\",\"altrove\",\"alunno\",\"alveolo\",\"alzare\",\"amalgama\",\"amanita\",\"amarena\",\"ambito\",\"ambrato\",\"ameba\",\"america\",\"ametista\",\"amico\",\"ammasso\",\"ammenda\",\"ammirare\",\"ammonito\",\"amore\",\"ampio\",\"ampliare\",\"amuleto\",\"anacardo\",\"anagrafe\",\"analista\",\"anarchia\",\"anatra\",\"anca\",\"ancella\",\"ancora\",\"andare\",\"andrea\",\"anello\",\"angelo\",\"angolare\",\"angusto\",\"anima\",\"annegare\",\"annidato\",\"anno\",\"annuncio\",\"anonimo\",\"anticipo\",\"anzi\",\"apatico\",\"apertura\",\"apode\",\"apparire\",\"appetito\",\"appoggio\",\"approdo\",\"appunto\",\"aprile\",\"arabica\",\"arachide\",\"aragosta\",\"araldica\",\"arancio\",\"aratura\",\"arazzo\",\"arbitro\",\"archivio\",\"ardito\",\"arenile\",\"argento\",\"argine\",\"arguto\",\"aria\",\"armonia\",\"arnese\",\"arredato\",\"arringa\",\"arrosto\",\"arsenico\",\"arso\",\"artefice\",\"arzillo\",\"asciutto\",\"ascolto\",\"asepsi\",\"asettico\",\"asfalto\",\"asino\",\"asola\",\"aspirato\",\"aspro\",\"assaggio\",\"asse\",\"assoluto\",\"assurdo\",\"asta\",\"astenuto\",\"astice\",\"astratto\",\"atavico\",\"ateismo\",\"atomico\",\"atono\",\"attesa\",\"attivare\",\"attorno\",\"attrito\",\"attuale\",\"ausilio\",\"austria\",\"autista\",\"autonomo\",\"autunno\",\"avanzato\",\"avere\",\"avvenire\",\"avviso\",\"avvolgere\",\"azione\",\"azoto\",\"azzimo\",\"azzurro\",\"babele\",\"baccano\",\"bacino\",\"baco\",\"badessa\",\"badilata\",\"bagnato\",\"baita\",\"balcone\",\"baldo\",\"balena\",\"ballata\",\"balzano\",\"bambino\",\"bandire\",\"baraonda\",\"barbaro\",\"barca\",\"baritono\",\"barlume\",\"barocco\",\"basilico\",\"basso\",\"batosta\",\"battuto\",\"baule\",\"bava\",\"bavosa\",\"becco\",\"beffa\",\"belgio\",\"belva\",\"benda\",\"benevole\",\"benigno\",\"benzina\",\"bere\",\"berlina\",\"beta\",\"bibita\",\"bici\",\"bidone\",\"bifido\",\"biga\",\"bilancia\",\"bimbo\",\"binocolo\",\"biologo\",\"bipede\",\"bipolare\",\"birbante\",\"birra\",\"biscotto\",\"bisesto\",\"bisnonno\",\"bisonte\",\"bisturi\",\"bizzarro\",\"blando\",\"blatta\",\"bollito\",\"bonifico\",\"bordo\",\"bosco\",\"botanico\",\"bottino\",\"bozzolo\",\"braccio\",\"bradipo\",\"brama\",\"branca\",\"bravura\",\"bretella\",\"brevetto\",\"brezza\",\"briglia\",\"brillante\",\"brindare\",\"broccolo\",\"brodo\",\"bronzina\",\"brullo\",\"bruno\",\"bubbone\",\"buca\",\"budino\",\"buffone\",\"buio\",\"bulbo\",\"buono\",\"burlone\",\"burrasca\",\"bussola\",\"busta\",\"cadetto\",\"caduco\",\"calamaro\",\"calcolo\",\"calesse\",\"calibro\",\"calmo\",\"caloria\",\"cambusa\",\"camerata\",\"camicia\",\"cammino\",\"camola\",\"campale\",\"canapa\",\"candela\",\"cane\",\"canino\",\"canotto\",\"cantina\",\"capace\",\"capello\",\"capitolo\",\"capogiro\",\"cappero\",\"capra\",\"capsula\",\"carapace\",\"carcassa\",\"cardo\",\"carisma\",\"carovana\",\"carretto\",\"cartolina\",\"casaccio\",\"cascata\",\"caserma\",\"caso\",\"cassone\",\"castello\",\"casuale\",\"catasta\",\"catena\",\"catrame\",\"cauto\",\"cavillo\",\"cedibile\",\"cedrata\",\"cefalo\",\"celebre\",\"cellulare\",\"cena\",\"cenone\",\"centesimo\",\"ceramica\",\"cercare\",\"certo\",\"cerume\",\"cervello\",\"cesoia\",\"cespo\",\"ceto\",\"chela\",\"chiaro\",\"chicca\",\"chiedere\",\"chimera\",\"china\",\"chirurgo\",\"chitarra\",\"ciao\",\"ciclismo\",\"cifrare\",\"cigno\",\"cilindro\",\"ciottolo\",\"circa\",\"cirrosi\",\"citrico\",\"cittadino\",\"ciuffo\",\"civetta\",\"civile\",\"classico\",\"clinica\",\"cloro\",\"cocco\",\"codardo\",\"codice\",\"coerente\",\"cognome\",\"collare\",\"colmato\",\"colore\",\"colposo\",\"coltivato\",\"colza\",\"coma\",\"cometa\",\"commando\",\"comodo\",\"computer\",\"comune\",\"conciso\",\"condurre\",\"conferma\",\"congelare\",\"coniuge\",\"connesso\",\"conoscere\",\"consumo\",\"continuo\",\"convegno\",\"coperto\",\"copione\",\"coppia\",\"copricapo\",\"corazza\",\"cordata\",\"coricato\",\"cornice\",\"corolla\",\"corpo\",\"corredo\",\"corsia\",\"cortese\",\"cosmico\",\"costante\",\"cottura\",\"covato\",\"cratere\",\"cravatta\",\"creato\",\"credere\",\"cremoso\",\"crescita\",\"creta\",\"criceto\",\"crinale\",\"crisi\",\"critico\",\"croce\",\"cronaca\",\"crostata\",\"cruciale\",\"crusca\",\"cucire\",\"cuculo\",\"cugino\",\"cullato\",\"cupola\",\"curatore\",\"cursore\",\"curvo\",\"cuscino\",\"custode\",\"dado\",\"daino\",\"dalmata\",\"damerino\",\"daniela\",\"dannoso\",\"danzare\",\"datato\",\"davanti\",\"davvero\",\"debutto\",\"decennio\",\"deciso\",\"declino\",\"decollo\",\"decreto\",\"dedicato\",\"definito\",\"deforme\",\"degno\",\"delegare\",\"delfino\",\"delirio\",\"delta\",\"demenza\",\"denotato\",\"dentro\",\"deposito\",\"derapata\",\"derivare\",\"deroga\",\"descritto\",\"deserto\",\"desiderio\",\"desumere\",\"detersivo\",\"devoto\",\"diametro\",\"dicembre\",\"diedro\",\"difeso\",\"diffuso\",\"digerire\",\"digitale\",\"diluvio\",\"dinamico\",\"dinnanzi\",\"dipinto\",\"diploma\",\"dipolo\",\"diradare\",\"dire\",\"dirotto\",\"dirupo\",\"disagio\",\"discreto\",\"disfare\",\"disgelo\",\"disposto\",\"distanza\",\"disumano\",\"dito\",\"divano\",\"divelto\",\"dividere\",\"divorato\",\"doblone\",\"docente\",\"doganale\",\"dogma\",\"dolce\",\"domato\",\"domenica\",\"dominare\",\"dondolo\",\"dono\",\"dormire\",\"dote\",\"dottore\",\"dovuto\",\"dozzina\",\"drago\",\"druido\",\"dubbio\",\"dubitare\",\"ducale\",\"duna\",\"duomo\",\"duplice\",\"duraturo\",\"ebano\",\"eccesso\",\"ecco\",\"eclissi\",\"economia\",\"edera\",\"edicola\",\"edile\",\"editoria\",\"educare\",\"egemonia\",\"egli\",\"egoismo\",\"egregio\",\"elaborato\",\"elargire\",\"elegante\",\"elencato\",\"eletto\",\"elevare\",\"elfico\",\"elica\",\"elmo\",\"elsa\",\"eluso\",\"emanato\",\"emblema\",\"emesso\",\"emiro\",\"emotivo\",\"emozione\",\"empirico\",\"emulo\",\"endemico\",\"enduro\",\"energia\",\"enfasi\",\"enoteca\",\"entrare\",\"enzima\",\"epatite\",\"epilogo\",\"episodio\",\"epocale\",\"eppure\",\"equatore\",\"erario\",\"erba\",\"erboso\",\"erede\",\"eremita\",\"erigere\",\"ermetico\",\"eroe\",\"erosivo\",\"errante\",\"esagono\",\"esame\",\"esanime\",\"esaudire\",\"esca\",\"esempio\",\"esercito\",\"esibito\",\"esigente\",\"esistere\",\"esito\",\"esofago\",\"esortato\",\"esoso\",\"espanso\",\"espresso\",\"essenza\",\"esso\",\"esteso\",\"estimare\",\"estonia\",\"estroso\",\"esultare\",\"etilico\",\"etnico\",\"etrusco\",\"etto\",\"euclideo\",\"europa\",\"evaso\",\"evidenza\",\"evitato\",\"evoluto\",\"evviva\",\"fabbrica\",\"faccenda\",\"fachiro\",\"falco\",\"famiglia\",\"fanale\",\"fanfara\",\"fango\",\"fantasma\",\"fare\",\"farfalla\",\"farinoso\",\"farmaco\",\"fascia\",\"fastoso\",\"fasullo\",\"faticare\",\"fato\",\"favoloso\",\"febbre\",\"fecola\",\"fede\",\"fegato\",\"felpa\",\"feltro\",\"femmina\",\"fendere\",\"fenomeno\",\"fermento\",\"ferro\",\"fertile\",\"fessura\",\"festivo\",\"fetta\",\"feudo\",\"fiaba\",\"fiducia\",\"fifa\",\"figurato\",\"filo\",\"finanza\",\"finestra\",\"finire\",\"fiore\",\"fiscale\",\"fisico\",\"fiume\",\"flacone\",\"flamenco\",\"flebo\",\"flemma\",\"florido\",\"fluente\",\"fluoro\",\"fobico\",\"focaccia\",\"focoso\",\"foderato\",\"foglio\",\"folata\",\"folclore\",\"folgore\",\"fondente\",\"fonetico\",\"fonia\",\"fontana\",\"forbito\",\"forchetta\",\"foresta\",\"formica\",\"fornaio\",\"foro\",\"fortezza\",\"forzare\",\"fosfato\",\"fosso\",\"fracasso\",\"frana\",\"frassino\",\"fratello\",\"freccetta\",\"frenata\",\"fresco\",\"frigo\",\"frollino\",\"fronde\",\"frugale\",\"frutta\",\"fucilata\",\"fucsia\",\"fuggente\",\"fulmine\",\"fulvo\",\"fumante\",\"fumetto\",\"fumoso\",\"fune\",\"funzione\",\"fuoco\",\"furbo\",\"furgone\",\"furore\",\"fuso\",\"futile\",\"gabbiano\",\"gaffe\",\"galateo\",\"gallina\",\"galoppo\",\"gambero\",\"gamma\",\"garanzia\",\"garbo\",\"garofano\",\"garzone\",\"gasdotto\",\"gasolio\",\"gastrico\",\"gatto\",\"gaudio\",\"gazebo\",\"gazzella\",\"geco\",\"gelatina\",\"gelso\",\"gemello\",\"gemmato\",\"gene\",\"genitore\",\"gennaio\",\"genotipo\",\"gergo\",\"ghepardo\",\"ghiaccio\",\"ghisa\",\"giallo\",\"gilda\",\"ginepro\",\"giocare\",\"gioiello\",\"giorno\",\"giove\",\"girato\",\"girone\",\"gittata\",\"giudizio\",\"giurato\",\"giusto\",\"globulo\",\"glutine\",\"gnomo\",\"gobba\",\"golf\",\"gomito\",\"gommone\",\"gonfio\",\"gonna\",\"governo\",\"gracile\",\"grado\",\"grafico\",\"grammo\",\"grande\",\"grattare\",\"gravoso\",\"grazia\",\"greca\",\"gregge\",\"grifone\",\"grigio\",\"grinza\",\"grotta\",\"gruppo\",\"guadagno\",\"guaio\",\"guanto\",\"guardare\",\"gufo\",\"guidare\",\"ibernato\",\"icona\",\"identico\",\"idillio\",\"idolo\",\"idra\",\"idrico\",\"idrogeno\",\"igiene\",\"ignaro\",\"ignorato\",\"ilare\",\"illeso\",\"illogico\",\"illudere\",\"imballo\",\"imbevuto\",\"imbocco\",\"imbuto\",\"immane\",\"immerso\",\"immolato\",\"impacco\",\"impeto\",\"impiego\",\"importo\",\"impronta\",\"inalare\",\"inarcare\",\"inattivo\",\"incanto\",\"incendio\",\"inchino\",\"incisivo\",\"incluso\",\"incontro\",\"incrocio\",\"incubo\",\"indagine\",\"india\",\"indole\",\"inedito\",\"infatti\",\"infilare\",\"inflitto\",\"ingaggio\",\"ingegno\",\"inglese\",\"ingordo\",\"ingrosso\",\"innesco\",\"inodore\",\"inoltrare\",\"inondato\",\"insano\",\"insetto\",\"insieme\",\"insonnia\",\"insulina\",\"intasato\",\"intero\",\"intonaco\",\"intuito\",\"inumidire\",\"invalido\",\"invece\",\"invito\",\"iperbole\",\"ipnotico\",\"ipotesi\",\"ippica\",\"iride\",\"irlanda\",\"ironico\",\"irrigato\",\"irrorare\",\"isolato\",\"isotopo\",\"isterico\",\"istituto\",\"istrice\",\"italia\",\"iterare\",\"labbro\",\"labirinto\",\"lacca\",\"lacerato\",\"lacrima\",\"lacuna\",\"laddove\",\"lago\",\"lampo\",\"lancetta\",\"lanterna\",\"lardoso\",\"larga\",\"laringe\",\"lastra\",\"latenza\",\"latino\",\"lattuga\",\"lavagna\",\"lavoro\",\"legale\",\"leggero\",\"lembo\",\"lentezza\",\"lenza\",\"leone\",\"lepre\",\"lesivo\",\"lessato\",\"lesto\",\"letterale\",\"leva\",\"levigato\",\"libero\",\"lido\",\"lievito\",\"lilla\",\"limatura\",\"limitare\",\"limpido\",\"lineare\",\"lingua\",\"liquido\",\"lira\",\"lirica\",\"lisca\",\"lite\",\"litigio\",\"livrea\",\"locanda\",\"lode\",\"logica\",\"lombare\",\"londra\",\"longevo\",\"loquace\",\"lorenzo\",\"loto\",\"lotteria\",\"luce\",\"lucidato\",\"lumaca\",\"luminoso\",\"lungo\",\"lupo\",\"luppolo\",\"lusinga\",\"lusso\",\"lutto\",\"macabro\",\"macchina\",\"macero\",\"macinato\",\"madama\",\"magico\",\"maglia\",\"magnete\",\"magro\",\"maiolica\",\"malafede\",\"malgrado\",\"malinteso\",\"malsano\",\"malto\",\"malumore\",\"mana\",\"mancia\",\"mandorla\",\"mangiare\",\"manifesto\",\"mannaro\",\"manovra\",\"mansarda\",\"mantide\",\"manubrio\",\"mappa\",\"maratona\",\"marcire\",\"maretta\",\"marmo\",\"marsupio\",\"maschera\",\"massaia\",\"mastino\",\"materasso\",\"matricola\",\"mattone\",\"maturo\",\"mazurca\",\"meandro\",\"meccanico\",\"mecenate\",\"medesimo\",\"meditare\",\"mega\",\"melassa\",\"melis\",\"melodia\",\"meninge\",\"meno\",\"mensola\",\"mercurio\",\"merenda\",\"merlo\",\"meschino\",\"mese\",\"messere\",\"mestolo\",\"metallo\",\"metodo\",\"mettere\",\"miagolare\",\"mica\",\"micelio\",\"michele\",\"microbo\",\"midollo\",\"miele\",\"migliore\",\"milano\",\"milite\",\"mimosa\",\"minerale\",\"mini\",\"minore\",\"mirino\",\"mirtillo\",\"miscela\",\"missiva\",\"misto\",\"misurare\",\"mitezza\",\"mitigare\",\"mitra\",\"mittente\",\"mnemonico\",\"modello\",\"modifica\",\"modulo\",\"mogano\",\"mogio\",\"mole\",\"molosso\",\"monastero\",\"monco\",\"mondina\",\"monetario\",\"monile\",\"monotono\",\"monsone\",\"montato\",\"monviso\",\"mora\",\"mordere\",\"morsicato\",\"mostro\",\"motivato\",\"motosega\",\"motto\",\"movenza\",\"movimento\",\"mozzo\",\"mucca\",\"mucosa\",\"muffa\",\"mughetto\",\"mugnaio\",\"mulatto\",\"mulinello\",\"multiplo\",\"mummia\",\"munto\",\"muovere\",\"murale\",\"musa\",\"muscolo\",\"musica\",\"mutevole\",\"muto\",\"nababbo\",\"nafta\",\"nanometro\",\"narciso\",\"narice\",\"narrato\",\"nascere\",\"nastrare\",\"naturale\",\"nautica\",\"naviglio\",\"nebulosa\",\"necrosi\",\"negativo\",\"negozio\",\"nemmeno\",\"neofita\",\"neretto\",\"nervo\",\"nessuno\",\"nettuno\",\"neutrale\",\"neve\",\"nevrotico\",\"nicchia\",\"ninfa\",\"nitido\",\"nobile\",\"nocivo\",\"nodo\",\"nome\",\"nomina\",\"nordico\",\"normale\",\"norvegese\",\"nostrano\",\"notare\",\"notizia\",\"notturno\",\"novella\",\"nucleo\",\"nulla\",\"numero\",\"nuovo\",\"nutrire\",\"nuvola\",\"nuziale\",\"oasi\",\"obbedire\",\"obbligo\",\"obelisco\",\"oblio\",\"obolo\",\"obsoleto\",\"occasione\",\"occhio\",\"occidente\",\"occorrere\",\"occultare\",\"ocra\",\"oculato\",\"odierno\",\"odorare\",\"offerta\",\"offrire\",\"offuscato\",\"oggetto\",\"oggi\",\"ognuno\",\"olandese\",\"olfatto\",\"oliato\",\"oliva\",\"ologramma\",\"oltre\",\"omaggio\",\"ombelico\",\"ombra\",\"omega\",\"omissione\",\"ondoso\",\"onere\",\"onice\",\"onnivoro\",\"onorevole\",\"onta\",\"operato\",\"opinione\",\"opposto\",\"oracolo\",\"orafo\",\"ordine\",\"orecchino\",\"orefice\",\"orfano\",\"organico\",\"origine\",\"orizzonte\",\"orma\",\"ormeggio\",\"ornativo\",\"orologio\",\"orrendo\",\"orribile\",\"ortensia\",\"ortica\",\"orzata\",\"orzo\",\"osare\",\"oscurare\",\"osmosi\",\"ospedale\",\"ospite\",\"ossa\",\"ossidare\",\"ostacolo\",\"oste\",\"otite\",\"otre\",\"ottagono\",\"ottimo\",\"ottobre\",\"ovale\",\"ovest\",\"ovino\",\"oviparo\",\"ovocito\",\"ovunque\",\"ovviare\",\"ozio\",\"pacchetto\",\"pace\",\"pacifico\",\"padella\",\"padrone\",\"paese\",\"paga\",\"pagina\",\"palazzina\",\"palesare\",\"pallido\",\"palo\",\"palude\",\"pandoro\",\"pannello\",\"paolo\",\"paonazzo\",\"paprica\",\"parabola\",\"parcella\",\"parere\",\"pargolo\",\"pari\",\"parlato\",\"parola\",\"partire\",\"parvenza\",\"parziale\",\"passivo\",\"pasticca\",\"patacca\",\"patologia\",\"pattume\",\"pavone\",\"peccato\",\"pedalare\",\"pedonale\",\"peggio\",\"peloso\",\"penare\",\"pendice\",\"penisola\",\"pennuto\",\"penombra\",\"pensare\",\"pentola\",\"pepe\",\"pepita\",\"perbene\",\"percorso\",\"perdonato\",\"perforare\",\"pergamena\",\"periodo\",\"permesso\",\"perno\",\"perplesso\",\"persuaso\",\"pertugio\",\"pervaso\",\"pesatore\",\"pesista\",\"peso\",\"pestifero\",\"petalo\",\"pettine\",\"petulante\",\"pezzo\",\"piacere\",\"pianta\",\"piattino\",\"piccino\",\"picozza\",\"piega\",\"pietra\",\"piffero\",\"pigiama\",\"pigolio\",\"pigro\",\"pila\",\"pilifero\",\"pillola\",\"pilota\",\"pimpante\",\"pineta\",\"pinna\",\"pinolo\",\"pioggia\",\"piombo\",\"piramide\",\"piretico\",\"pirite\",\"pirolisi\",\"pitone\",\"pizzico\",\"placebo\",\"planare\",\"plasma\",\"platano\",\"plenario\",\"pochezza\",\"poderoso\",\"podismo\",\"poesia\",\"poggiare\",\"polenta\",\"poligono\",\"pollice\",\"polmonite\",\"polpetta\",\"polso\",\"poltrona\",\"polvere\",\"pomice\",\"pomodoro\",\"ponte\",\"popoloso\",\"porfido\",\"poroso\",\"porpora\",\"porre\",\"portata\",\"posa\",\"positivo\",\"possesso\",\"postulato\",\"potassio\",\"potere\",\"pranzo\",\"prassi\",\"pratica\",\"precluso\",\"predica\",\"prefisso\",\"pregiato\",\"prelievo\",\"premere\",\"prenotare\",\"preparato\",\"presenza\",\"pretesto\",\"prevalso\",\"prima\",\"principe\",\"privato\",\"problema\",\"procura\",\"produrre\",\"profumo\",\"progetto\",\"prolunga\",\"promessa\",\"pronome\",\"proposta\",\"proroga\",\"proteso\",\"prova\",\"prudente\",\"prugna\",\"prurito\",\"psiche\",\"pubblico\",\"pudica\",\"pugilato\",\"pugno\",\"pulce\",\"pulito\",\"pulsante\",\"puntare\",\"pupazzo\",\"pupilla\",\"puro\",\"quadro\",\"qualcosa\",\"quasi\",\"querela\",\"quota\",\"raccolto\",\"raddoppio\",\"radicale\",\"radunato\",\"raffica\",\"ragazzo\",\"ragione\",\"ragno\",\"ramarro\",\"ramingo\",\"ramo\",\"randagio\",\"rantolare\",\"rapato\",\"rapina\",\"rappreso\",\"rasatura\",\"raschiato\",\"rasente\",\"rassegna\",\"rastrello\",\"rata\",\"ravveduto\",\"reale\",\"recepire\",\"recinto\",\"recluta\",\"recondito\",\"recupero\",\"reddito\",\"redimere\",\"regalato\",\"registro\",\"regola\",\"regresso\",\"relazione\",\"remare\",\"remoto\",\"renna\",\"replica\",\"reprimere\",\"reputare\",\"resa\",\"residente\",\"responso\",\"restauro\",\"rete\",\"retina\",\"retorica\",\"rettifica\",\"revocato\",\"riassunto\",\"ribadire\",\"ribelle\",\"ribrezzo\",\"ricarica\",\"ricco\",\"ricevere\",\"riciclato\",\"ricordo\",\"ricreduto\",\"ridicolo\",\"ridurre\",\"rifasare\",\"riflesso\",\"riforma\",\"rifugio\",\"rigare\",\"rigettato\",\"righello\",\"rilassato\",\"rilevato\",\"rimanere\",\"rimbalzo\",\"rimedio\",\"rimorchio\",\"rinascita\",\"rincaro\",\"rinforzo\",\"rinnovo\",\"rinomato\",\"rinsavito\",\"rintocco\",\"rinuncia\",\"rinvenire\",\"riparato\",\"ripetuto\",\"ripieno\",\"riportare\",\"ripresa\",\"ripulire\",\"risata\",\"rischio\",\"riserva\",\"risibile\",\"riso\",\"rispetto\",\"ristoro\",\"risultato\",\"risvolto\",\"ritardo\",\"ritegno\",\"ritmico\",\"ritrovo\",\"riunione\",\"riva\",\"riverso\",\"rivincita\",\"rivolto\",\"rizoma\",\"roba\",\"robotico\",\"robusto\",\"roccia\",\"roco\",\"rodaggio\",\"rodere\",\"roditore\",\"rogito\",\"rollio\",\"romantico\",\"rompere\",\"ronzio\",\"rosolare\",\"rospo\",\"rotante\",\"rotondo\",\"rotula\",\"rovescio\",\"rubizzo\",\"rubrica\",\"ruga\",\"rullino\",\"rumine\",\"rumoroso\",\"ruolo\",\"rupe\",\"russare\",\"rustico\",\"sabato\",\"sabbiare\",\"sabotato\",\"sagoma\",\"salasso\",\"saldatura\",\"salgemma\",\"salivare\",\"salmone\",\"salone\",\"saltare\",\"saluto\",\"salvo\",\"sapere\",\"sapido\",\"saporito\",\"saraceno\",\"sarcasmo\",\"sarto\",\"sassoso\",\"satellite\",\"satira\",\"satollo\",\"saturno\",\"savana\",\"savio\",\"saziato\",\"sbadiglio\",\"sbalzo\",\"sbancato\",\"sbarra\",\"sbattere\",\"sbavare\",\"sbendare\",\"sbirciare\",\"sbloccato\",\"sbocciato\",\"sbrinare\",\"sbruffone\",\"sbuffare\",\"scabroso\",\"scadenza\",\"scala\",\"scambiare\",\"scandalo\",\"scapola\",\"scarso\",\"scatenare\",\"scavato\",\"scelto\",\"scenico\",\"scettro\",\"scheda\",\"schiena\",\"sciarpa\",\"scienza\",\"scindere\",\"scippo\",\"sciroppo\",\"scivolo\",\"sclerare\",\"scodella\",\"scolpito\",\"scomparto\",\"sconforto\",\"scoprire\",\"scorta\",\"scossone\",\"scozzese\",\"scriba\",\"scrollare\",\"scrutinio\",\"scuderia\",\"scultore\",\"scuola\",\"scuro\",\"scusare\",\"sdebitare\",\"sdoganare\",\"seccatura\",\"secondo\",\"sedano\",\"seggiola\",\"segnalato\",\"segregato\",\"seguito\",\"selciato\",\"selettivo\",\"sella\",\"selvaggio\",\"semaforo\",\"sembrare\",\"seme\",\"seminato\",\"sempre\",\"senso\",\"sentire\",\"sepolto\",\"sequenza\",\"serata\",\"serbato\",\"sereno\",\"serio\",\"serpente\",\"serraglio\",\"servire\",\"sestina\",\"setola\",\"settimana\",\"sfacelo\",\"sfaldare\",\"sfamato\",\"sfarzoso\",\"sfaticato\",\"sfera\",\"sfida\",\"sfilato\",\"sfinge\",\"sfocato\",\"sfoderare\",\"sfogo\",\"sfoltire\",\"sforzato\",\"sfratto\",\"sfruttato\",\"sfuggito\",\"sfumare\",\"sfuso\",\"sgabello\",\"sgarbato\",\"sgonfiare\",\"sgorbio\",\"sgrassato\",\"sguardo\",\"sibilo\",\"siccome\",\"sierra\",\"sigla\",\"signore\",\"silenzio\",\"sillaba\",\"simbolo\",\"simpatico\",\"simulato\",\"sinfonia\",\"singolo\",\"sinistro\",\"sino\",\"sintesi\",\"sinusoide\",\"sipario\",\"sisma\",\"sistole\",\"situato\",\"slitta\",\"slogatura\",\"sloveno\",\"smarrito\",\"smemorato\",\"smentito\",\"smeraldo\",\"smilzo\",\"smontare\",\"smottato\",\"smussato\",\"snellire\",\"snervato\",\"snodo\",\"sobbalzo\",\"sobrio\",\"soccorso\",\"sociale\",\"sodale\",\"soffitto\",\"sogno\",\"soldato\",\"solenne\",\"solido\",\"sollazzo\",\"solo\",\"solubile\",\"solvente\",\"somatico\",\"somma\",\"sonda\",\"sonetto\",\"sonnifero\",\"sopire\",\"soppeso\",\"sopra\",\"sorgere\",\"sorpasso\",\"sorriso\",\"sorso\",\"sorteggio\",\"sorvolato\",\"sospiro\",\"sosta\",\"sottile\",\"spada\",\"spalla\",\"spargere\",\"spatola\",\"spavento\",\"spazzola\",\"specie\",\"spedire\",\"spegnere\",\"spelatura\",\"speranza\",\"spessore\",\"spettrale\",\"spezzato\",\"spia\",\"spigoloso\",\"spillato\",\"spinoso\",\"spirale\",\"splendido\",\"sportivo\",\"sposo\",\"spranga\",\"sprecare\",\"spronato\",\"spruzzo\",\"spuntino\",\"squillo\",\"sradicare\",\"srotolato\",\"stabile\",\"stacco\",\"staffa\",\"stagnare\",\"stampato\",\"stantio\",\"starnuto\",\"stasera\",\"statuto\",\"stelo\",\"steppa\",\"sterzo\",\"stiletto\",\"stima\",\"stirpe\",\"stivale\",\"stizzoso\",\"stonato\",\"storico\",\"strappo\",\"stregato\",\"stridulo\",\"strozzare\",\"strutto\",\"stuccare\",\"stufo\",\"stupendo\",\"subentro\",\"succoso\",\"sudore\",\"suggerito\",\"sugo\",\"sultano\",\"suonare\",\"superbo\",\"supporto\",\"surgelato\",\"surrogato\",\"sussurro\",\"sutura\",\"svagare\",\"svedese\",\"sveglio\",\"svelare\",\"svenuto\",\"svezia\",\"sviluppo\",\"svista\",\"svizzera\",\"svolta\",\"svuotare\",\"tabacco\",\"tabulato\",\"tacciare\",\"taciturno\",\"tale\",\"talismano\",\"tampone\",\"tannino\",\"tara\",\"tardivo\",\"targato\",\"tariffa\",\"tarpare\",\"tartaruga\",\"tasto\",\"tattico\",\"taverna\",\"tavolata\",\"tazza\",\"teca\",\"tecnico\",\"telefono\",\"temerario\",\"tempo\",\"temuto\",\"tendone\",\"tenero\",\"tensione\",\"tentacolo\",\"teorema\",\"terme\",\"terrazzo\",\"terzetto\",\"tesi\",\"tesserato\",\"testato\",\"tetro\",\"tettoia\",\"tifare\",\"tigella\",\"timbro\",\"tinto\",\"tipico\",\"tipografo\",\"tiraggio\",\"tiro\",\"titanio\",\"titolo\",\"titubante\",\"tizio\",\"tizzone\",\"toccare\",\"tollerare\",\"tolto\",\"tombola\",\"tomo\",\"tonfo\",\"tonsilla\",\"topazio\",\"topologia\",\"toppa\",\"torba\",\"tornare\",\"torrone\",\"tortora\",\"toscano\",\"tossire\",\"tostatura\",\"totano\",\"trabocco\",\"trachea\",\"trafila\",\"tragedia\",\"tralcio\",\"tramonto\",\"transito\",\"trapano\",\"trarre\",\"trasloco\",\"trattato\",\"trave\",\"treccia\",\"tremolio\",\"trespolo\",\"tributo\",\"tricheco\",\"trifoglio\",\"trillo\",\"trincea\",\"trio\",\"tristezza\",\"triturato\",\"trivella\",\"tromba\",\"trono\",\"troppo\",\"trottola\",\"trovare\",\"truccato\",\"tubatura\",\"tuffato\",\"tulipano\",\"tumulto\",\"tunisia\",\"turbare\",\"turchino\",\"tuta\",\"tutela\",\"ubicato\",\"uccello\",\"uccisore\",\"udire\",\"uditivo\",\"uffa\",\"ufficio\",\"uguale\",\"ulisse\",\"ultimato\",\"umano\",\"umile\",\"umorismo\",\"uncinetto\",\"ungere\",\"ungherese\",\"unicorno\",\"unificato\",\"unisono\",\"unitario\",\"unte\",\"uovo\",\"upupa\",\"uragano\",\"urgenza\",\"urlo\",\"usanza\",\"usato\",\"uscito\",\"usignolo\",\"usuraio\",\"utensile\",\"utilizzo\",\"utopia\",\"vacante\",\"vaccinato\",\"vagabondo\",\"vagliato\",\"valanga\",\"valgo\",\"valico\",\"valletta\",\"valoroso\",\"valutare\",\"valvola\",\"vampata\",\"vangare\",\"vanitoso\",\"vano\",\"vantaggio\",\"vanvera\",\"vapore\",\"varano\",\"varcato\",\"variante\",\"vasca\",\"vedetta\",\"vedova\",\"veduto\",\"vegetale\",\"veicolo\",\"velcro\",\"velina\",\"velluto\",\"veloce\",\"venato\",\"vendemmia\",\"vento\",\"verace\",\"verbale\",\"vergogna\",\"verifica\",\"vero\",\"verruca\",\"verticale\",\"vescica\",\"vessillo\",\"vestale\",\"veterano\",\"vetrina\",\"vetusto\",\"viandante\",\"vibrante\",\"vicenda\",\"vichingo\",\"vicinanza\",\"vidimare\",\"vigilia\",\"vigneto\",\"vigore\",\"vile\",\"villano\",\"vimini\",\"vincitore\",\"viola\",\"vipera\",\"virgola\",\"virologo\",\"virulento\",\"viscoso\",\"visione\",\"vispo\",\"vissuto\",\"visura\",\"vita\",\"vitello\",\"vittima\",\"vivanda\",\"vivido\",\"viziare\",\"voce\",\"voga\",\"volatile\",\"volere\",\"volpe\",\"voragine\",\"vulcano\",\"zampogna\",\"zanna\",\"zappato\",\"zattera\",\"zavorra\",\"zefiro\",\"zelante\",\"zelo\",\"zenzero\",\"zerbino\",\"zibetto\",\"zinco\",\"zircone\",\"zitto\",\"zolla\",\"zotico\",\"zucchero\",\"zufolo\",\"zulu\",\"zuppa\"]");
 
 /***/ }),
-/* 191 */
+/* 192 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"ábaco\",\"abdomen\",\"abeja\",\"abierto\",\"abogado\",\"abono\",\"aborto\",\"abrazo\",\"abrir\",\"abuelo\",\"abuso\",\"acabar\",\"academia\",\"acceso\",\"acción\",\"aceite\",\"acelga\",\"acento\",\"aceptar\",\"ácido\",\"aclarar\",\"acné\",\"acoger\",\"acoso\",\"activo\",\"acto\",\"actriz\",\"actuar\",\"acudir\",\"acuerdo\",\"acusar\",\"adicto\",\"admitir\",\"adoptar\",\"adorno\",\"aduana\",\"adulto\",\"aéreo\",\"afectar\",\"afición\",\"afinar\",\"afirmar\",\"ágil\",\"agitar\",\"agonía\",\"agosto\",\"agotar\",\"agregar\",\"agrio\",\"agua\",\"agudo\",\"águila\",\"aguja\",\"ahogo\",\"ahorro\",\"aire\",\"aislar\",\"ajedrez\",\"ajeno\",\"ajuste\",\"alacrán\",\"alambre\",\"alarma\",\"alba\",\"álbum\",\"alcalde\",\"aldea\",\"alegre\",\"alejar\",\"alerta\",\"aleta\",\"alfiler\",\"alga\",\"algodón\",\"aliado\",\"aliento\",\"alivio\",\"alma\",\"almeja\",\"almíbar\",\"altar\",\"alteza\",\"altivo\",\"alto\",\"altura\",\"alumno\",\"alzar\",\"amable\",\"amante\",\"amapola\",\"amargo\",\"amasar\",\"ámbar\",\"ámbito\",\"ameno\",\"amigo\",\"amistad\",\"amor\",\"amparo\",\"amplio\",\"ancho\",\"anciano\",\"ancla\",\"andar\",\"andén\",\"anemia\",\"ángulo\",\"anillo\",\"ánimo\",\"anís\",\"anotar\",\"antena\",\"antiguo\",\"antojo\",\"anual\",\"anular\",\"anuncio\",\"añadir\",\"añejo\",\"año\",\"apagar\",\"aparato\",\"apetito\",\"apio\",\"aplicar\",\"apodo\",\"aporte\",\"apoyo\",\"aprender\",\"aprobar\",\"apuesta\",\"apuro\",\"arado\",\"araña\",\"arar\",\"árbitro\",\"árbol\",\"arbusto\",\"archivo\",\"arco\",\"arder\",\"ardilla\",\"arduo\",\"área\",\"árido\",\"aries\",\"armonía\",\"arnés\",\"aroma\",\"arpa\",\"arpón\",\"arreglo\",\"arroz\",\"arruga\",\"arte\",\"artista\",\"asa\",\"asado\",\"asalto\",\"ascenso\",\"asegurar\",\"aseo\",\"asesor\",\"asiento\",\"asilo\",\"asistir\",\"asno\",\"asombro\",\"áspero\",\"astilla\",\"astro\",\"astuto\",\"asumir\",\"asunto\",\"atajo\",\"ataque\",\"atar\",\"atento\",\"ateo\",\"ático\",\"atleta\",\"átomo\",\"atraer\",\"atroz\",\"atún\",\"audaz\",\"audio\",\"auge\",\"aula\",\"aumento\",\"ausente\",\"autor\",\"aval\",\"avance\",\"avaro\",\"ave\",\"avellana\",\"avena\",\"avestruz\",\"avión\",\"aviso\",\"ayer\",\"ayuda\",\"ayuno\",\"azafrán\",\"azar\",\"azote\",\"azúcar\",\"azufre\",\"azul\",\"baba\",\"babor\",\"bache\",\"bahía\",\"baile\",\"bajar\",\"balanza\",\"balcón\",\"balde\",\"bambú\",\"banco\",\"banda\",\"baño\",\"barba\",\"barco\",\"barniz\",\"barro\",\"báscula\",\"bastón\",\"basura\",\"batalla\",\"batería\",\"batir\",\"batuta\",\"baúl\",\"bazar\",\"bebé\",\"bebida\",\"bello\",\"besar\",\"beso\",\"bestia\",\"bicho\",\"bien\",\"bingo\",\"blanco\",\"bloque\",\"blusa\",\"boa\",\"bobina\",\"bobo\",\"boca\",\"bocina\",\"boda\",\"bodega\",\"boina\",\"bola\",\"bolero\",\"bolsa\",\"bomba\",\"bondad\",\"bonito\",\"bono\",\"bonsái\",\"borde\",\"borrar\",\"bosque\",\"bote\",\"botín\",\"bóveda\",\"bozal\",\"bravo\",\"brazo\",\"brecha\",\"breve\",\"brillo\",\"brinco\",\"brisa\",\"broca\",\"broma\",\"bronce\",\"brote\",\"bruja\",\"brusco\",\"bruto\",\"buceo\",\"bucle\",\"bueno\",\"buey\",\"bufanda\",\"bufón\",\"búho\",\"buitre\",\"bulto\",\"burbuja\",\"burla\",\"burro\",\"buscar\",\"butaca\",\"buzón\",\"caballo\",\"cabeza\",\"cabina\",\"cabra\",\"cacao\",\"cadáver\",\"cadena\",\"caer\",\"café\",\"caída\",\"caimán\",\"caja\",\"cajón\",\"cal\",\"calamar\",\"calcio\",\"caldo\",\"calidad\",\"calle\",\"calma\",\"calor\",\"calvo\",\"cama\",\"cambio\",\"camello\",\"camino\",\"campo\",\"cáncer\",\"candil\",\"canela\",\"canguro\",\"canica\",\"canto\",\"caña\",\"cañón\",\"caoba\",\"caos\",\"capaz\",\"capitán\",\"capote\",\"captar\",\"capucha\",\"cara\",\"carbón\",\"cárcel\",\"careta\",\"carga\",\"cariño\",\"carne\",\"carpeta\",\"carro\",\"carta\",\"casa\",\"casco\",\"casero\",\"caspa\",\"castor\",\"catorce\",\"catre\",\"caudal\",\"causa\",\"cazo\",\"cebolla\",\"ceder\",\"cedro\",\"celda\",\"célebre\",\"celoso\",\"célula\",\"cemento\",\"ceniza\",\"centro\",\"cerca\",\"cerdo\",\"cereza\",\"cero\",\"cerrar\",\"certeza\",\"césped\",\"cetro\",\"chacal\",\"chaleco\",\"champú\",\"chancla\",\"chapa\",\"charla\",\"chico\",\"chiste\",\"chivo\",\"choque\",\"choza\",\"chuleta\",\"chupar\",\"ciclón\",\"ciego\",\"cielo\",\"cien\",\"cierto\",\"cifra\",\"cigarro\",\"cima\",\"cinco\",\"cine\",\"cinta\",\"ciprés\",\"circo\",\"ciruela\",\"cisne\",\"cita\",\"ciudad\",\"clamor\",\"clan\",\"claro\",\"clase\",\"clave\",\"cliente\",\"clima\",\"clínica\",\"cobre\",\"cocción\",\"cochino\",\"cocina\",\"coco\",\"código\",\"codo\",\"cofre\",\"coger\",\"cohete\",\"cojín\",\"cojo\",\"cola\",\"colcha\",\"colegio\",\"colgar\",\"colina\",\"collar\",\"colmo\",\"columna\",\"combate\",\"comer\",\"comida\",\"cómodo\",\"compra\",\"conde\",\"conejo\",\"conga\",\"conocer\",\"consejo\",\"contar\",\"copa\",\"copia\",\"corazón\",\"corbata\",\"corcho\",\"cordón\",\"corona\",\"correr\",\"coser\",\"cosmos\",\"costa\",\"cráneo\",\"cráter\",\"crear\",\"crecer\",\"creído\",\"crema\",\"cría\",\"crimen\",\"cripta\",\"crisis\",\"cromo\",\"crónica\",\"croqueta\",\"crudo\",\"cruz\",\"cuadro\",\"cuarto\",\"cuatro\",\"cubo\",\"cubrir\",\"cuchara\",\"cuello\",\"cuento\",\"cuerda\",\"cuesta\",\"cueva\",\"cuidar\",\"culebra\",\"culpa\",\"culto\",\"cumbre\",\"cumplir\",\"cuna\",\"cuneta\",\"cuota\",\"cupón\",\"cúpula\",\"curar\",\"curioso\",\"curso\",\"curva\",\"cutis\",\"dama\",\"danza\",\"dar\",\"dardo\",\"dátil\",\"deber\",\"débil\",\"década\",\"decir\",\"dedo\",\"defensa\",\"definir\",\"dejar\",\"delfín\",\"delgado\",\"delito\",\"demora\",\"denso\",\"dental\",\"deporte\",\"derecho\",\"derrota\",\"desayuno\",\"deseo\",\"desfile\",\"desnudo\",\"destino\",\"desvío\",\"detalle\",\"detener\",\"deuda\",\"día\",\"diablo\",\"diadema\",\"diamante\",\"diana\",\"diario\",\"dibujo\",\"dictar\",\"diente\",\"dieta\",\"diez\",\"difícil\",\"digno\",\"dilema\",\"diluir\",\"dinero\",\"directo\",\"dirigir\",\"disco\",\"diseño\",\"disfraz\",\"diva\",\"divino\",\"doble\",\"doce\",\"dolor\",\"domingo\",\"don\",\"donar\",\"dorado\",\"dormir\",\"dorso\",\"dos\",\"dosis\",\"dragón\",\"droga\",\"ducha\",\"duda\",\"duelo\",\"dueño\",\"dulce\",\"dúo\",\"duque\",\"durar\",\"dureza\",\"duro\",\"ébano\",\"ebrio\",\"echar\",\"eco\",\"ecuador\",\"edad\",\"edición\",\"edificio\",\"editor\",\"educar\",\"efecto\",\"eficaz\",\"eje\",\"ejemplo\",\"elefante\",\"elegir\",\"elemento\",\"elevar\",\"elipse\",\"élite\",\"elixir\",\"elogio\",\"eludir\",\"embudo\",\"emitir\",\"emoción\",\"empate\",\"empeño\",\"empleo\",\"empresa\",\"enano\",\"encargo\",\"enchufe\",\"encía\",\"enemigo\",\"enero\",\"enfado\",\"enfermo\",\"engaño\",\"enigma\",\"enlace\",\"enorme\",\"enredo\",\"ensayo\",\"enseñar\",\"entero\",\"entrar\",\"envase\",\"envío\",\"época\",\"equipo\",\"erizo\",\"escala\",\"escena\",\"escolar\",\"escribir\",\"escudo\",\"esencia\",\"esfera\",\"esfuerzo\",\"espada\",\"espejo\",\"espía\",\"esposa\",\"espuma\",\"esquí\",\"estar\",\"este\",\"estilo\",\"estufa\",\"etapa\",\"eterno\",\"ética\",\"etnia\",\"evadir\",\"evaluar\",\"evento\",\"evitar\",\"exacto\",\"examen\",\"exceso\",\"excusa\",\"exento\",\"exigir\",\"exilio\",\"existir\",\"éxito\",\"experto\",\"explicar\",\"exponer\",\"extremo\",\"fábrica\",\"fábula\",\"fachada\",\"fácil\",\"factor\",\"faena\",\"faja\",\"falda\",\"fallo\",\"falso\",\"faltar\",\"fama\",\"familia\",\"famoso\",\"faraón\",\"farmacia\",\"farol\",\"farsa\",\"fase\",\"fatiga\",\"fauna\",\"favor\",\"fax\",\"febrero\",\"fecha\",\"feliz\",\"feo\",\"feria\",\"feroz\",\"fértil\",\"fervor\",\"festín\",\"fiable\",\"fianza\",\"fiar\",\"fibra\",\"ficción\",\"ficha\",\"fideo\",\"fiebre\",\"fiel\",\"fiera\",\"fiesta\",\"figura\",\"fijar\",\"fijo\",\"fila\",\"filete\",\"filial\",\"filtro\",\"fin\",\"finca\",\"fingir\",\"finito\",\"firma\",\"flaco\",\"flauta\",\"flecha\",\"flor\",\"flota\",\"fluir\",\"flujo\",\"flúor\",\"fobia\",\"foca\",\"fogata\",\"fogón\",\"folio\",\"folleto\",\"fondo\",\"forma\",\"forro\",\"fortuna\",\"forzar\",\"fosa\",\"foto\",\"fracaso\",\"frágil\",\"franja\",\"frase\",\"fraude\",\"freír\",\"freno\",\"fresa\",\"frío\",\"frito\",\"fruta\",\"fuego\",\"fuente\",\"fuerza\",\"fuga\",\"fumar\",\"función\",\"funda\",\"furgón\",\"furia\",\"fusil\",\"fútbol\",\"futuro\",\"gacela\",\"gafas\",\"gaita\",\"gajo\",\"gala\",\"galería\",\"gallo\",\"gamba\",\"ganar\",\"gancho\",\"ganga\",\"ganso\",\"garaje\",\"garza\",\"gasolina\",\"gastar\",\"gato\",\"gavilán\",\"gemelo\",\"gemir\",\"gen\",\"género\",\"genio\",\"gente\",\"geranio\",\"gerente\",\"germen\",\"gesto\",\"gigante\",\"gimnasio\",\"girar\",\"giro\",\"glaciar\",\"globo\",\"gloria\",\"gol\",\"golfo\",\"goloso\",\"golpe\",\"goma\",\"gordo\",\"gorila\",\"gorra\",\"gota\",\"goteo\",\"gozar\",\"grada\",\"gráfico\",\"grano\",\"grasa\",\"gratis\",\"grave\",\"grieta\",\"grillo\",\"gripe\",\"gris\",\"grito\",\"grosor\",\"grúa\",\"grueso\",\"grumo\",\"grupo\",\"guante\",\"guapo\",\"guardia\",\"guerra\",\"guía\",\"guiño\",\"guion\",\"guiso\",\"guitarra\",\"gusano\",\"gustar\",\"haber\",\"hábil\",\"hablar\",\"hacer\",\"hacha\",\"hada\",\"hallar\",\"hamaca\",\"harina\",\"haz\",\"hazaña\",\"hebilla\",\"hebra\",\"hecho\",\"helado\",\"helio\",\"hembra\",\"herir\",\"hermano\",\"héroe\",\"hervir\",\"hielo\",\"hierro\",\"hígado\",\"higiene\",\"hijo\",\"himno\",\"historia\",\"hocico\",\"hogar\",\"hoguera\",\"hoja\",\"hombre\",\"hongo\",\"honor\",\"honra\",\"hora\",\"hormiga\",\"horno\",\"hostil\",\"hoyo\",\"hueco\",\"huelga\",\"huerta\",\"hueso\",\"huevo\",\"huida\",\"huir\",\"humano\",\"húmedo\",\"humilde\",\"humo\",\"hundir\",\"huracán\",\"hurto\",\"icono\",\"ideal\",\"idioma\",\"ídolo\",\"iglesia\",\"iglú\",\"igual\",\"ilegal\",\"ilusión\",\"imagen\",\"imán\",\"imitar\",\"impar\",\"imperio\",\"imponer\",\"impulso\",\"incapaz\",\"índice\",\"inerte\",\"infiel\",\"informe\",\"ingenio\",\"inicio\",\"inmenso\",\"inmune\",\"innato\",\"insecto\",\"instante\",\"interés\",\"íntimo\",\"intuir\",\"inútil\",\"invierno\",\"ira\",\"iris\",\"ironía\",\"isla\",\"islote\",\"jabalí\",\"jabón\",\"jamón\",\"jarabe\",\"jardín\",\"jarra\",\"jaula\",\"jazmín\",\"jefe\",\"jeringa\",\"jinete\",\"jornada\",\"joroba\",\"joven\",\"joya\",\"juerga\",\"jueves\",\"juez\",\"jugador\",\"jugo\",\"juguete\",\"juicio\",\"junco\",\"jungla\",\"junio\",\"juntar\",\"júpiter\",\"jurar\",\"justo\",\"juvenil\",\"juzgar\",\"kilo\",\"koala\",\"labio\",\"lacio\",\"lacra\",\"lado\",\"ladrón\",\"lagarto\",\"lágrima\",\"laguna\",\"laico\",\"lamer\",\"lámina\",\"lámpara\",\"lana\",\"lancha\",\"langosta\",\"lanza\",\"lápiz\",\"largo\",\"larva\",\"lástima\",\"lata\",\"látex\",\"latir\",\"laurel\",\"lavar\",\"lazo\",\"leal\",\"lección\",\"leche\",\"lector\",\"leer\",\"legión\",\"legumbre\",\"lejano\",\"lengua\",\"lento\",\"leña\",\"león\",\"leopardo\",\"lesión\",\"letal\",\"letra\",\"leve\",\"leyenda\",\"libertad\",\"libro\",\"licor\",\"líder\",\"lidiar\",\"lienzo\",\"liga\",\"ligero\",\"lima\",\"límite\",\"limón\",\"limpio\",\"lince\",\"lindo\",\"línea\",\"lingote\",\"lino\",\"linterna\",\"líquido\",\"liso\",\"lista\",\"litera\",\"litio\",\"litro\",\"llaga\",\"llama\",\"llanto\",\"llave\",\"llegar\",\"llenar\",\"llevar\",\"llorar\",\"llover\",\"lluvia\",\"lobo\",\"loción\",\"loco\",\"locura\",\"lógica\",\"logro\",\"lombriz\",\"lomo\",\"lonja\",\"lote\",\"lucha\",\"lucir\",\"lugar\",\"lujo\",\"luna\",\"lunes\",\"lupa\",\"lustro\",\"luto\",\"luz\",\"maceta\",\"macho\",\"madera\",\"madre\",\"maduro\",\"maestro\",\"mafia\",\"magia\",\"mago\",\"maíz\",\"maldad\",\"maleta\",\"malla\",\"malo\",\"mamá\",\"mambo\",\"mamut\",\"manco\",\"mando\",\"manejar\",\"manga\",\"maniquí\",\"manjar\",\"mano\",\"manso\",\"manta\",\"mañana\",\"mapa\",\"máquina\",\"mar\",\"marco\",\"marea\",\"marfil\",\"margen\",\"marido\",\"mármol\",\"marrón\",\"martes\",\"marzo\",\"masa\",\"máscara\",\"masivo\",\"matar\",\"materia\",\"matiz\",\"matriz\",\"máximo\",\"mayor\",\"mazorca\",\"mecha\",\"medalla\",\"medio\",\"médula\",\"mejilla\",\"mejor\",\"melena\",\"melón\",\"memoria\",\"menor\",\"mensaje\",\"mente\",\"menú\",\"mercado\",\"merengue\",\"mérito\",\"mes\",\"mesón\",\"meta\",\"meter\",\"método\",\"metro\",\"mezcla\",\"miedo\",\"miel\",\"miembro\",\"miga\",\"mil\",\"milagro\",\"militar\",\"millón\",\"mimo\",\"mina\",\"minero\",\"mínimo\",\"minuto\",\"miope\",\"mirar\",\"misa\",\"miseria\",\"misil\",\"mismo\",\"mitad\",\"mito\",\"mochila\",\"moción\",\"moda\",\"modelo\",\"moho\",\"mojar\",\"molde\",\"moler\",\"molino\",\"momento\",\"momia\",\"monarca\",\"moneda\",\"monja\",\"monto\",\"moño\",\"morada\",\"morder\",\"moreno\",\"morir\",\"morro\",\"morsa\",\"mortal\",\"mosca\",\"mostrar\",\"motivo\",\"mover\",\"móvil\",\"mozo\",\"mucho\",\"mudar\",\"mueble\",\"muela\",\"muerte\",\"muestra\",\"mugre\",\"mujer\",\"mula\",\"muleta\",\"multa\",\"mundo\",\"muñeca\",\"mural\",\"muro\",\"músculo\",\"museo\",\"musgo\",\"música\",\"muslo\",\"nácar\",\"nación\",\"nadar\",\"naipe\",\"naranja\",\"nariz\",\"narrar\",\"nasal\",\"natal\",\"nativo\",\"natural\",\"náusea\",\"naval\",\"nave\",\"navidad\",\"necio\",\"néctar\",\"negar\",\"negocio\",\"negro\",\"neón\",\"nervio\",\"neto\",\"neutro\",\"nevar\",\"nevera\",\"nicho\",\"nido\",\"niebla\",\"nieto\",\"niñez\",\"niño\",\"nítido\",\"nivel\",\"nobleza\",\"noche\",\"nómina\",\"noria\",\"norma\",\"norte\",\"nota\",\"noticia\",\"novato\",\"novela\",\"novio\",\"nube\",\"nuca\",\"núcleo\",\"nudillo\",\"nudo\",\"nuera\",\"nueve\",\"nuez\",\"nulo\",\"número\",\"nutria\",\"oasis\",\"obeso\",\"obispo\",\"objeto\",\"obra\",\"obrero\",\"observar\",\"obtener\",\"obvio\",\"oca\",\"ocaso\",\"océano\",\"ochenta\",\"ocho\",\"ocio\",\"ocre\",\"octavo\",\"octubre\",\"oculto\",\"ocupar\",\"ocurrir\",\"odiar\",\"odio\",\"odisea\",\"oeste\",\"ofensa\",\"oferta\",\"oficio\",\"ofrecer\",\"ogro\",\"oído\",\"oír\",\"ojo\",\"ola\",\"oleada\",\"olfato\",\"olivo\",\"olla\",\"olmo\",\"olor\",\"olvido\",\"ombligo\",\"onda\",\"onza\",\"opaco\",\"opción\",\"ópera\",\"opinar\",\"oponer\",\"optar\",\"óptica\",\"opuesto\",\"oración\",\"orador\",\"oral\",\"órbita\",\"orca\",\"orden\",\"oreja\",\"órgano\",\"orgía\",\"orgullo\",\"oriente\",\"origen\",\"orilla\",\"oro\",\"orquesta\",\"oruga\",\"osadía\",\"oscuro\",\"osezno\",\"oso\",\"ostra\",\"otoño\",\"otro\",\"oveja\",\"óvulo\",\"óxido\",\"oxígeno\",\"oyente\",\"ozono\",\"pacto\",\"padre\",\"paella\",\"página\",\"pago\",\"país\",\"pájaro\",\"palabra\",\"palco\",\"paleta\",\"pálido\",\"palma\",\"paloma\",\"palpar\",\"pan\",\"panal\",\"pánico\",\"pantera\",\"pañuelo\",\"papá\",\"papel\",\"papilla\",\"paquete\",\"parar\",\"parcela\",\"pared\",\"parir\",\"paro\",\"párpado\",\"parque\",\"párrafo\",\"parte\",\"pasar\",\"paseo\",\"pasión\",\"paso\",\"pasta\",\"pata\",\"patio\",\"patria\",\"pausa\",\"pauta\",\"pavo\",\"payaso\",\"peatón\",\"pecado\",\"pecera\",\"pecho\",\"pedal\",\"pedir\",\"pegar\",\"peine\",\"pelar\",\"peldaño\",\"pelea\",\"peligro\",\"pellejo\",\"pelo\",\"peluca\",\"pena\",\"pensar\",\"peñón\",\"peón\",\"peor\",\"pepino\",\"pequeño\",\"pera\",\"percha\",\"perder\",\"pereza\",\"perfil\",\"perico\",\"perla\",\"permiso\",\"perro\",\"persona\",\"pesa\",\"pesca\",\"pésimo\",\"pestaña\",\"pétalo\",\"petróleo\",\"pez\",\"pezuña\",\"picar\",\"pichón\",\"pie\",\"piedra\",\"pierna\",\"pieza\",\"pijama\",\"pilar\",\"piloto\",\"pimienta\",\"pino\",\"pintor\",\"pinza\",\"piña\",\"piojo\",\"pipa\",\"pirata\",\"pisar\",\"piscina\",\"piso\",\"pista\",\"pitón\",\"pizca\",\"placa\",\"plan\",\"plata\",\"playa\",\"plaza\",\"pleito\",\"pleno\",\"plomo\",\"pluma\",\"plural\",\"pobre\",\"poco\",\"poder\",\"podio\",\"poema\",\"poesía\",\"poeta\",\"polen\",\"policía\",\"pollo\",\"polvo\",\"pomada\",\"pomelo\",\"pomo\",\"pompa\",\"poner\",\"porción\",\"portal\",\"posada\",\"poseer\",\"posible\",\"poste\",\"potencia\",\"potro\",\"pozo\",\"prado\",\"precoz\",\"pregunta\",\"premio\",\"prensa\",\"preso\",\"previo\",\"primo\",\"príncipe\",\"prisión\",\"privar\",\"proa\",\"probar\",\"proceso\",\"producto\",\"proeza\",\"profesor\",\"programa\",\"prole\",\"promesa\",\"pronto\",\"propio\",\"próximo\",\"prueba\",\"público\",\"puchero\",\"pudor\",\"pueblo\",\"puerta\",\"puesto\",\"pulga\",\"pulir\",\"pulmón\",\"pulpo\",\"pulso\",\"puma\",\"punto\",\"puñal\",\"puño\",\"pupa\",\"pupila\",\"puré\",\"quedar\",\"queja\",\"quemar\",\"querer\",\"queso\",\"quieto\",\"química\",\"quince\",\"quitar\",\"rábano\",\"rabia\",\"rabo\",\"ración\",\"radical\",\"raíz\",\"rama\",\"rampa\",\"rancho\",\"rango\",\"rapaz\",\"rápido\",\"rapto\",\"rasgo\",\"raspa\",\"rato\",\"rayo\",\"raza\",\"razón\",\"reacción\",\"realidad\",\"rebaño\",\"rebote\",\"recaer\",\"receta\",\"rechazo\",\"recoger\",\"recreo\",\"recto\",\"recurso\",\"red\",\"redondo\",\"reducir\",\"reflejo\",\"reforma\",\"refrán\",\"refugio\",\"regalo\",\"regir\",\"regla\",\"regreso\",\"rehén\",\"reino\",\"reír\",\"reja\",\"relato\",\"relevo\",\"relieve\",\"relleno\",\"reloj\",\"remar\",\"remedio\",\"remo\",\"rencor\",\"rendir\",\"renta\",\"reparto\",\"repetir\",\"reposo\",\"reptil\",\"res\",\"rescate\",\"resina\",\"respeto\",\"resto\",\"resumen\",\"retiro\",\"retorno\",\"retrato\",\"reunir\",\"revés\",\"revista\",\"rey\",\"rezar\",\"rico\",\"riego\",\"rienda\",\"riesgo\",\"rifa\",\"rígido\",\"rigor\",\"rincón\",\"riñón\",\"río\",\"riqueza\",\"risa\",\"ritmo\",\"rito\",\"rizo\",\"roble\",\"roce\",\"rociar\",\"rodar\",\"rodeo\",\"rodilla\",\"roer\",\"rojizo\",\"rojo\",\"romero\",\"romper\",\"ron\",\"ronco\",\"ronda\",\"ropa\",\"ropero\",\"rosa\",\"rosca\",\"rostro\",\"rotar\",\"rubí\",\"rubor\",\"rudo\",\"rueda\",\"rugir\",\"ruido\",\"ruina\",\"ruleta\",\"rulo\",\"rumbo\",\"rumor\",\"ruptura\",\"ruta\",\"rutina\",\"sábado\",\"saber\",\"sabio\",\"sable\",\"sacar\",\"sagaz\",\"sagrado\",\"sala\",\"saldo\",\"salero\",\"salir\",\"salmón\",\"salón\",\"salsa\",\"salto\",\"salud\",\"salvar\",\"samba\",\"sanción\",\"sandía\",\"sanear\",\"sangre\",\"sanidad\",\"sano\",\"santo\",\"sapo\",\"saque\",\"sardina\",\"sartén\",\"sastre\",\"satán\",\"sauna\",\"saxofón\",\"sección\",\"seco\",\"secreto\",\"secta\",\"sed\",\"seguir\",\"seis\",\"sello\",\"selva\",\"semana\",\"semilla\",\"senda\",\"sensor\",\"señal\",\"señor\",\"separar\",\"sepia\",\"sequía\",\"ser\",\"serie\",\"sermón\",\"servir\",\"sesenta\",\"sesión\",\"seta\",\"setenta\",\"severo\",\"sexo\",\"sexto\",\"sidra\",\"siesta\",\"siete\",\"siglo\",\"signo\",\"sílaba\",\"silbar\",\"silencio\",\"silla\",\"símbolo\",\"simio\",\"sirena\",\"sistema\",\"sitio\",\"situar\",\"sobre\",\"socio\",\"sodio\",\"sol\",\"solapa\",\"soldado\",\"soledad\",\"sólido\",\"soltar\",\"solución\",\"sombra\",\"sondeo\",\"sonido\",\"sonoro\",\"sonrisa\",\"sopa\",\"soplar\",\"soporte\",\"sordo\",\"sorpresa\",\"sorteo\",\"sostén\",\"sótano\",\"suave\",\"subir\",\"suceso\",\"sudor\",\"suegra\",\"suelo\",\"sueño\",\"suerte\",\"sufrir\",\"sujeto\",\"sultán\",\"sumar\",\"superar\",\"suplir\",\"suponer\",\"supremo\",\"sur\",\"surco\",\"sureño\",\"surgir\",\"susto\",\"sutil\",\"tabaco\",\"tabique\",\"tabla\",\"tabú\",\"taco\",\"tacto\",\"tajo\",\"talar\",\"talco\",\"talento\",\"talla\",\"talón\",\"tamaño\",\"tambor\",\"tango\",\"tanque\",\"tapa\",\"tapete\",\"tapia\",\"tapón\",\"taquilla\",\"tarde\",\"tarea\",\"tarifa\",\"tarjeta\",\"tarot\",\"tarro\",\"tarta\",\"tatuaje\",\"tauro\",\"taza\",\"tazón\",\"teatro\",\"techo\",\"tecla\",\"técnica\",\"tejado\",\"tejer\",\"tejido\",\"tela\",\"teléfono\",\"tema\",\"temor\",\"templo\",\"tenaz\",\"tender\",\"tener\",\"tenis\",\"tenso\",\"teoría\",\"terapia\",\"terco\",\"término\",\"ternura\",\"terror\",\"tesis\",\"tesoro\",\"testigo\",\"tetera\",\"texto\",\"tez\",\"tibio\",\"tiburón\",\"tiempo\",\"tienda\",\"tierra\",\"tieso\",\"tigre\",\"tijera\",\"tilde\",\"timbre\",\"tímido\",\"timo\",\"tinta\",\"tío\",\"típico\",\"tipo\",\"tira\",\"tirón\",\"titán\",\"títere\",\"título\",\"tiza\",\"toalla\",\"tobillo\",\"tocar\",\"tocino\",\"todo\",\"toga\",\"toldo\",\"tomar\",\"tono\",\"tonto\",\"topar\",\"tope\",\"toque\",\"tórax\",\"torero\",\"tormenta\",\"torneo\",\"toro\",\"torpedo\",\"torre\",\"torso\",\"tortuga\",\"tos\",\"tosco\",\"toser\",\"tóxico\",\"trabajo\",\"tractor\",\"traer\",\"tráfico\",\"trago\",\"traje\",\"tramo\",\"trance\",\"trato\",\"trauma\",\"trazar\",\"trébol\",\"tregua\",\"treinta\",\"tren\",\"trepar\",\"tres\",\"tribu\",\"trigo\",\"tripa\",\"triste\",\"triunfo\",\"trofeo\",\"trompa\",\"tronco\",\"tropa\",\"trote\",\"trozo\",\"truco\",\"trueno\",\"trufa\",\"tubería\",\"tubo\",\"tuerto\",\"tumba\",\"tumor\",\"túnel\",\"túnica\",\"turbina\",\"turismo\",\"turno\",\"tutor\",\"ubicar\",\"úlcera\",\"umbral\",\"unidad\",\"unir\",\"universo\",\"uno\",\"untar\",\"uña\",\"urbano\",\"urbe\",\"urgente\",\"urna\",\"usar\",\"usuario\",\"útil\",\"utopía\",\"uva\",\"vaca\",\"vacío\",\"vacuna\",\"vagar\",\"vago\",\"vaina\",\"vajilla\",\"vale\",\"válido\",\"valle\",\"valor\",\"válvula\",\"vampiro\",\"vara\",\"variar\",\"varón\",\"vaso\",\"vecino\",\"vector\",\"vehículo\",\"veinte\",\"vejez\",\"vela\",\"velero\",\"veloz\",\"vena\",\"vencer\",\"venda\",\"veneno\",\"vengar\",\"venir\",\"venta\",\"venus\",\"ver\",\"verano\",\"verbo\",\"verde\",\"vereda\",\"verja\",\"verso\",\"verter\",\"vía\",\"viaje\",\"vibrar\",\"vicio\",\"víctima\",\"vida\",\"vídeo\",\"vidrio\",\"viejo\",\"viernes\",\"vigor\",\"vil\",\"villa\",\"vinagre\",\"vino\",\"viñedo\",\"violín\",\"viral\",\"virgo\",\"virtud\",\"visor\",\"víspera\",\"vista\",\"vitamina\",\"viudo\",\"vivaz\",\"vivero\",\"vivir\",\"vivo\",\"volcán\",\"volumen\",\"volver\",\"voraz\",\"votar\",\"voto\",\"voz\",\"vuelo\",\"vulgar\",\"yacer\",\"yate\",\"yegua\",\"yema\",\"yerno\",\"yeso\",\"yodo\",\"yoga\",\"yogur\",\"zafiro\",\"zanja\",\"zapato\",\"zarza\",\"zona\",\"zorro\",\"zumo\",\"zurdo\"]");
 
 /***/ }),
-/* 192 */
+/* 193 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"あいこくしん\",\"あいさつ\",\"あいだ\",\"あおぞら\",\"あかちゃん\",\"あきる\",\"あけがた\",\"あける\",\"あこがれる\",\"あさい\",\"あさひ\",\"あしあと\",\"あじわう\",\"あずかる\",\"あずき\",\"あそぶ\",\"あたえる\",\"あたためる\",\"あたりまえ\",\"あたる\",\"あつい\",\"あつかう\",\"あっしゅく\",\"あつまり\",\"あつめる\",\"あてな\",\"あてはまる\",\"あひる\",\"あぶら\",\"あぶる\",\"あふれる\",\"あまい\",\"あまど\",\"あまやかす\",\"あまり\",\"あみもの\",\"あめりか\",\"あやまる\",\"あゆむ\",\"あらいぐま\",\"あらし\",\"あらすじ\",\"あらためる\",\"あらゆる\",\"あらわす\",\"ありがとう\",\"あわせる\",\"あわてる\",\"あんい\",\"あんがい\",\"あんこ\",\"あんぜん\",\"あんてい\",\"あんない\",\"あんまり\",\"いいだす\",\"いおん\",\"いがい\",\"いがく\",\"いきおい\",\"いきなり\",\"いきもの\",\"いきる\",\"いくじ\",\"いくぶん\",\"いけばな\",\"いけん\",\"いこう\",\"いこく\",\"いこつ\",\"いさましい\",\"いさん\",\"いしき\",\"いじゅう\",\"いじょう\",\"いじわる\",\"いずみ\",\"いずれ\",\"いせい\",\"いせえび\",\"いせかい\",\"いせき\",\"いぜん\",\"いそうろう\",\"いそがしい\",\"いだい\",\"いだく\",\"いたずら\",\"いたみ\",\"いたりあ\",\"いちおう\",\"いちじ\",\"いちど\",\"いちば\",\"いちぶ\",\"いちりゅう\",\"いつか\",\"いっしゅん\",\"いっせい\",\"いっそう\",\"いったん\",\"いっち\",\"いってい\",\"いっぽう\",\"いてざ\",\"いてん\",\"いどう\",\"いとこ\",\"いない\",\"いなか\",\"いねむり\",\"いのち\",\"いのる\",\"いはつ\",\"いばる\",\"いはん\",\"いびき\",\"いひん\",\"いふく\",\"いへん\",\"いほう\",\"いみん\",\"いもうと\",\"いもたれ\",\"いもり\",\"いやがる\",\"いやす\",\"いよかん\",\"いよく\",\"いらい\",\"いらすと\",\"いりぐち\",\"いりょう\",\"いれい\",\"いれもの\",\"いれる\",\"いろえんぴつ\",\"いわい\",\"いわう\",\"いわかん\",\"いわば\",\"いわゆる\",\"いんげんまめ\",\"いんさつ\",\"いんしょう\",\"いんよう\",\"うえき\",\"うえる\",\"うおざ\",\"うがい\",\"うかぶ\",\"うかべる\",\"うきわ\",\"うくらいな\",\"うくれれ\",\"うけたまわる\",\"うけつけ\",\"うけとる\",\"うけもつ\",\"うける\",\"うごかす\",\"うごく\",\"うこん\",\"うさぎ\",\"うしなう\",\"うしろがみ\",\"うすい\",\"うすぎ\",\"うすぐらい\",\"うすめる\",\"うせつ\",\"うちあわせ\",\"うちがわ\",\"うちき\",\"うちゅう\",\"うっかり\",\"うつくしい\",\"うったえる\",\"うつる\",\"うどん\",\"うなぎ\",\"うなじ\",\"うなずく\",\"うなる\",\"うねる\",\"うのう\",\"うぶげ\",\"うぶごえ\",\"うまれる\",\"うめる\",\"うもう\",\"うやまう\",\"うよく\",\"うらがえす\",\"うらぐち\",\"うらない\",\"うりあげ\",\"うりきれ\",\"うるさい\",\"うれしい\",\"うれゆき\",\"うれる\",\"うろこ\",\"うわき\",\"うわさ\",\"うんこう\",\"うんちん\",\"うんてん\",\"うんどう\",\"えいえん\",\"えいが\",\"えいきょう\",\"えいご\",\"えいせい\",\"えいぶん\",\"えいよう\",\"えいわ\",\"えおり\",\"えがお\",\"えがく\",\"えきたい\",\"えくせる\",\"えしゃく\",\"えすて\",\"えつらん\",\"えのぐ\",\"えほうまき\",\"えほん\",\"えまき\",\"えもじ\",\"えもの\",\"えらい\",\"えらぶ\",\"えりあ\",\"えんえん\",\"えんかい\",\"えんぎ\",\"えんげき\",\"えんしゅう\",\"えんぜつ\",\"えんそく\",\"えんちょう\",\"えんとつ\",\"おいかける\",\"おいこす\",\"おいしい\",\"おいつく\",\"おうえん\",\"おうさま\",\"おうじ\",\"おうせつ\",\"おうたい\",\"おうふく\",\"おうべい\",\"おうよう\",\"おえる\",\"おおい\",\"おおう\",\"おおどおり\",\"おおや\",\"おおよそ\",\"おかえり\",\"おかず\",\"おがむ\",\"おかわり\",\"おぎなう\",\"おきる\",\"おくさま\",\"おくじょう\",\"おくりがな\",\"おくる\",\"おくれる\",\"おこす\",\"おこなう\",\"おこる\",\"おさえる\",\"おさない\",\"おさめる\",\"おしいれ\",\"おしえる\",\"おじぎ\",\"おじさん\",\"おしゃれ\",\"おそらく\",\"おそわる\",\"おたがい\",\"おたく\",\"おだやか\",\"おちつく\",\"おっと\",\"おつり\",\"おでかけ\",\"おとしもの\",\"おとなしい\",\"おどり\",\"おどろかす\",\"おばさん\",\"おまいり\",\"おめでとう\",\"おもいで\",\"おもう\",\"おもたい\",\"おもちゃ\",\"おやつ\",\"おやゆび\",\"およぼす\",\"おらんだ\",\"おろす\",\"おんがく\",\"おんけい\",\"おんしゃ\",\"おんせん\",\"おんだん\",\"おんちゅう\",\"おんどけい\",\"かあつ\",\"かいが\",\"がいき\",\"がいけん\",\"がいこう\",\"かいさつ\",\"かいしゃ\",\"かいすいよく\",\"かいぜん\",\"かいぞうど\",\"かいつう\",\"かいてん\",\"かいとう\",\"かいふく\",\"がいへき\",\"かいほう\",\"かいよう\",\"がいらい\",\"かいわ\",\"かえる\",\"かおり\",\"かかえる\",\"かがく\",\"かがし\",\"かがみ\",\"かくご\",\"かくとく\",\"かざる\",\"がぞう\",\"かたい\",\"かたち\",\"がちょう\",\"がっきゅう\",\"がっこう\",\"がっさん\",\"がっしょう\",\"かなざわし\",\"かのう\",\"がはく\",\"かぶか\",\"かほう\",\"かほご\",\"かまう\",\"かまぼこ\",\"かめれおん\",\"かゆい\",\"かようび\",\"からい\",\"かるい\",\"かろう\",\"かわく\",\"かわら\",\"がんか\",\"かんけい\",\"かんこう\",\"かんしゃ\",\"かんそう\",\"かんたん\",\"かんち\",\"がんばる\",\"きあい\",\"きあつ\",\"きいろ\",\"ぎいん\",\"きうい\",\"きうん\",\"きえる\",\"きおう\",\"きおく\",\"きおち\",\"きおん\",\"きかい\",\"きかく\",\"きかんしゃ\",\"ききて\",\"きくばり\",\"きくらげ\",\"きけんせい\",\"きこう\",\"きこえる\",\"きこく\",\"きさい\",\"きさく\",\"きさま\",\"きさらぎ\",\"ぎじかがく\",\"ぎしき\",\"ぎじたいけん\",\"ぎじにってい\",\"ぎじゅつしゃ\",\"きすう\",\"きせい\",\"きせき\",\"きせつ\",\"きそう\",\"きぞく\",\"きぞん\",\"きたえる\",\"きちょう\",\"きつえん\",\"ぎっちり\",\"きつつき\",\"きつね\",\"きてい\",\"きどう\",\"きどく\",\"きない\",\"きなが\",\"きなこ\",\"きぬごし\",\"きねん\",\"きのう\",\"きのした\",\"きはく\",\"きびしい\",\"きひん\",\"きふく\",\"きぶん\",\"きぼう\",\"きほん\",\"きまる\",\"きみつ\",\"きむずかしい\",\"きめる\",\"きもだめし\",\"きもち\",\"きもの\",\"きゃく\",\"きやく\",\"ぎゅうにく\",\"きよう\",\"きょうりゅう\",\"きらい\",\"きらく\",\"きりん\",\"きれい\",\"きれつ\",\"きろく\",\"ぎろん\",\"きわめる\",\"ぎんいろ\",\"きんかくじ\",\"きんじょ\",\"きんようび\",\"ぐあい\",\"くいず\",\"くうかん\",\"くうき\",\"くうぐん\",\"くうこう\",\"ぐうせい\",\"くうそう\",\"ぐうたら\",\"くうふく\",\"くうぼ\",\"くかん\",\"くきょう\",\"くげん\",\"ぐこう\",\"くさい\",\"くさき\",\"くさばな\",\"くさる\",\"くしゃみ\",\"くしょう\",\"くすのき\",\"くすりゆび\",\"くせげ\",\"くせん\",\"ぐたいてき\",\"くださる\",\"くたびれる\",\"くちこみ\",\"くちさき\",\"くつした\",\"ぐっすり\",\"くつろぐ\",\"くとうてん\",\"くどく\",\"くなん\",\"くねくね\",\"くのう\",\"くふう\",\"くみあわせ\",\"くみたてる\",\"くめる\",\"くやくしょ\",\"くらす\",\"くらべる\",\"くるま\",\"くれる\",\"くろう\",\"くわしい\",\"ぐんかん\",\"ぐんしょく\",\"ぐんたい\",\"ぐんて\",\"けあな\",\"けいかく\",\"けいけん\",\"けいこ\",\"けいさつ\",\"げいじゅつ\",\"けいたい\",\"げいのうじん\",\"けいれき\",\"けいろ\",\"けおとす\",\"けおりもの\",\"げきか\",\"げきげん\",\"げきだん\",\"げきちん\",\"げきとつ\",\"げきは\",\"げきやく\",\"げこう\",\"げこくじょう\",\"げざい\",\"けさき\",\"げざん\",\"けしき\",\"けしごむ\",\"けしょう\",\"げすと\",\"けたば\",\"けちゃっぷ\",\"けちらす\",\"けつあつ\",\"けつい\",\"けつえき\",\"けっこん\",\"けつじょ\",\"けっせき\",\"けってい\",\"けつまつ\",\"げつようび\",\"げつれい\",\"けつろん\",\"げどく\",\"けとばす\",\"けとる\",\"けなげ\",\"けなす\",\"けなみ\",\"けぬき\",\"げねつ\",\"けねん\",\"けはい\",\"げひん\",\"けぶかい\",\"げぼく\",\"けまり\",\"けみかる\",\"けむし\",\"けむり\",\"けもの\",\"けらい\",\"けろけろ\",\"けわしい\",\"けんい\",\"けんえつ\",\"けんお\",\"けんか\",\"げんき\",\"けんげん\",\"けんこう\",\"けんさく\",\"けんしゅう\",\"けんすう\",\"げんそう\",\"けんちく\",\"けんてい\",\"けんとう\",\"けんない\",\"けんにん\",\"げんぶつ\",\"けんま\",\"けんみん\",\"けんめい\",\"けんらん\",\"けんり\",\"こあくま\",\"こいぬ\",\"こいびと\",\"ごうい\",\"こうえん\",\"こうおん\",\"こうかん\",\"ごうきゅう\",\"ごうけい\",\"こうこう\",\"こうさい\",\"こうじ\",\"こうすい\",\"ごうせい\",\"こうそく\",\"こうたい\",\"こうちゃ\",\"こうつう\",\"こうてい\",\"こうどう\",\"こうない\",\"こうはい\",\"ごうほう\",\"ごうまん\",\"こうもく\",\"こうりつ\",\"こえる\",\"こおり\",\"ごかい\",\"ごがつ\",\"ごかん\",\"こくご\",\"こくさい\",\"こくとう\",\"こくない\",\"こくはく\",\"こぐま\",\"こけい\",\"こける\",\"ここのか\",\"こころ\",\"こさめ\",\"こしつ\",\"こすう\",\"こせい\",\"こせき\",\"こぜん\",\"こそだて\",\"こたい\",\"こたえる\",\"こたつ\",\"こちょう\",\"こっか\",\"こつこつ\",\"こつばん\",\"こつぶ\",\"こてい\",\"こてん\",\"ことがら\",\"ことし\",\"ことば\",\"ことり\",\"こなごな\",\"こねこね\",\"このまま\",\"このみ\",\"このよ\",\"ごはん\",\"こひつじ\",\"こふう\",\"こふん\",\"こぼれる\",\"ごまあぶら\",\"こまかい\",\"ごますり\",\"こまつな\",\"こまる\",\"こむぎこ\",\"こもじ\",\"こもち\",\"こもの\",\"こもん\",\"こやく\",\"こやま\",\"こゆう\",\"こゆび\",\"こよい\",\"こよう\",\"こりる\",\"これくしょん\",\"ころっけ\",\"こわもて\",\"こわれる\",\"こんいん\",\"こんかい\",\"こんき\",\"こんしゅう\",\"こんすい\",\"こんだて\",\"こんとん\",\"こんなん\",\"こんびに\",\"こんぽん\",\"こんまけ\",\"こんや\",\"こんれい\",\"こんわく\",\"ざいえき\",\"さいかい\",\"さいきん\",\"ざいげん\",\"ざいこ\",\"さいしょ\",\"さいせい\",\"ざいたく\",\"ざいちゅう\",\"さいてき\",\"ざいりょう\",\"さうな\",\"さかいし\",\"さがす\",\"さかな\",\"さかみち\",\"さがる\",\"さぎょう\",\"さくし\",\"さくひん\",\"さくら\",\"さこく\",\"さこつ\",\"さずかる\",\"ざせき\",\"さたん\",\"さつえい\",\"ざつおん\",\"ざっか\",\"ざつがく\",\"さっきょく\",\"ざっし\",\"さつじん\",\"ざっそう\",\"さつたば\",\"さつまいも\",\"さてい\",\"さといも\",\"さとう\",\"さとおや\",\"さとし\",\"さとる\",\"さのう\",\"さばく\",\"さびしい\",\"さべつ\",\"さほう\",\"さほど\",\"さます\",\"さみしい\",\"さみだれ\",\"さむけ\",\"さめる\",\"さやえんどう\",\"さゆう\",\"さよう\",\"さよく\",\"さらだ\",\"ざるそば\",\"さわやか\",\"さわる\",\"さんいん\",\"さんか\",\"さんきゃく\",\"さんこう\",\"さんさい\",\"ざんしょ\",\"さんすう\",\"さんせい\",\"さんそ\",\"さんち\",\"さんま\",\"さんみ\",\"さんらん\",\"しあい\",\"しあげ\",\"しあさって\",\"しあわせ\",\"しいく\",\"しいん\",\"しうち\",\"しえい\",\"しおけ\",\"しかい\",\"しかく\",\"じかん\",\"しごと\",\"しすう\",\"じだい\",\"したうけ\",\"したぎ\",\"したて\",\"したみ\",\"しちょう\",\"しちりん\",\"しっかり\",\"しつじ\",\"しつもん\",\"してい\",\"してき\",\"してつ\",\"じてん\",\"じどう\",\"しなぎれ\",\"しなもの\",\"しなん\",\"しねま\",\"しねん\",\"しのぐ\",\"しのぶ\",\"しはい\",\"しばかり\",\"しはつ\",\"しはらい\",\"しはん\",\"しひょう\",\"しふく\",\"じぶん\",\"しへい\",\"しほう\",\"しほん\",\"しまう\",\"しまる\",\"しみん\",\"しむける\",\"じむしょ\",\"しめい\",\"しめる\",\"しもん\",\"しゃいん\",\"しゃうん\",\"しゃおん\",\"じゃがいも\",\"しやくしょ\",\"しゃくほう\",\"しゃけん\",\"しゃこ\",\"しゃざい\",\"しゃしん\",\"しゃせん\",\"しゃそう\",\"しゃたい\",\"しゃちょう\",\"しゃっきん\",\"じゃま\",\"しゃりん\",\"しゃれい\",\"じゆう\",\"じゅうしょ\",\"しゅくはく\",\"じゅしん\",\"しゅっせき\",\"しゅみ\",\"しゅらば\",\"じゅんばん\",\"しょうかい\",\"しょくたく\",\"しょっけん\",\"しょどう\",\"しょもつ\",\"しらせる\",\"しらべる\",\"しんか\",\"しんこう\",\"じんじゃ\",\"しんせいじ\",\"しんちく\",\"しんりん\",\"すあげ\",\"すあし\",\"すあな\",\"ずあん\",\"すいえい\",\"すいか\",\"すいとう\",\"ずいぶん\",\"すいようび\",\"すうがく\",\"すうじつ\",\"すうせん\",\"すおどり\",\"すきま\",\"すくう\",\"すくない\",\"すける\",\"すごい\",\"すこし\",\"ずさん\",\"すずしい\",\"すすむ\",\"すすめる\",\"すっかり\",\"ずっしり\",\"ずっと\",\"すてき\",\"すてる\",\"すねる\",\"すのこ\",\"すはだ\",\"すばらしい\",\"ずひょう\",\"ずぶぬれ\",\"すぶり\",\"すふれ\",\"すべて\",\"すべる\",\"ずほう\",\"すぼん\",\"すまい\",\"すめし\",\"すもう\",\"すやき\",\"すらすら\",\"するめ\",\"すれちがう\",\"すろっと\",\"すわる\",\"すんぜん\",\"すんぽう\",\"せあぶら\",\"せいかつ\",\"せいげん\",\"せいじ\",\"せいよう\",\"せおう\",\"せかいかん\",\"せきにん\",\"せきむ\",\"せきゆ\",\"せきらんうん\",\"せけん\",\"せこう\",\"せすじ\",\"せたい\",\"せたけ\",\"せっかく\",\"せっきゃく\",\"ぜっく\",\"せっけん\",\"せっこつ\",\"せっさたくま\",\"せつぞく\",\"せつだん\",\"せつでん\",\"せっぱん\",\"せつび\",\"せつぶん\",\"せつめい\",\"せつりつ\",\"せなか\",\"せのび\",\"せはば\",\"せびろ\",\"せぼね\",\"せまい\",\"せまる\",\"せめる\",\"せもたれ\",\"せりふ\",\"ぜんあく\",\"せんい\",\"せんえい\",\"せんか\",\"せんきょ\",\"せんく\",\"せんげん\",\"ぜんご\",\"せんさい\",\"せんしゅ\",\"せんすい\",\"せんせい\",\"せんぞ\",\"せんたく\",\"せんちょう\",\"せんてい\",\"せんとう\",\"せんぬき\",\"せんねん\",\"せんぱい\",\"ぜんぶ\",\"ぜんぽう\",\"せんむ\",\"せんめんじょ\",\"せんもん\",\"せんやく\",\"せんゆう\",\"せんよう\",\"ぜんら\",\"ぜんりゃく\",\"せんれい\",\"せんろ\",\"そあく\",\"そいとげる\",\"そいね\",\"そうがんきょう\",\"そうき\",\"そうご\",\"そうしん\",\"そうだん\",\"そうなん\",\"そうび\",\"そうめん\",\"そうり\",\"そえもの\",\"そえん\",\"そがい\",\"そげき\",\"そこう\",\"そこそこ\",\"そざい\",\"そしな\",\"そせい\",\"そせん\",\"そそぐ\",\"そだてる\",\"そつう\",\"そつえん\",\"そっかん\",\"そつぎょう\",\"そっけつ\",\"そっこう\",\"そっせん\",\"そっと\",\"そとがわ\",\"そとづら\",\"そなえる\",\"そなた\",\"そふぼ\",\"そぼく\",\"そぼろ\",\"そまつ\",\"そまる\",\"そむく\",\"そむりえ\",\"そめる\",\"そもそも\",\"そよかぜ\",\"そらまめ\",\"そろう\",\"そんかい\",\"そんけい\",\"そんざい\",\"そんしつ\",\"そんぞく\",\"そんちょう\",\"ぞんび\",\"ぞんぶん\",\"そんみん\",\"たあい\",\"たいいん\",\"たいうん\",\"たいえき\",\"たいおう\",\"だいがく\",\"たいき\",\"たいぐう\",\"たいけん\",\"たいこ\",\"たいざい\",\"だいじょうぶ\",\"だいすき\",\"たいせつ\",\"たいそう\",\"だいたい\",\"たいちょう\",\"たいてい\",\"だいどころ\",\"たいない\",\"たいねつ\",\"たいのう\",\"たいはん\",\"だいひょう\",\"たいふう\",\"たいへん\",\"たいほ\",\"たいまつばな\",\"たいみんぐ\",\"たいむ\",\"たいめん\",\"たいやき\",\"たいよう\",\"たいら\",\"たいりょく\",\"たいる\",\"たいわん\",\"たうえ\",\"たえる\",\"たおす\",\"たおる\",\"たおれる\",\"たかい\",\"たかね\",\"たきび\",\"たくさん\",\"たこく\",\"たこやき\",\"たさい\",\"たしざん\",\"だじゃれ\",\"たすける\",\"たずさわる\",\"たそがれ\",\"たたかう\",\"たたく\",\"ただしい\",\"たたみ\",\"たちばな\",\"だっかい\",\"だっきゃく\",\"だっこ\",\"だっしゅつ\",\"だったい\",\"たてる\",\"たとえる\",\"たなばた\",\"たにん\",\"たぬき\",\"たのしみ\",\"たはつ\",\"たぶん\",\"たべる\",\"たぼう\",\"たまご\",\"たまる\",\"だむる\",\"ためいき\",\"ためす\",\"ためる\",\"たもつ\",\"たやすい\",\"たよる\",\"たらす\",\"たりきほんがん\",\"たりょう\",\"たりる\",\"たると\",\"たれる\",\"たれんと\",\"たろっと\",\"たわむれる\",\"だんあつ\",\"たんい\",\"たんおん\",\"たんか\",\"たんき\",\"たんけん\",\"たんご\",\"たんさん\",\"たんじょうび\",\"だんせい\",\"たんそく\",\"たんたい\",\"だんち\",\"たんてい\",\"たんとう\",\"だんな\",\"たんにん\",\"だんねつ\",\"たんのう\",\"たんぴん\",\"だんぼう\",\"たんまつ\",\"たんめい\",\"だんれつ\",\"だんろ\",\"だんわ\",\"ちあい\",\"ちあん\",\"ちいき\",\"ちいさい\",\"ちえん\",\"ちかい\",\"ちから\",\"ちきゅう\",\"ちきん\",\"ちけいず\",\"ちけん\",\"ちこく\",\"ちさい\",\"ちしき\",\"ちしりょう\",\"ちせい\",\"ちそう\",\"ちたい\",\"ちたん\",\"ちちおや\",\"ちつじょ\",\"ちてき\",\"ちてん\",\"ちぬき\",\"ちぬり\",\"ちのう\",\"ちひょう\",\"ちへいせん\",\"ちほう\",\"ちまた\",\"ちみつ\",\"ちみどろ\",\"ちめいど\",\"ちゃんこなべ\",\"ちゅうい\",\"ちゆりょく\",\"ちょうし\",\"ちょさくけん\",\"ちらし\",\"ちらみ\",\"ちりがみ\",\"ちりょう\",\"ちるど\",\"ちわわ\",\"ちんたい\",\"ちんもく\",\"ついか\",\"ついたち\",\"つうか\",\"つうじょう\",\"つうはん\",\"つうわ\",\"つかう\",\"つかれる\",\"つくね\",\"つくる\",\"つけね\",\"つける\",\"つごう\",\"つたえる\",\"つづく\",\"つつじ\",\"つつむ\",\"つとめる\",\"つながる\",\"つなみ\",\"つねづね\",\"つのる\",\"つぶす\",\"つまらない\",\"つまる\",\"つみき\",\"つめたい\",\"つもり\",\"つもる\",\"つよい\",\"つるぼ\",\"つるみく\",\"つわもの\",\"つわり\",\"てあし\",\"てあて\",\"てあみ\",\"ていおん\",\"ていか\",\"ていき\",\"ていけい\",\"ていこく\",\"ていさつ\",\"ていし\",\"ていせい\",\"ていたい\",\"ていど\",\"ていねい\",\"ていひょう\",\"ていへん\",\"ていぼう\",\"てうち\",\"ておくれ\",\"てきとう\",\"てくび\",\"でこぼこ\",\"てさぎょう\",\"てさげ\",\"てすり\",\"てそう\",\"てちがい\",\"てちょう\",\"てつがく\",\"てつづき\",\"でっぱ\",\"てつぼう\",\"てつや\",\"でぬかえ\",\"てぬき\",\"てぬぐい\",\"てのひら\",\"てはい\",\"てぶくろ\",\"てふだ\",\"てほどき\",\"てほん\",\"てまえ\",\"てまきずし\",\"てみじか\",\"てみやげ\",\"てらす\",\"てれび\",\"てわけ\",\"てわたし\",\"でんあつ\",\"てんいん\",\"てんかい\",\"てんき\",\"てんぐ\",\"てんけん\",\"てんごく\",\"てんさい\",\"てんし\",\"てんすう\",\"でんち\",\"てんてき\",\"てんとう\",\"てんない\",\"てんぷら\",\"てんぼうだい\",\"てんめつ\",\"てんらんかい\",\"でんりょく\",\"でんわ\",\"どあい\",\"といれ\",\"どうかん\",\"とうきゅう\",\"どうぐ\",\"とうし\",\"とうむぎ\",\"とおい\",\"とおか\",\"とおく\",\"とおす\",\"とおる\",\"とかい\",\"とかす\",\"ときおり\",\"ときどき\",\"とくい\",\"とくしゅう\",\"とくてん\",\"とくに\",\"とくべつ\",\"とけい\",\"とける\",\"とこや\",\"とさか\",\"としょかん\",\"とそう\",\"とたん\",\"とちゅう\",\"とっきゅう\",\"とっくん\",\"とつぜん\",\"とつにゅう\",\"とどける\",\"ととのえる\",\"とない\",\"となえる\",\"となり\",\"とのさま\",\"とばす\",\"どぶがわ\",\"とほう\",\"とまる\",\"とめる\",\"ともだち\",\"ともる\",\"どようび\",\"とらえる\",\"とんかつ\",\"どんぶり\",\"ないかく\",\"ないこう\",\"ないしょ\",\"ないす\",\"ないせん\",\"ないそう\",\"なおす\",\"ながい\",\"なくす\",\"なげる\",\"なこうど\",\"なさけ\",\"なたでここ\",\"なっとう\",\"なつやすみ\",\"ななおし\",\"なにごと\",\"なにもの\",\"なにわ\",\"なのか\",\"なふだ\",\"なまいき\",\"なまえ\",\"なまみ\",\"なみだ\",\"なめらか\",\"なめる\",\"なやむ\",\"ならう\",\"ならび\",\"ならぶ\",\"なれる\",\"なわとび\",\"なわばり\",\"にあう\",\"にいがた\",\"にうけ\",\"におい\",\"にかい\",\"にがて\",\"にきび\",\"にくしみ\",\"にくまん\",\"にげる\",\"にさんかたんそ\",\"にしき\",\"にせもの\",\"にちじょう\",\"にちようび\",\"にっか\",\"にっき\",\"にっけい\",\"にっこう\",\"にっさん\",\"にっしょく\",\"にっすう\",\"にっせき\",\"にってい\",\"になう\",\"にほん\",\"にまめ\",\"にもつ\",\"にやり\",\"にゅういん\",\"にりんしゃ\",\"にわとり\",\"にんい\",\"にんか\",\"にんき\",\"にんげん\",\"にんしき\",\"にんずう\",\"にんそう\",\"にんたい\",\"にんち\",\"にんてい\",\"にんにく\",\"にんぷ\",\"にんまり\",\"にんむ\",\"にんめい\",\"にんよう\",\"ぬいくぎ\",\"ぬかす\",\"ぬぐいとる\",\"ぬぐう\",\"ぬくもり\",\"ぬすむ\",\"ぬまえび\",\"ぬめり\",\"ぬらす\",\"ぬんちゃく\",\"ねあげ\",\"ねいき\",\"ねいる\",\"ねいろ\",\"ねぐせ\",\"ねくたい\",\"ねくら\",\"ねこぜ\",\"ねこむ\",\"ねさげ\",\"ねすごす\",\"ねそべる\",\"ねだん\",\"ねつい\",\"ねっしん\",\"ねつぞう\",\"ねったいぎょ\",\"ねぶそく\",\"ねふだ\",\"ねぼう\",\"ねほりはほり\",\"ねまき\",\"ねまわし\",\"ねみみ\",\"ねむい\",\"ねむたい\",\"ねもと\",\"ねらう\",\"ねわざ\",\"ねんいり\",\"ねんおし\",\"ねんかん\",\"ねんきん\",\"ねんぐ\",\"ねんざ\",\"ねんし\",\"ねんちゃく\",\"ねんど\",\"ねんぴ\",\"ねんぶつ\",\"ねんまつ\",\"ねんりょう\",\"ねんれい\",\"のいず\",\"のおづま\",\"のがす\",\"のきなみ\",\"のこぎり\",\"のこす\",\"のこる\",\"のせる\",\"のぞく\",\"のぞむ\",\"のたまう\",\"のちほど\",\"のっく\",\"のばす\",\"のはら\",\"のべる\",\"のぼる\",\"のみもの\",\"のやま\",\"のらいぬ\",\"のらねこ\",\"のりもの\",\"のりゆき\",\"のれん\",\"のんき\",\"ばあい\",\"はあく\",\"ばあさん\",\"ばいか\",\"ばいく\",\"はいけん\",\"はいご\",\"はいしん\",\"はいすい\",\"はいせん\",\"はいそう\",\"はいち\",\"ばいばい\",\"はいれつ\",\"はえる\",\"はおる\",\"はかい\",\"ばかり\",\"はかる\",\"はくしゅ\",\"はけん\",\"はこぶ\",\"はさみ\",\"はさん\",\"はしご\",\"ばしょ\",\"はしる\",\"はせる\",\"ぱそこん\",\"はそん\",\"はたん\",\"はちみつ\",\"はつおん\",\"はっかく\",\"はづき\",\"はっきり\",\"はっくつ\",\"はっけん\",\"はっこう\",\"はっさん\",\"はっしん\",\"はったつ\",\"はっちゅう\",\"はってん\",\"はっぴょう\",\"はっぽう\",\"はなす\",\"はなび\",\"はにかむ\",\"はぶらし\",\"はみがき\",\"はむかう\",\"はめつ\",\"はやい\",\"はやし\",\"はらう\",\"はろうぃん\",\"はわい\",\"はんい\",\"はんえい\",\"はんおん\",\"はんかく\",\"はんきょう\",\"ばんぐみ\",\"はんこ\",\"はんしゃ\",\"はんすう\",\"はんだん\",\"ぱんち\",\"ぱんつ\",\"はんてい\",\"はんとし\",\"はんのう\",\"はんぱ\",\"はんぶん\",\"はんぺん\",\"はんぼうき\",\"はんめい\",\"はんらん\",\"はんろん\",\"ひいき\",\"ひうん\",\"ひえる\",\"ひかく\",\"ひかり\",\"ひかる\",\"ひかん\",\"ひくい\",\"ひけつ\",\"ひこうき\",\"ひこく\",\"ひさい\",\"ひさしぶり\",\"ひさん\",\"びじゅつかん\",\"ひしょ\",\"ひそか\",\"ひそむ\",\"ひたむき\",\"ひだり\",\"ひたる\",\"ひつぎ\",\"ひっこし\",\"ひっし\",\"ひつじゅひん\",\"ひっす\",\"ひつぜん\",\"ぴったり\",\"ぴっちり\",\"ひつよう\",\"ひてい\",\"ひとごみ\",\"ひなまつり\",\"ひなん\",\"ひねる\",\"ひはん\",\"ひびく\",\"ひひょう\",\"ひほう\",\"ひまわり\",\"ひまん\",\"ひみつ\",\"ひめい\",\"ひめじし\",\"ひやけ\",\"ひやす\",\"ひよう\",\"びょうき\",\"ひらがな\",\"ひらく\",\"ひりつ\",\"ひりょう\",\"ひるま\",\"ひるやすみ\",\"ひれい\",\"ひろい\",\"ひろう\",\"ひろき\",\"ひろゆき\",\"ひんかく\",\"ひんけつ\",\"ひんこん\",\"ひんしゅ\",\"ひんそう\",\"ぴんち\",\"ひんぱん\",\"びんぼう\",\"ふあん\",\"ふいうち\",\"ふうけい\",\"ふうせん\",\"ぷうたろう\",\"ふうとう\",\"ふうふ\",\"ふえる\",\"ふおん\",\"ふかい\",\"ふきん\",\"ふくざつ\",\"ふくぶくろ\",\"ふこう\",\"ふさい\",\"ふしぎ\",\"ふじみ\",\"ふすま\",\"ふせい\",\"ふせぐ\",\"ふそく\",\"ぶたにく\",\"ふたん\",\"ふちょう\",\"ふつう\",\"ふつか\",\"ふっかつ\",\"ふっき\",\"ふっこく\",\"ぶどう\",\"ふとる\",\"ふとん\",\"ふのう\",\"ふはい\",\"ふひょう\",\"ふへん\",\"ふまん\",\"ふみん\",\"ふめつ\",\"ふめん\",\"ふよう\",\"ふりこ\",\"ふりる\",\"ふるい\",\"ふんいき\",\"ぶんがく\",\"ぶんぐ\",\"ふんしつ\",\"ぶんせき\",\"ふんそう\",\"ぶんぽう\",\"へいあん\",\"へいおん\",\"へいがい\",\"へいき\",\"へいげん\",\"へいこう\",\"へいさ\",\"へいしゃ\",\"へいせつ\",\"へいそ\",\"へいたく\",\"へいてん\",\"へいねつ\",\"へいわ\",\"へきが\",\"へこむ\",\"べにいろ\",\"べにしょうが\",\"へらす\",\"へんかん\",\"べんきょう\",\"べんごし\",\"へんさい\",\"へんたい\",\"べんり\",\"ほあん\",\"ほいく\",\"ぼうぎょ\",\"ほうこく\",\"ほうそう\",\"ほうほう\",\"ほうもん\",\"ほうりつ\",\"ほえる\",\"ほおん\",\"ほかん\",\"ほきょう\",\"ぼきん\",\"ほくろ\",\"ほけつ\",\"ほけん\",\"ほこう\",\"ほこる\",\"ほしい\",\"ほしつ\",\"ほしゅ\",\"ほしょう\",\"ほせい\",\"ほそい\",\"ほそく\",\"ほたて\",\"ほたる\",\"ぽちぶくろ\",\"ほっきょく\",\"ほっさ\",\"ほったん\",\"ほとんど\",\"ほめる\",\"ほんい\",\"ほんき\",\"ほんけ\",\"ほんしつ\",\"ほんやく\",\"まいにち\",\"まかい\",\"まかせる\",\"まがる\",\"まける\",\"まこと\",\"まさつ\",\"まじめ\",\"ますく\",\"まぜる\",\"まつり\",\"まとめ\",\"まなぶ\",\"まぬけ\",\"まねく\",\"まほう\",\"まもる\",\"まゆげ\",\"まよう\",\"まろやか\",\"まわす\",\"まわり\",\"まわる\",\"まんが\",\"まんきつ\",\"まんぞく\",\"まんなか\",\"みいら\",\"みうち\",\"みえる\",\"みがく\",\"みかた\",\"みかん\",\"みけん\",\"みこん\",\"みじかい\",\"みすい\",\"みすえる\",\"みせる\",\"みっか\",\"みつかる\",\"みつける\",\"みてい\",\"みとめる\",\"みなと\",\"みなみかさい\",\"みねらる\",\"みのう\",\"みのがす\",\"みほん\",\"みもと\",\"みやげ\",\"みらい\",\"みりょく\",\"みわく\",\"みんか\",\"みんぞく\",\"むいか\",\"むえき\",\"むえん\",\"むかい\",\"むかう\",\"むかえ\",\"むかし\",\"むぎちゃ\",\"むける\",\"むげん\",\"むさぼる\",\"むしあつい\",\"むしば\",\"むじゅん\",\"むしろ\",\"むすう\",\"むすこ\",\"むすぶ\",\"むすめ\",\"むせる\",\"むせん\",\"むちゅう\",\"むなしい\",\"むのう\",\"むやみ\",\"むよう\",\"むらさき\",\"むりょう\",\"むろん\",\"めいあん\",\"めいうん\",\"めいえん\",\"めいかく\",\"めいきょく\",\"めいさい\",\"めいし\",\"めいそう\",\"めいぶつ\",\"めいれい\",\"めいわく\",\"めぐまれる\",\"めざす\",\"めした\",\"めずらしい\",\"めだつ\",\"めまい\",\"めやす\",\"めんきょ\",\"めんせき\",\"めんどう\",\"もうしあげる\",\"もうどうけん\",\"もえる\",\"もくし\",\"もくてき\",\"もくようび\",\"もちろん\",\"もどる\",\"もらう\",\"もんく\",\"もんだい\",\"やおや\",\"やける\",\"やさい\",\"やさしい\",\"やすい\",\"やすたろう\",\"やすみ\",\"やせる\",\"やそう\",\"やたい\",\"やちん\",\"やっと\",\"やっぱり\",\"やぶる\",\"やめる\",\"ややこしい\",\"やよい\",\"やわらかい\",\"ゆうき\",\"ゆうびんきょく\",\"ゆうべ\",\"ゆうめい\",\"ゆけつ\",\"ゆしゅつ\",\"ゆせん\",\"ゆそう\",\"ゆたか\",\"ゆちゃく\",\"ゆでる\",\"ゆにゅう\",\"ゆびわ\",\"ゆらい\",\"ゆれる\",\"ようい\",\"ようか\",\"ようきゅう\",\"ようじ\",\"ようす\",\"ようちえん\",\"よかぜ\",\"よかん\",\"よきん\",\"よくせい\",\"よくぼう\",\"よけい\",\"よごれる\",\"よさん\",\"よしゅう\",\"よそう\",\"よそく\",\"よっか\",\"よてい\",\"よどがわく\",\"よねつ\",\"よやく\",\"よゆう\",\"よろこぶ\",\"よろしい\",\"らいう\",\"らくがき\",\"らくご\",\"らくさつ\",\"らくだ\",\"らしんばん\",\"らせん\",\"らぞく\",\"らたい\",\"らっか\",\"られつ\",\"りえき\",\"りかい\",\"りきさく\",\"りきせつ\",\"りくぐん\",\"りくつ\",\"りけん\",\"りこう\",\"りせい\",\"りそう\",\"りそく\",\"りてん\",\"りねん\",\"りゆう\",\"りゅうがく\",\"りよう\",\"りょうり\",\"りょかん\",\"りょくちゃ\",\"りょこう\",\"りりく\",\"りれき\",\"りろん\",\"りんご\",\"るいけい\",\"るいさい\",\"るいじ\",\"るいせき\",\"るすばん\",\"るりがわら\",\"れいかん\",\"れいぎ\",\"れいせい\",\"れいぞうこ\",\"れいとう\",\"れいぼう\",\"れきし\",\"れきだい\",\"れんあい\",\"れんけい\",\"れんこん\",\"れんさい\",\"れんしゅう\",\"れんぞく\",\"れんらく\",\"ろうか\",\"ろうご\",\"ろうじん\",\"ろうそく\",\"ろくが\",\"ろこつ\",\"ろじうら\",\"ろしゅつ\",\"ろせん\",\"ろてん\",\"ろめん\",\"ろれつ\",\"ろんぎ\",\"ろんぱ\",\"ろんぶん\",\"ろんり\",\"わかす\",\"わかめ\",\"わかやま\",\"わかれる\",\"わしつ\",\"わじまし\",\"わすれもの\",\"わらう\",\"われる\"]");
 
 /***/ }),
-/* 193 */
+/* 194 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above\",\"absent\",\"absorb\",\"abstract\",\"absurd\",\"abuse\",\"access\",\"accident\",\"account\",\"accuse\",\"achieve\",\"acid\",\"acoustic\",\"acquire\",\"across\",\"act\",\"action\",\"actor\",\"actress\",\"actual\",\"adapt\",\"add\",\"addict\",\"address\",\"adjust\",\"admit\",\"adult\",\"advance\",\"advice\",\"aerobic\",\"affair\",\"afford\",\"afraid\",\"again\",\"age\",\"agent\",\"agree\",\"ahead\",\"aim\",\"air\",\"airport\",\"aisle\",\"alarm\",\"album\",\"alcohol\",\"alert\",\"alien\",\"all\",\"alley\",\"allow\",\"almost\",\"alone\",\"alpha\",\"already\",\"also\",\"alter\",\"always\",\"amateur\",\"amazing\",\"among\",\"amount\",\"amused\",\"analyst\",\"anchor\",\"ancient\",\"anger\",\"angle\",\"angry\",\"animal\",\"ankle\",\"announce\",\"annual\",\"another\",\"answer\",\"antenna\",\"antique\",\"anxiety\",\"any\",\"apart\",\"apology\",\"appear\",\"apple\",\"approve\",\"april\",\"arch\",\"arctic\",\"area\",\"arena\",\"argue\",\"arm\",\"armed\",\"armor\",\"army\",\"around\",\"arrange\",\"arrest\",\"arrive\",\"arrow\",\"art\",\"artefact\",\"artist\",\"artwork\",\"ask\",\"aspect\",\"assault\",\"asset\",\"assist\",\"assume\",\"asthma\",\"athlete\",\"atom\",\"attack\",\"attend\",\"attitude\",\"attract\",\"auction\",\"audit\",\"august\",\"aunt\",\"author\",\"auto\",\"autumn\",\"average\",\"avocado\",\"avoid\",\"awake\",\"aware\",\"away\",\"awesome\",\"awful\",\"awkward\",\"axis\",\"baby\",\"bachelor\",\"bacon\",\"badge\",\"bag\",\"balance\",\"balcony\",\"ball\",\"bamboo\",\"banana\",\"banner\",\"bar\",\"barely\",\"bargain\",\"barrel\",\"base\",\"basic\",\"basket\",\"battle\",\"beach\",\"bean\",\"beauty\",\"because\",\"become\",\"beef\",\"before\",\"begin\",\"behave\",\"behind\",\"believe\",\"below\",\"belt\",\"bench\",\"benefit\",\"best\",\"betray\",\"better\",\"between\",\"beyond\",\"bicycle\",\"bid\",\"bike\",\"bind\",\"biology\",\"bird\",\"birth\",\"bitter\",\"black\",\"blade\",\"blame\",\"blanket\",\"blast\",\"bleak\",\"bless\",\"blind\",\"blood\",\"blossom\",\"blouse\",\"blue\",\"blur\",\"blush\",\"board\",\"boat\",\"body\",\"boil\",\"bomb\",\"bone\",\"bonus\",\"book\",\"boost\",\"border\",\"boring\",\"borrow\",\"boss\",\"bottom\",\"bounce\",\"box\",\"boy\",\"bracket\",\"brain\",\"brand\",\"brass\",\"brave\",\"bread\",\"breeze\",\"brick\",\"bridge\",\"brief\",\"bright\",\"bring\",\"brisk\",\"broccoli\",\"broken\",\"bronze\",\"broom\",\"brother\",\"brown\",\"brush\",\"bubble\",\"buddy\",\"budget\",\"buffalo\",\"build\",\"bulb\",\"bulk\",\"bullet\",\"bundle\",\"bunker\",\"burden\",\"burger\",\"burst\",\"bus\",\"business\",\"busy\",\"butter\",\"buyer\",\"buzz\",\"cabbage\",\"cabin\",\"cable\",\"cactus\",\"cage\",\"cake\",\"call\",\"calm\",\"camera\",\"camp\",\"can\",\"canal\",\"cancel\",\"candy\",\"cannon\",\"canoe\",\"canvas\",\"canyon\",\"capable\",\"capital\",\"captain\",\"car\",\"carbon\",\"card\",\"cargo\",\"carpet\",\"carry\",\"cart\",\"case\",\"cash\",\"casino\",\"castle\",\"casual\",\"cat\",\"catalog\",\"catch\",\"category\",\"cattle\",\"caught\",\"cause\",\"caution\",\"cave\",\"ceiling\",\"celery\",\"cement\",\"census\",\"century\",\"cereal\",\"certain\",\"chair\",\"chalk\",\"champion\",\"change\",\"chaos\",\"chapter\",\"charge\",\"chase\",\"chat\",\"cheap\",\"check\",\"cheese\",\"chef\",\"cherry\",\"chest\",\"chicken\",\"chief\",\"child\",\"chimney\",\"choice\",\"choose\",\"chronic\",\"chuckle\",\"chunk\",\"churn\",\"cigar\",\"cinnamon\",\"circle\",\"citizen\",\"city\",\"civil\",\"claim\",\"clap\",\"clarify\",\"claw\",\"clay\",\"clean\",\"clerk\",\"clever\",\"click\",\"client\",\"cliff\",\"climb\",\"clinic\",\"clip\",\"clock\",\"clog\",\"close\",\"cloth\",\"cloud\",\"clown\",\"club\",\"clump\",\"cluster\",\"clutch\",\"coach\",\"coast\",\"coconut\",\"code\",\"coffee\",\"coil\",\"coin\",\"collect\",\"color\",\"column\",\"combine\",\"come\",\"comfort\",\"comic\",\"common\",\"company\",\"concert\",\"conduct\",\"confirm\",\"congress\",\"connect\",\"consider\",\"control\",\"convince\",\"cook\",\"cool\",\"copper\",\"copy\",\"coral\",\"core\",\"corn\",\"correct\",\"cost\",\"cotton\",\"couch\",\"country\",\"couple\",\"course\",\"cousin\",\"cover\",\"coyote\",\"crack\",\"cradle\",\"craft\",\"cram\",\"crane\",\"crash\",\"crater\",\"crawl\",\"crazy\",\"cream\",\"credit\",\"creek\",\"crew\",\"cricket\",\"crime\",\"crisp\",\"critic\",\"crop\",\"cross\",\"crouch\",\"crowd\",\"crucial\",\"cruel\",\"cruise\",\"crumble\",\"crunch\",\"crush\",\"cry\",\"crystal\",\"cube\",\"culture\",\"cup\",\"cupboard\",\"curious\",\"current\",\"curtain\",\"curve\",\"cushion\",\"custom\",\"cute\",\"cycle\",\"dad\",\"damage\",\"damp\",\"dance\",\"danger\",\"daring\",\"dash\",\"daughter\",\"dawn\",\"day\",\"deal\",\"debate\",\"debris\",\"decade\",\"december\",\"decide\",\"decline\",\"decorate\",\"decrease\",\"deer\",\"defense\",\"define\",\"defy\",\"degree\",\"delay\",\"deliver\",\"demand\",\"demise\",\"denial\",\"dentist\",\"deny\",\"depart\",\"depend\",\"deposit\",\"depth\",\"deputy\",\"derive\",\"describe\",\"desert\",\"design\",\"desk\",\"despair\",\"destroy\",\"detail\",\"detect\",\"develop\",\"device\",\"devote\",\"diagram\",\"dial\",\"diamond\",\"diary\",\"dice\",\"diesel\",\"diet\",\"differ\",\"digital\",\"dignity\",\"dilemma\",\"dinner\",\"dinosaur\",\"direct\",\"dirt\",\"disagree\",\"discover\",\"disease\",\"dish\",\"dismiss\",\"disorder\",\"display\",\"distance\",\"divert\",\"divide\",\"divorce\",\"dizzy\",\"doctor\",\"document\",\"dog\",\"doll\",\"dolphin\",\"domain\",\"donate\",\"donkey\",\"donor\",\"door\",\"dose\",\"double\",\"dove\",\"draft\",\"dragon\",\"drama\",\"drastic\",\"draw\",\"dream\",\"dress\",\"drift\",\"drill\",\"drink\",\"drip\",\"drive\",\"drop\",\"drum\",\"dry\",\"duck\",\"dumb\",\"dune\",\"during\",\"dust\",\"dutch\",\"duty\",\"dwarf\",\"dynamic\",\"eager\",\"eagle\",\"early\",\"earn\",\"earth\",\"easily\",\"east\",\"easy\",\"echo\",\"ecology\",\"economy\",\"edge\",\"edit\",\"educate\",\"effort\",\"egg\",\"eight\",\"either\",\"elbow\",\"elder\",\"electric\",\"elegant\",\"element\",\"elephant\",\"elevator\",\"elite\",\"else\",\"embark\",\"embody\",\"embrace\",\"emerge\",\"emotion\",\"employ\",\"empower\",\"empty\",\"enable\",\"enact\",\"end\",\"endless\",\"endorse\",\"enemy\",\"energy\",\"enforce\",\"engage\",\"engine\",\"enhance\",\"enjoy\",\"enlist\",\"enough\",\"enrich\",\"enroll\",\"ensure\",\"enter\",\"entire\",\"entry\",\"envelope\",\"episode\",\"equal\",\"equip\",\"era\",\"erase\",\"erode\",\"erosion\",\"error\",\"erupt\",\"escape\",\"essay\",\"essence\",\"estate\",\"eternal\",\"ethics\",\"evidence\",\"evil\",\"evoke\",\"evolve\",\"exact\",\"example\",\"excess\",\"exchange\",\"excite\",\"exclude\",\"excuse\",\"execute\",\"exercise\",\"exhaust\",\"exhibit\",\"exile\",\"exist\",\"exit\",\"exotic\",\"expand\",\"expect\",\"expire\",\"explain\",\"expose\",\"express\",\"extend\",\"extra\",\"eye\",\"eyebrow\",\"fabric\",\"face\",\"faculty\",\"fade\",\"faint\",\"faith\",\"fall\",\"false\",\"fame\",\"family\",\"famous\",\"fan\",\"fancy\",\"fantasy\",\"farm\",\"fashion\",\"fat\",\"fatal\",\"father\",\"fatigue\",\"fault\",\"favorite\",\"feature\",\"february\",\"federal\",\"fee\",\"feed\",\"feel\",\"female\",\"fence\",\"festival\",\"fetch\",\"fever\",\"few\",\"fiber\",\"fiction\",\"field\",\"figure\",\"file\",\"film\",\"filter\",\"final\",\"find\",\"fine\",\"finger\",\"finish\",\"fire\",\"firm\",\"first\",\"fiscal\",\"fish\",\"fit\",\"fitness\",\"fix\",\"flag\",\"flame\",\"flash\",\"flat\",\"flavor\",\"flee\",\"flight\",\"flip\",\"float\",\"flock\",\"floor\",\"flower\",\"fluid\",\"flush\",\"fly\",\"foam\",\"focus\",\"fog\",\"foil\",\"fold\",\"follow\",\"food\",\"foot\",\"force\",\"forest\",\"forget\",\"fork\",\"fortune\",\"forum\",\"forward\",\"fossil\",\"foster\",\"found\",\"fox\",\"fragile\",\"frame\",\"frequent\",\"fresh\",\"friend\",\"fringe\",\"frog\",\"front\",\"frost\",\"frown\",\"frozen\",\"fruit\",\"fuel\",\"fun\",\"funny\",\"furnace\",\"fury\",\"future\",\"gadget\",\"gain\",\"galaxy\",\"gallery\",\"game\",\"gap\",\"garage\",\"garbage\",\"garden\",\"garlic\",\"garment\",\"gas\",\"gasp\",\"gate\",\"gather\",\"gauge\",\"gaze\",\"general\",\"genius\",\"genre\",\"gentle\",\"genuine\",\"gesture\",\"ghost\",\"giant\",\"gift\",\"giggle\",\"ginger\",\"giraffe\",\"girl\",\"give\",\"glad\",\"glance\",\"glare\",\"glass\",\"glide\",\"glimpse\",\"globe\",\"gloom\",\"glory\",\"glove\",\"glow\",\"glue\",\"goat\",\"goddess\",\"gold\",\"good\",\"goose\",\"gorilla\",\"gospel\",\"gossip\",\"govern\",\"gown\",\"grab\",\"grace\",\"grain\",\"grant\",\"grape\",\"grass\",\"gravity\",\"great\",\"green\",\"grid\",\"grief\",\"grit\",\"grocery\",\"group\",\"grow\",\"grunt\",\"guard\",\"guess\",\"guide\",\"guilt\",\"guitar\",\"gun\",\"gym\",\"habit\",\"hair\",\"half\",\"hammer\",\"hamster\",\"hand\",\"happy\",\"harbor\",\"hard\",\"harsh\",\"harvest\",\"hat\",\"have\",\"hawk\",\"hazard\",\"head\",\"health\",\"heart\",\"heavy\",\"hedgehog\",\"height\",\"hello\",\"helmet\",\"help\",\"hen\",\"hero\",\"hidden\",\"high\",\"hill\",\"hint\",\"hip\",\"hire\",\"history\",\"hobby\",\"hockey\",\"hold\",\"hole\",\"holiday\",\"hollow\",\"home\",\"honey\",\"hood\",\"hope\",\"horn\",\"horror\",\"horse\",\"hospital\",\"host\",\"hotel\",\"hour\",\"hover\",\"hub\",\"huge\",\"human\",\"humble\",\"humor\",\"hundred\",\"hungry\",\"hunt\",\"hurdle\",\"hurry\",\"hurt\",\"husband\",\"hybrid\",\"ice\",\"icon\",\"idea\",\"identify\",\"idle\",\"ignore\",\"ill\",\"illegal\",\"illness\",\"image\",\"imitate\",\"immense\",\"immune\",\"impact\",\"impose\",\"improve\",\"impulse\",\"inch\",\"include\",\"income\",\"increase\",\"index\",\"indicate\",\"indoor\",\"industry\",\"infant\",\"inflict\",\"inform\",\"inhale\",\"inherit\",\"initial\",\"inject\",\"injury\",\"inmate\",\"inner\",\"innocent\",\"input\",\"inquiry\",\"insane\",\"insect\",\"inside\",\"inspire\",\"install\",\"intact\",\"interest\",\"into\",\"invest\",\"invite\",\"involve\",\"iron\",\"island\",\"isolate\",\"issue\",\"item\",\"ivory\",\"jacket\",\"jaguar\",\"jar\",\"jazz\",\"jealous\",\"jeans\",\"jelly\",\"jewel\",\"job\",\"join\",\"joke\",\"journey\",\"joy\",\"judge\",\"juice\",\"jump\",\"jungle\",\"junior\",\"junk\",\"just\",\"kangaroo\",\"keen\",\"keep\",\"ketchup\",\"key\",\"kick\",\"kid\",\"kidney\",\"kind\",\"kingdom\",\"kiss\",\"kit\",\"kitchen\",\"kite\",\"kitten\",\"kiwi\",\"knee\",\"knife\",\"knock\",\"know\",\"lab\",\"label\",\"labor\",\"ladder\",\"lady\",\"lake\",\"lamp\",\"language\",\"laptop\",\"large\",\"later\",\"latin\",\"laugh\",\"laundry\",\"lava\",\"law\",\"lawn\",\"lawsuit\",\"layer\",\"lazy\",\"leader\",\"leaf\",\"learn\",\"leave\",\"lecture\",\"left\",\"leg\",\"legal\",\"legend\",\"leisure\",\"lemon\",\"lend\",\"length\",\"lens\",\"leopard\",\"lesson\",\"letter\",\"level\",\"liar\",\"liberty\",\"library\",\"license\",\"life\",\"lift\",\"light\",\"like\",\"limb\",\"limit\",\"link\",\"lion\",\"liquid\",\"list\",\"little\",\"live\",\"lizard\",\"load\",\"loan\",\"lobster\",\"local\",\"lock\",\"logic\",\"lonely\",\"long\",\"loop\",\"lottery\",\"loud\",\"lounge\",\"love\",\"loyal\",\"lucky\",\"luggage\",\"lumber\",\"lunar\",\"lunch\",\"luxury\",\"lyrics\",\"machine\",\"mad\",\"magic\",\"magnet\",\"maid\",\"mail\",\"main\",\"major\",\"make\",\"mammal\",\"man\",\"manage\",\"mandate\",\"mango\",\"mansion\",\"manual\",\"maple\",\"marble\",\"march\",\"margin\",\"marine\",\"market\",\"marriage\",\"mask\",\"mass\",\"master\",\"match\",\"material\",\"math\",\"matrix\",\"matter\",\"maximum\",\"maze\",\"meadow\",\"mean\",\"measure\",\"meat\",\"mechanic\",\"medal\",\"media\",\"melody\",\"melt\",\"member\",\"memory\",\"mention\",\"menu\",\"mercy\",\"merge\",\"merit\",\"merry\",\"mesh\",\"message\",\"metal\",\"method\",\"middle\",\"midnight\",\"milk\",\"million\",\"mimic\",\"mind\",\"minimum\",\"minor\",\"minute\",\"miracle\",\"mirror\",\"misery\",\"miss\",\"mistake\",\"mix\",\"mixed\",\"mixture\",\"mobile\",\"model\",\"modify\",\"mom\",\"moment\",\"monitor\",\"monkey\",\"monster\",\"month\",\"moon\",\"moral\",\"more\",\"morning\",\"mosquito\",\"mother\",\"motion\",\"motor\",\"mountain\",\"mouse\",\"move\",\"movie\",\"much\",\"muffin\",\"mule\",\"multiply\",\"muscle\",\"museum\",\"mushroom\",\"music\",\"must\",\"mutual\",\"myself\",\"mystery\",\"myth\",\"naive\",\"name\",\"napkin\",\"narrow\",\"nasty\",\"nation\",\"nature\",\"near\",\"neck\",\"need\",\"negative\",\"neglect\",\"neither\",\"nephew\",\"nerve\",\"nest\",\"net\",\"network\",\"neutral\",\"never\",\"news\",\"next\",\"nice\",\"night\",\"noble\",\"noise\",\"nominee\",\"noodle\",\"normal\",\"north\",\"nose\",\"notable\",\"note\",\"nothing\",\"notice\",\"novel\",\"now\",\"nuclear\",\"number\",\"nurse\",\"nut\",\"oak\",\"obey\",\"object\",\"oblige\",\"obscure\",\"observe\",\"obtain\",\"obvious\",\"occur\",\"ocean\",\"october\",\"odor\",\"off\",\"offer\",\"office\",\"often\",\"oil\",\"okay\",\"old\",\"olive\",\"olympic\",\"omit\",\"once\",\"one\",\"onion\",\"online\",\"only\",\"open\",\"opera\",\"opinion\",\"oppose\",\"option\",\"orange\",\"orbit\",\"orchard\",\"order\",\"ordinary\",\"organ\",\"orient\",\"original\",\"orphan\",\"ostrich\",\"other\",\"outdoor\",\"outer\",\"output\",\"outside\",\"oval\",\"oven\",\"over\",\"own\",\"owner\",\"oxygen\",\"oyster\",\"ozone\",\"pact\",\"paddle\",\"page\",\"pair\",\"palace\",\"palm\",\"panda\",\"panel\",\"panic\",\"panther\",\"paper\",\"parade\",\"parent\",\"park\",\"parrot\",\"party\",\"pass\",\"patch\",\"path\",\"patient\",\"patrol\",\"pattern\",\"pause\",\"pave\",\"payment\",\"peace\",\"peanut\",\"pear\",\"peasant\",\"pelican\",\"pen\",\"penalty\",\"pencil\",\"people\",\"pepper\",\"perfect\",\"permit\",\"person\",\"pet\",\"phone\",\"photo\",\"phrase\",\"physical\",\"piano\",\"picnic\",\"picture\",\"piece\",\"pig\",\"pigeon\",\"pill\",\"pilot\",\"pink\",\"pioneer\",\"pipe\",\"pistol\",\"pitch\",\"pizza\",\"place\",\"planet\",\"plastic\",\"plate\",\"play\",\"please\",\"pledge\",\"pluck\",\"plug\",\"plunge\",\"poem\",\"poet\",\"point\",\"polar\",\"pole\",\"police\",\"pond\",\"pony\",\"pool\",\"popular\",\"portion\",\"position\",\"possible\",\"post\",\"potato\",\"pottery\",\"poverty\",\"powder\",\"power\",\"practice\",\"praise\",\"predict\",\"prefer\",\"prepare\",\"present\",\"pretty\",\"prevent\",\"price\",\"pride\",\"primary\",\"print\",\"priority\",\"prison\",\"private\",\"prize\",\"problem\",\"process\",\"produce\",\"profit\",\"program\",\"project\",\"promote\",\"proof\",\"property\",\"prosper\",\"protect\",\"proud\",\"provide\",\"public\",\"pudding\",\"pull\",\"pulp\",\"pulse\",\"pumpkin\",\"punch\",\"pupil\",\"puppy\",\"purchase\",\"purity\",\"purpose\",\"purse\",\"push\",\"put\",\"puzzle\",\"pyramid\",\"quality\",\"quantum\",\"quarter\",\"question\",\"quick\",\"quit\",\"quiz\",\"quote\",\"rabbit\",\"raccoon\",\"race\",\"rack\",\"radar\",\"radio\",\"rail\",\"rain\",\"raise\",\"rally\",\"ramp\",\"ranch\",\"random\",\"range\",\"rapid\",\"rare\",\"rate\",\"rather\",\"raven\",\"raw\",\"razor\",\"ready\",\"real\",\"reason\",\"rebel\",\"rebuild\",\"recall\",\"receive\",\"recipe\",\"record\",\"recycle\",\"reduce\",\"reflect\",\"reform\",\"refuse\",\"region\",\"regret\",\"regular\",\"reject\",\"relax\",\"release\",\"relief\",\"rely\",\"remain\",\"remember\",\"remind\",\"remove\",\"render\",\"renew\",\"rent\",\"reopen\",\"repair\",\"repeat\",\"replace\",\"report\",\"require\",\"rescue\",\"resemble\",\"resist\",\"resource\",\"response\",\"result\",\"retire\",\"retreat\",\"return\",\"reunion\",\"reveal\",\"review\",\"reward\",\"rhythm\",\"rib\",\"ribbon\",\"rice\",\"rich\",\"ride\",\"ridge\",\"rifle\",\"right\",\"rigid\",\"ring\",\"riot\",\"ripple\",\"risk\",\"ritual\",\"rival\",\"river\",\"road\",\"roast\",\"robot\",\"robust\",\"rocket\",\"romance\",\"roof\",\"rookie\",\"room\",\"rose\",\"rotate\",\"rough\",\"round\",\"route\",\"royal\",\"rubber\",\"rude\",\"rug\",\"rule\",\"run\",\"runway\",\"rural\",\"sad\",\"saddle\",\"sadness\",\"safe\",\"sail\",\"salad\",\"salmon\",\"salon\",\"salt\",\"salute\",\"same\",\"sample\",\"sand\",\"satisfy\",\"satoshi\",\"sauce\",\"sausage\",\"save\",\"say\",\"scale\",\"scan\",\"scare\",\"scatter\",\"scene\",\"scheme\",\"school\",\"science\",\"scissors\",\"scorpion\",\"scout\",\"scrap\",\"screen\",\"script\",\"scrub\",\"sea\",\"search\",\"season\",\"seat\",\"second\",\"secret\",\"section\",\"security\",\"seed\",\"seek\",\"segment\",\"select\",\"sell\",\"seminar\",\"senior\",\"sense\",\"sentence\",\"series\",\"service\",\"session\",\"settle\",\"setup\",\"seven\",\"shadow\",\"shaft\",\"shallow\",\"share\",\"shed\",\"shell\",\"sheriff\",\"shield\",\"shift\",\"shine\",\"ship\",\"shiver\",\"shock\",\"shoe\",\"shoot\",\"shop\",\"short\",\"shoulder\",\"shove\",\"shrimp\",\"shrug\",\"shuffle\",\"shy\",\"sibling\",\"sick\",\"side\",\"siege\",\"sight\",\"sign\",\"silent\",\"silk\",\"silly\",\"silver\",\"similar\",\"simple\",\"since\",\"sing\",\"siren\",\"sister\",\"situate\",\"six\",\"size\",\"skate\",\"sketch\",\"ski\",\"skill\",\"skin\",\"skirt\",\"skull\",\"slab\",\"slam\",\"sleep\",\"slender\",\"slice\",\"slide\",\"slight\",\"slim\",\"slogan\",\"slot\",\"slow\",\"slush\",\"small\",\"smart\",\"smile\",\"smoke\",\"smooth\",\"snack\",\"snake\",\"snap\",\"sniff\",\"snow\",\"soap\",\"soccer\",\"social\",\"sock\",\"soda\",\"soft\",\"solar\",\"soldier\",\"solid\",\"solution\",\"solve\",\"someone\",\"song\",\"soon\",\"sorry\",\"sort\",\"soul\",\"sound\",\"soup\",\"source\",\"south\",\"space\",\"spare\",\"spatial\",\"spawn\",\"speak\",\"special\",\"speed\",\"spell\",\"spend\",\"sphere\",\"spice\",\"spider\",\"spike\",\"spin\",\"spirit\",\"split\",\"spoil\",\"sponsor\",\"spoon\",\"sport\",\"spot\",\"spray\",\"spread\",\"spring\",\"spy\",\"square\",\"squeeze\",\"squirrel\",\"stable\",\"stadium\",\"staff\",\"stage\",\"stairs\",\"stamp\",\"stand\",\"start\",\"state\",\"stay\",\"steak\",\"steel\",\"stem\",\"step\",\"stereo\",\"stick\",\"still\",\"sting\",\"stock\",\"stomach\",\"stone\",\"stool\",\"story\",\"stove\",\"strategy\",\"street\",\"strike\",\"strong\",\"struggle\",\"student\",\"stuff\",\"stumble\",\"style\",\"subject\",\"submit\",\"subway\",\"success\",\"such\",\"sudden\",\"suffer\",\"sugar\",\"suggest\",\"suit\",\"summer\",\"sun\",\"sunny\",\"sunset\",\"super\",\"supply\",\"supreme\",\"sure\",\"surface\",\"surge\",\"surprise\",\"surround\",\"survey\",\"suspect\",\"sustain\",\"swallow\",\"swamp\",\"swap\",\"swarm\",\"swear\",\"sweet\",\"swift\",\"swim\",\"swing\",\"switch\",\"sword\",\"symbol\",\"symptom\",\"syrup\",\"system\",\"table\",\"tackle\",\"tag\",\"tail\",\"talent\",\"talk\",\"tank\",\"tape\",\"target\",\"task\",\"taste\",\"tattoo\",\"taxi\",\"teach\",\"team\",\"tell\",\"ten\",\"tenant\",\"tennis\",\"tent\",\"term\",\"test\",\"text\",\"thank\",\"that\",\"theme\",\"then\",\"theory\",\"there\",\"they\",\"thing\",\"this\",\"thought\",\"three\",\"thrive\",\"throw\",\"thumb\",\"thunder\",\"ticket\",\"tide\",\"tiger\",\"tilt\",\"timber\",\"time\",\"tiny\",\"tip\",\"tired\",\"tissue\",\"title\",\"toast\",\"tobacco\",\"today\",\"toddler\",\"toe\",\"together\",\"toilet\",\"token\",\"tomato\",\"tomorrow\",\"tone\",\"tongue\",\"tonight\",\"tool\",\"tooth\",\"top\",\"topic\",\"topple\",\"torch\",\"tornado\",\"tortoise\",\"toss\",\"total\",\"tourist\",\"toward\",\"tower\",\"town\",\"toy\",\"track\",\"trade\",\"traffic\",\"tragic\",\"train\",\"transfer\",\"trap\",\"trash\",\"travel\",\"tray\",\"treat\",\"tree\",\"trend\",\"trial\",\"tribe\",\"trick\",\"trigger\",\"trim\",\"trip\",\"trophy\",\"trouble\",\"truck\",\"true\",\"truly\",\"trumpet\",\"trust\",\"truth\",\"try\",\"tube\",\"tuition\",\"tumble\",\"tuna\",\"tunnel\",\"turkey\",\"turn\",\"turtle\",\"twelve\",\"twenty\",\"twice\",\"twin\",\"twist\",\"two\",\"type\",\"typical\",\"ugly\",\"umbrella\",\"unable\",\"unaware\",\"uncle\",\"uncover\",\"under\",\"undo\",\"unfair\",\"unfold\",\"unhappy\",\"uniform\",\"unique\",\"unit\",\"universe\",\"unknown\",\"unlock\",\"until\",\"unusual\",\"unveil\",\"update\",\"upgrade\",\"uphold\",\"upon\",\"upper\",\"upset\",\"urban\",\"urge\",\"usage\",\"use\",\"used\",\"useful\",\"useless\",\"usual\",\"utility\",\"vacant\",\"vacuum\",\"vague\",\"valid\",\"valley\",\"valve\",\"van\",\"vanish\",\"vapor\",\"various\",\"vast\",\"vault\",\"vehicle\",\"velvet\",\"vendor\",\"venture\",\"venue\",\"verb\",\"verify\",\"version\",\"very\",\"vessel\",\"veteran\",\"viable\",\"vibrant\",\"vicious\",\"victory\",\"video\",\"view\",\"village\",\"vintage\",\"violin\",\"virtual\",\"virus\",\"visa\",\"visit\",\"visual\",\"vital\",\"vivid\",\"vocal\",\"voice\",\"void\",\"volcano\",\"volume\",\"vote\",\"voyage\",\"wage\",\"wagon\",\"wait\",\"walk\",\"wall\",\"walnut\",\"want\",\"warfare\",\"warm\",\"warrior\",\"wash\",\"wasp\",\"waste\",\"water\",\"wave\",\"way\",\"wealth\",\"weapon\",\"wear\",\"weasel\",\"weather\",\"web\",\"wedding\",\"weekend\",\"weird\",\"welcome\",\"west\",\"wet\",\"whale\",\"what\",\"wheat\",\"wheel\",\"when\",\"where\",\"whip\",\"whisper\",\"wide\",\"width\",\"wife\",\"wild\",\"will\",\"win\",\"window\",\"wine\",\"wing\",\"wink\",\"winner\",\"winter\",\"wire\",\"wisdom\",\"wise\",\"wish\",\"witness\",\"wolf\",\"woman\",\"wonder\",\"wood\",\"wool\",\"word\",\"work\",\"world\",\"worry\",\"worth\",\"wrap\",\"wreck\",\"wrestle\",\"wrist\",\"write\",\"wrong\",\"yard\",\"year\",\"yellow\",\"you\",\"young\",\"youth\",\"zebra\",\"zero\",\"zone\",\"zoo\"]");
 
 /***/ }),
-/* 194 */
+/* 195 */
+/***/ (function(module, exports, __webpack_require__) {
+
+(function(nacl) {
+'use strict';
+
+// Ported in 2014 by Dmitry Chestnykh and Devi Mandiri.
+// Public domain.
+//
+// Implementation derived from TweetNaCl version 20140427.
+// See for details: http://tweetnacl.cr.yp.to/
+
+var gf = function(init) {
+  var i, r = new Float64Array(16);
+  if (init) for (i = 0; i < init.length; i++) r[i] = init[i];
+  return r;
+};
+
+//  Pluggable, initialized in high-level API below.
+var randombytes = function(/* x, n */) { throw new Error('no PRNG'); };
+
+var _0 = new Uint8Array(16);
+var _9 = new Uint8Array(32); _9[0] = 9;
+
+var gf0 = gf(),
+    gf1 = gf([1]),
+    _121665 = gf([0xdb41, 1]),
+    D = gf([0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070, 0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203]),
+    D2 = gf([0xf159, 0x26b2, 0x9b94, 0xebd6, 0xb156, 0x8283, 0x149a, 0x00e0, 0xd130, 0xeef3, 0x80f2, 0x198e, 0xfce7, 0x56df, 0xd9dc, 0x2406]),
+    X = gf([0xd51a, 0x8f25, 0x2d60, 0xc956, 0xa7b2, 0x9525, 0xc760, 0x692c, 0xdc5c, 0xfdd6, 0xe231, 0xc0a4, 0x53fe, 0xcd6e, 0x36d3, 0x2169]),
+    Y = gf([0x6658, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666]),
+    I = gf([0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43, 0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83]);
+
+function ts64(x, i, h, l) {
+  x[i]   = (h >> 24) & 0xff;
+  x[i+1] = (h >> 16) & 0xff;
+  x[i+2] = (h >>  8) & 0xff;
+  x[i+3] = h & 0xff;
+  x[i+4] = (l >> 24)  & 0xff;
+  x[i+5] = (l >> 16)  & 0xff;
+  x[i+6] = (l >>  8)  & 0xff;
+  x[i+7] = l & 0xff;
+}
+
+function vn(x, xi, y, yi, n) {
+  var i,d = 0;
+  for (i = 0; i < n; i++) d |= x[xi+i]^y[yi+i];
+  return (1 & ((d - 1) >>> 8)) - 1;
+}
+
+function crypto_verify_16(x, xi, y, yi) {
+  return vn(x,xi,y,yi,16);
+}
+
+function crypto_verify_32(x, xi, y, yi) {
+  return vn(x,xi,y,yi,32);
+}
+
+function core_salsa20(o, p, k, c) {
+  var j0  = c[ 0] & 0xff | (c[ 1] & 0xff)<<8 | (c[ 2] & 0xff)<<16 | (c[ 3] & 0xff)<<24,
+      j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
+      j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
+      j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
+      j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
+      j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
+      j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
+      j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
+      j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
+      j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
+      j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
+      j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
+      j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
+      j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
+      j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
+      j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24;
+
+  var x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7,
+      x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
+      x15 = j15, u;
+
+  for (var i = 0; i < 20; i += 2) {
+    u = x0 + x12 | 0;
+    x4 ^= u<<7 | u>>>(32-7);
+    u = x4 + x0 | 0;
+    x8 ^= u<<9 | u>>>(32-9);
+    u = x8 + x4 | 0;
+    x12 ^= u<<13 | u>>>(32-13);
+    u = x12 + x8 | 0;
+    x0 ^= u<<18 | u>>>(32-18);
+
+    u = x5 + x1 | 0;
+    x9 ^= u<<7 | u>>>(32-7);
+    u = x9 + x5 | 0;
+    x13 ^= u<<9 | u>>>(32-9);
+    u = x13 + x9 | 0;
+    x1 ^= u<<13 | u>>>(32-13);
+    u = x1 + x13 | 0;
+    x5 ^= u<<18 | u>>>(32-18);
+
+    u = x10 + x6 | 0;
+    x14 ^= u<<7 | u>>>(32-7);
+    u = x14 + x10 | 0;
+    x2 ^= u<<9 | u>>>(32-9);
+    u = x2 + x14 | 0;
+    x6 ^= u<<13 | u>>>(32-13);
+    u = x6 + x2 | 0;
+    x10 ^= u<<18 | u>>>(32-18);
+
+    u = x15 + x11 | 0;
+    x3 ^= u<<7 | u>>>(32-7);
+    u = x3 + x15 | 0;
+    x7 ^= u<<9 | u>>>(32-9);
+    u = x7 + x3 | 0;
+    x11 ^= u<<13 | u>>>(32-13);
+    u = x11 + x7 | 0;
+    x15 ^= u<<18 | u>>>(32-18);
+
+    u = x0 + x3 | 0;
+    x1 ^= u<<7 | u>>>(32-7);
+    u = x1 + x0 | 0;
+    x2 ^= u<<9 | u>>>(32-9);
+    u = x2 + x1 | 0;
+    x3 ^= u<<13 | u>>>(32-13);
+    u = x3 + x2 | 0;
+    x0 ^= u<<18 | u>>>(32-18);
+
+    u = x5 + x4 | 0;
+    x6 ^= u<<7 | u>>>(32-7);
+    u = x6 + x5 | 0;
+    x7 ^= u<<9 | u>>>(32-9);
+    u = x7 + x6 | 0;
+    x4 ^= u<<13 | u>>>(32-13);
+    u = x4 + x7 | 0;
+    x5 ^= u<<18 | u>>>(32-18);
+
+    u = x10 + x9 | 0;
+    x11 ^= u<<7 | u>>>(32-7);
+    u = x11 + x10 | 0;
+    x8 ^= u<<9 | u>>>(32-9);
+    u = x8 + x11 | 0;
+    x9 ^= u<<13 | u>>>(32-13);
+    u = x9 + x8 | 0;
+    x10 ^= u<<18 | u>>>(32-18);
+
+    u = x15 + x14 | 0;
+    x12 ^= u<<7 | u>>>(32-7);
+    u = x12 + x15 | 0;
+    x13 ^= u<<9 | u>>>(32-9);
+    u = x13 + x12 | 0;
+    x14 ^= u<<13 | u>>>(32-13);
+    u = x14 + x13 | 0;
+    x15 ^= u<<18 | u>>>(32-18);
+  }
+   x0 =  x0 +  j0 | 0;
+   x1 =  x1 +  j1 | 0;
+   x2 =  x2 +  j2 | 0;
+   x3 =  x3 +  j3 | 0;
+   x4 =  x4 +  j4 | 0;
+   x5 =  x5 +  j5 | 0;
+   x6 =  x6 +  j6 | 0;
+   x7 =  x7 +  j7 | 0;
+   x8 =  x8 +  j8 | 0;
+   x9 =  x9 +  j9 | 0;
+  x10 = x10 + j10 | 0;
+  x11 = x11 + j11 | 0;
+  x12 = x12 + j12 | 0;
+  x13 = x13 + j13 | 0;
+  x14 = x14 + j14 | 0;
+  x15 = x15 + j15 | 0;
+
+  o[ 0] = x0 >>>  0 & 0xff;
+  o[ 1] = x0 >>>  8 & 0xff;
+  o[ 2] = x0 >>> 16 & 0xff;
+  o[ 3] = x0 >>> 24 & 0xff;
+
+  o[ 4] = x1 >>>  0 & 0xff;
+  o[ 5] = x1 >>>  8 & 0xff;
+  o[ 6] = x1 >>> 16 & 0xff;
+  o[ 7] = x1 >>> 24 & 0xff;
+
+  o[ 8] = x2 >>>  0 & 0xff;
+  o[ 9] = x2 >>>  8 & 0xff;
+  o[10] = x2 >>> 16 & 0xff;
+  o[11] = x2 >>> 24 & 0xff;
+
+  o[12] = x3 >>>  0 & 0xff;
+  o[13] = x3 >>>  8 & 0xff;
+  o[14] = x3 >>> 16 & 0xff;
+  o[15] = x3 >>> 24 & 0xff;
+
+  o[16] = x4 >>>  0 & 0xff;
+  o[17] = x4 >>>  8 & 0xff;
+  o[18] = x4 >>> 16 & 0xff;
+  o[19] = x4 >>> 24 & 0xff;
+
+  o[20] = x5 >>>  0 & 0xff;
+  o[21] = x5 >>>  8 & 0xff;
+  o[22] = x5 >>> 16 & 0xff;
+  o[23] = x5 >>> 24 & 0xff;
+
+  o[24] = x6 >>>  0 & 0xff;
+  o[25] = x6 >>>  8 & 0xff;
+  o[26] = x6 >>> 16 & 0xff;
+  o[27] = x6 >>> 24 & 0xff;
+
+  o[28] = x7 >>>  0 & 0xff;
+  o[29] = x7 >>>  8 & 0xff;
+  o[30] = x7 >>> 16 & 0xff;
+  o[31] = x7 >>> 24 & 0xff;
+
+  o[32] = x8 >>>  0 & 0xff;
+  o[33] = x8 >>>  8 & 0xff;
+  o[34] = x8 >>> 16 & 0xff;
+  o[35] = x8 >>> 24 & 0xff;
+
+  o[36] = x9 >>>  0 & 0xff;
+  o[37] = x9 >>>  8 & 0xff;
+  o[38] = x9 >>> 16 & 0xff;
+  o[39] = x9 >>> 24 & 0xff;
+
+  o[40] = x10 >>>  0 & 0xff;
+  o[41] = x10 >>>  8 & 0xff;
+  o[42] = x10 >>> 16 & 0xff;
+  o[43] = x10 >>> 24 & 0xff;
+
+  o[44] = x11 >>>  0 & 0xff;
+  o[45] = x11 >>>  8 & 0xff;
+  o[46] = x11 >>> 16 & 0xff;
+  o[47] = x11 >>> 24 & 0xff;
+
+  o[48] = x12 >>>  0 & 0xff;
+  o[49] = x12 >>>  8 & 0xff;
+  o[50] = x12 >>> 16 & 0xff;
+  o[51] = x12 >>> 24 & 0xff;
+
+  o[52] = x13 >>>  0 & 0xff;
+  o[53] = x13 >>>  8 & 0xff;
+  o[54] = x13 >>> 16 & 0xff;
+  o[55] = x13 >>> 24 & 0xff;
+
+  o[56] = x14 >>>  0 & 0xff;
+  o[57] = x14 >>>  8 & 0xff;
+  o[58] = x14 >>> 16 & 0xff;
+  o[59] = x14 >>> 24 & 0xff;
+
+  o[60] = x15 >>>  0 & 0xff;
+  o[61] = x15 >>>  8 & 0xff;
+  o[62] = x15 >>> 16 & 0xff;
+  o[63] = x15 >>> 24 & 0xff;
+}
+
+function core_hsalsa20(o,p,k,c) {
+  var j0  = c[ 0] & 0xff | (c[ 1] & 0xff)<<8 | (c[ 2] & 0xff)<<16 | (c[ 3] & 0xff)<<24,
+      j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
+      j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
+      j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
+      j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
+      j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
+      j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
+      j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
+      j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
+      j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
+      j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
+      j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
+      j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
+      j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
+      j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
+      j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24;
+
+  var x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7,
+      x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
+      x15 = j15, u;
+
+  for (var i = 0; i < 20; i += 2) {
+    u = x0 + x12 | 0;
+    x4 ^= u<<7 | u>>>(32-7);
+    u = x4 + x0 | 0;
+    x8 ^= u<<9 | u>>>(32-9);
+    u = x8 + x4 | 0;
+    x12 ^= u<<13 | u>>>(32-13);
+    u = x12 + x8 | 0;
+    x0 ^= u<<18 | u>>>(32-18);
+
+    u = x5 + x1 | 0;
+    x9 ^= u<<7 | u>>>(32-7);
+    u = x9 + x5 | 0;
+    x13 ^= u<<9 | u>>>(32-9);
+    u = x13 + x9 | 0;
+    x1 ^= u<<13 | u>>>(32-13);
+    u = x1 + x13 | 0;
+    x5 ^= u<<18 | u>>>(32-18);
+
+    u = x10 + x6 | 0;
+    x14 ^= u<<7 | u>>>(32-7);
+    u = x14 + x10 | 0;
+    x2 ^= u<<9 | u>>>(32-9);
+    u = x2 + x14 | 0;
+    x6 ^= u<<13 | u>>>(32-13);
+    u = x6 + x2 | 0;
+    x10 ^= u<<18 | u>>>(32-18);
+
+    u = x15 + x11 | 0;
+    x3 ^= u<<7 | u>>>(32-7);
+    u = x3 + x15 | 0;
+    x7 ^= u<<9 | u>>>(32-9);
+    u = x7 + x3 | 0;
+    x11 ^= u<<13 | u>>>(32-13);
+    u = x11 + x7 | 0;
+    x15 ^= u<<18 | u>>>(32-18);
+
+    u = x0 + x3 | 0;
+    x1 ^= u<<7 | u>>>(32-7);
+    u = x1 + x0 | 0;
+    x2 ^= u<<9 | u>>>(32-9);
+    u = x2 + x1 | 0;
+    x3 ^= u<<13 | u>>>(32-13);
+    u = x3 + x2 | 0;
+    x0 ^= u<<18 | u>>>(32-18);
+
+    u = x5 + x4 | 0;
+    x6 ^= u<<7 | u>>>(32-7);
+    u = x6 + x5 | 0;
+    x7 ^= u<<9 | u>>>(32-9);
+    u = x7 + x6 | 0;
+    x4 ^= u<<13 | u>>>(32-13);
+    u = x4 + x7 | 0;
+    x5 ^= u<<18 | u>>>(32-18);
+
+    u = x10 + x9 | 0;
+    x11 ^= u<<7 | u>>>(32-7);
+    u = x11 + x10 | 0;
+    x8 ^= u<<9 | u>>>(32-9);
+    u = x8 + x11 | 0;
+    x9 ^= u<<13 | u>>>(32-13);
+    u = x9 + x8 | 0;
+    x10 ^= u<<18 | u>>>(32-18);
+
+    u = x15 + x14 | 0;
+    x12 ^= u<<7 | u>>>(32-7);
+    u = x12 + x15 | 0;
+    x13 ^= u<<9 | u>>>(32-9);
+    u = x13 + x12 | 0;
+    x14 ^= u<<13 | u>>>(32-13);
+    u = x14 + x13 | 0;
+    x15 ^= u<<18 | u>>>(32-18);
+  }
+
+  o[ 0] = x0 >>>  0 & 0xff;
+  o[ 1] = x0 >>>  8 & 0xff;
+  o[ 2] = x0 >>> 16 & 0xff;
+  o[ 3] = x0 >>> 24 & 0xff;
+
+  o[ 4] = x5 >>>  0 & 0xff;
+  o[ 5] = x5 >>>  8 & 0xff;
+  o[ 6] = x5 >>> 16 & 0xff;
+  o[ 7] = x5 >>> 24 & 0xff;
+
+  o[ 8] = x10 >>>  0 & 0xff;
+  o[ 9] = x10 >>>  8 & 0xff;
+  o[10] = x10 >>> 16 & 0xff;
+  o[11] = x10 >>> 24 & 0xff;
+
+  o[12] = x15 >>>  0 & 0xff;
+  o[13] = x15 >>>  8 & 0xff;
+  o[14] = x15 >>> 16 & 0xff;
+  o[15] = x15 >>> 24 & 0xff;
+
+  o[16] = x6 >>>  0 & 0xff;
+  o[17] = x6 >>>  8 & 0xff;
+  o[18] = x6 >>> 16 & 0xff;
+  o[19] = x6 >>> 24 & 0xff;
+
+  o[20] = x7 >>>  0 & 0xff;
+  o[21] = x7 >>>  8 & 0xff;
+  o[22] = x7 >>> 16 & 0xff;
+  o[23] = x7 >>> 24 & 0xff;
+
+  o[24] = x8 >>>  0 & 0xff;
+  o[25] = x8 >>>  8 & 0xff;
+  o[26] = x8 >>> 16 & 0xff;
+  o[27] = x8 >>> 24 & 0xff;
+
+  o[28] = x9 >>>  0 & 0xff;
+  o[29] = x9 >>>  8 & 0xff;
+  o[30] = x9 >>> 16 & 0xff;
+  o[31] = x9 >>> 24 & 0xff;
+}
+
+function crypto_core_salsa20(out,inp,k,c) {
+  core_salsa20(out,inp,k,c);
+}
+
+function crypto_core_hsalsa20(out,inp,k,c) {
+  core_hsalsa20(out,inp,k,c);
+}
+
+var sigma = new Uint8Array([101, 120, 112, 97, 110, 100, 32, 51, 50, 45, 98, 121, 116, 101, 32, 107]);
+            // "expand 32-byte k"
+
+function crypto_stream_salsa20_xor(c,cpos,m,mpos,b,n,k) {
+  var z = new Uint8Array(16), x = new Uint8Array(64);
+  var u, i;
+  for (i = 0; i < 16; i++) z[i] = 0;
+  for (i = 0; i < 8; i++) z[i] = n[i];
+  while (b >= 64) {
+    crypto_core_salsa20(x,z,k,sigma);
+    for (i = 0; i < 64; i++) c[cpos+i] = m[mpos+i] ^ x[i];
+    u = 1;
+    for (i = 8; i < 16; i++) {
+      u = u + (z[i] & 0xff) | 0;
+      z[i] = u & 0xff;
+      u >>>= 8;
+    }
+    b -= 64;
+    cpos += 64;
+    mpos += 64;
+  }
+  if (b > 0) {
+    crypto_core_salsa20(x,z,k,sigma);
+    for (i = 0; i < b; i++) c[cpos+i] = m[mpos+i] ^ x[i];
+  }
+  return 0;
+}
+
+function crypto_stream_salsa20(c,cpos,b,n,k) {
+  var z = new Uint8Array(16), x = new Uint8Array(64);
+  var u, i;
+  for (i = 0; i < 16; i++) z[i] = 0;
+  for (i = 0; i < 8; i++) z[i] = n[i];
+  while (b >= 64) {
+    crypto_core_salsa20(x,z,k,sigma);
+    for (i = 0; i < 64; i++) c[cpos+i] = x[i];
+    u = 1;
+    for (i = 8; i < 16; i++) {
+      u = u + (z[i] & 0xff) | 0;
+      z[i] = u & 0xff;
+      u >>>= 8;
+    }
+    b -= 64;
+    cpos += 64;
+  }
+  if (b > 0) {
+    crypto_core_salsa20(x,z,k,sigma);
+    for (i = 0; i < b; i++) c[cpos+i] = x[i];
+  }
+  return 0;
+}
+
+function crypto_stream(c,cpos,d,n,k) {
+  var s = new Uint8Array(32);
+  crypto_core_hsalsa20(s,n,k,sigma);
+  var sn = new Uint8Array(8);
+  for (var i = 0; i < 8; i++) sn[i] = n[i+16];
+  return crypto_stream_salsa20(c,cpos,d,sn,s);
+}
+
+function crypto_stream_xor(c,cpos,m,mpos,d,n,k) {
+  var s = new Uint8Array(32);
+  crypto_core_hsalsa20(s,n,k,sigma);
+  var sn = new Uint8Array(8);
+  for (var i = 0; i < 8; i++) sn[i] = n[i+16];
+  return crypto_stream_salsa20_xor(c,cpos,m,mpos,d,sn,s);
+}
+
+/*
+* Port of Andrew Moon's Poly1305-donna-16. Public domain.
+* https://github.com/floodyberry/poly1305-donna
+*/
+
+var poly1305 = function(key) {
+  this.buffer = new Uint8Array(16);
+  this.r = new Uint16Array(10);
+  this.h = new Uint16Array(10);
+  this.pad = new Uint16Array(8);
+  this.leftover = 0;
+  this.fin = 0;
+
+  var t0, t1, t2, t3, t4, t5, t6, t7;
+
+  t0 = key[ 0] & 0xff | (key[ 1] & 0xff) << 8; this.r[0] = ( t0                     ) & 0x1fff;
+  t1 = key[ 2] & 0xff | (key[ 3] & 0xff) << 8; this.r[1] = ((t0 >>> 13) | (t1 <<  3)) & 0x1fff;
+  t2 = key[ 4] & 0xff | (key[ 5] & 0xff) << 8; this.r[2] = ((t1 >>> 10) | (t2 <<  6)) & 0x1f03;
+  t3 = key[ 6] & 0xff | (key[ 7] & 0xff) << 8; this.r[3] = ((t2 >>>  7) | (t3 <<  9)) & 0x1fff;
+  t4 = key[ 8] & 0xff | (key[ 9] & 0xff) << 8; this.r[4] = ((t3 >>>  4) | (t4 << 12)) & 0x00ff;
+  this.r[5] = ((t4 >>>  1)) & 0x1ffe;
+  t5 = key[10] & 0xff | (key[11] & 0xff) << 8; this.r[6] = ((t4 >>> 14) | (t5 <<  2)) & 0x1fff;
+  t6 = key[12] & 0xff | (key[13] & 0xff) << 8; this.r[7] = ((t5 >>> 11) | (t6 <<  5)) & 0x1f81;
+  t7 = key[14] & 0xff | (key[15] & 0xff) << 8; this.r[8] = ((t6 >>>  8) | (t7 <<  8)) & 0x1fff;
+  this.r[9] = ((t7 >>>  5)) & 0x007f;
+
+  this.pad[0] = key[16] & 0xff | (key[17] & 0xff) << 8;
+  this.pad[1] = key[18] & 0xff | (key[19] & 0xff) << 8;
+  this.pad[2] = key[20] & 0xff | (key[21] & 0xff) << 8;
+  this.pad[3] = key[22] & 0xff | (key[23] & 0xff) << 8;
+  this.pad[4] = key[24] & 0xff | (key[25] & 0xff) << 8;
+  this.pad[5] = key[26] & 0xff | (key[27] & 0xff) << 8;
+  this.pad[6] = key[28] & 0xff | (key[29] & 0xff) << 8;
+  this.pad[7] = key[30] & 0xff | (key[31] & 0xff) << 8;
+};
+
+poly1305.prototype.blocks = function(m, mpos, bytes) {
+  var hibit = this.fin ? 0 : (1 << 11);
+  var t0, t1, t2, t3, t4, t5, t6, t7, c;
+  var d0, d1, d2, d3, d4, d5, d6, d7, d8, d9;
+
+  var h0 = this.h[0],
+      h1 = this.h[1],
+      h2 = this.h[2],
+      h3 = this.h[3],
+      h4 = this.h[4],
+      h5 = this.h[5],
+      h6 = this.h[6],
+      h7 = this.h[7],
+      h8 = this.h[8],
+      h9 = this.h[9];
+
+  var r0 = this.r[0],
+      r1 = this.r[1],
+      r2 = this.r[2],
+      r3 = this.r[3],
+      r4 = this.r[4],
+      r5 = this.r[5],
+      r6 = this.r[6],
+      r7 = this.r[7],
+      r8 = this.r[8],
+      r9 = this.r[9];
+
+  while (bytes >= 16) {
+    t0 = m[mpos+ 0] & 0xff | (m[mpos+ 1] & 0xff) << 8; h0 += ( t0                     ) & 0x1fff;
+    t1 = m[mpos+ 2] & 0xff | (m[mpos+ 3] & 0xff) << 8; h1 += ((t0 >>> 13) | (t1 <<  3)) & 0x1fff;
+    t2 = m[mpos+ 4] & 0xff | (m[mpos+ 5] & 0xff) << 8; h2 += ((t1 >>> 10) | (t2 <<  6)) & 0x1fff;
+    t3 = m[mpos+ 6] & 0xff | (m[mpos+ 7] & 0xff) << 8; h3 += ((t2 >>>  7) | (t3 <<  9)) & 0x1fff;
+    t4 = m[mpos+ 8] & 0xff | (m[mpos+ 9] & 0xff) << 8; h4 += ((t3 >>>  4) | (t4 << 12)) & 0x1fff;
+    h5 += ((t4 >>>  1)) & 0x1fff;
+    t5 = m[mpos+10] & 0xff | (m[mpos+11] & 0xff) << 8; h6 += ((t4 >>> 14) | (t5 <<  2)) & 0x1fff;
+    t6 = m[mpos+12] & 0xff | (m[mpos+13] & 0xff) << 8; h7 += ((t5 >>> 11) | (t6 <<  5)) & 0x1fff;
+    t7 = m[mpos+14] & 0xff | (m[mpos+15] & 0xff) << 8; h8 += ((t6 >>>  8) | (t7 <<  8)) & 0x1fff;
+    h9 += ((t7 >>> 5)) | hibit;
+
+    c = 0;
+
+    d0 = c;
+    d0 += h0 * r0;
+    d0 += h1 * (5 * r9);
+    d0 += h2 * (5 * r8);
+    d0 += h3 * (5 * r7);
+    d0 += h4 * (5 * r6);
+    c = (d0 >>> 13); d0 &= 0x1fff;
+    d0 += h5 * (5 * r5);
+    d0 += h6 * (5 * r4);
+    d0 += h7 * (5 * r3);
+    d0 += h8 * (5 * r2);
+    d0 += h9 * (5 * r1);
+    c += (d0 >>> 13); d0 &= 0x1fff;
+
+    d1 = c;
+    d1 += h0 * r1;
+    d1 += h1 * r0;
+    d1 += h2 * (5 * r9);
+    d1 += h3 * (5 * r8);
+    d1 += h4 * (5 * r7);
+    c = (d1 >>> 13); d1 &= 0x1fff;
+    d1 += h5 * (5 * r6);
+    d1 += h6 * (5 * r5);
+    d1 += h7 * (5 * r4);
+    d1 += h8 * (5 * r3);
+    d1 += h9 * (5 * r2);
+    c += (d1 >>> 13); d1 &= 0x1fff;
+
+    d2 = c;
+    d2 += h0 * r2;
+    d2 += h1 * r1;
+    d2 += h2 * r0;
+    d2 += h3 * (5 * r9);
+    d2 += h4 * (5 * r8);
+    c = (d2 >>> 13); d2 &= 0x1fff;
+    d2 += h5 * (5 * r7);
+    d2 += h6 * (5 * r6);
+    d2 += h7 * (5 * r5);
+    d2 += h8 * (5 * r4);
+    d2 += h9 * (5 * r3);
+    c += (d2 >>> 13); d2 &= 0x1fff;
+
+    d3 = c;
+    d3 += h0 * r3;
+    d3 += h1 * r2;
+    d3 += h2 * r1;
+    d3 += h3 * r0;
+    d3 += h4 * (5 * r9);
+    c = (d3 >>> 13); d3 &= 0x1fff;
+    d3 += h5 * (5 * r8);
+    d3 += h6 * (5 * r7);
+    d3 += h7 * (5 * r6);
+    d3 += h8 * (5 * r5);
+    d3 += h9 * (5 * r4);
+    c += (d3 >>> 13); d3 &= 0x1fff;
+
+    d4 = c;
+    d4 += h0 * r4;
+    d4 += h1 * r3;
+    d4 += h2 * r2;
+    d4 += h3 * r1;
+    d4 += h4 * r0;
+    c = (d4 >>> 13); d4 &= 0x1fff;
+    d4 += h5 * (5 * r9);
+    d4 += h6 * (5 * r8);
+    d4 += h7 * (5 * r7);
+    d4 += h8 * (5 * r6);
+    d4 += h9 * (5 * r5);
+    c += (d4 >>> 13); d4 &= 0x1fff;
+
+    d5 = c;
+    d5 += h0 * r5;
+    d5 += h1 * r4;
+    d5 += h2 * r3;
+    d5 += h3 * r2;
+    d5 += h4 * r1;
+    c = (d5 >>> 13); d5 &= 0x1fff;
+    d5 += h5 * r0;
+    d5 += h6 * (5 * r9);
+    d5 += h7 * (5 * r8);
+    d5 += h8 * (5 * r7);
+    d5 += h9 * (5 * r6);
+    c += (d5 >>> 13); d5 &= 0x1fff;
+
+    d6 = c;
+    d6 += h0 * r6;
+    d6 += h1 * r5;
+    d6 += h2 * r4;
+    d6 += h3 * r3;
+    d6 += h4 * r2;
+    c = (d6 >>> 13); d6 &= 0x1fff;
+    d6 += h5 * r1;
+    d6 += h6 * r0;
+    d6 += h7 * (5 * r9);
+    d6 += h8 * (5 * r8);
+    d6 += h9 * (5 * r7);
+    c += (d6 >>> 13); d6 &= 0x1fff;
+
+    d7 = c;
+    d7 += h0 * r7;
+    d7 += h1 * r6;
+    d7 += h2 * r5;
+    d7 += h3 * r4;
+    d7 += h4 * r3;
+    c = (d7 >>> 13); d7 &= 0x1fff;
+    d7 += h5 * r2;
+    d7 += h6 * r1;
+    d7 += h7 * r0;
+    d7 += h8 * (5 * r9);
+    d7 += h9 * (5 * r8);
+    c += (d7 >>> 13); d7 &= 0x1fff;
+
+    d8 = c;
+    d8 += h0 * r8;
+    d8 += h1 * r7;
+    d8 += h2 * r6;
+    d8 += h3 * r5;
+    d8 += h4 * r4;
+    c = (d8 >>> 13); d8 &= 0x1fff;
+    d8 += h5 * r3;
+    d8 += h6 * r2;
+    d8 += h7 * r1;
+    d8 += h8 * r0;
+    d8 += h9 * (5 * r9);
+    c += (d8 >>> 13); d8 &= 0x1fff;
+
+    d9 = c;
+    d9 += h0 * r9;
+    d9 += h1 * r8;
+    d9 += h2 * r7;
+    d9 += h3 * r6;
+    d9 += h4 * r5;
+    c = (d9 >>> 13); d9 &= 0x1fff;
+    d9 += h5 * r4;
+    d9 += h6 * r3;
+    d9 += h7 * r2;
+    d9 += h8 * r1;
+    d9 += h9 * r0;
+    c += (d9 >>> 13); d9 &= 0x1fff;
+
+    c = (((c << 2) + c)) | 0;
+    c = (c + d0) | 0;
+    d0 = c & 0x1fff;
+    c = (c >>> 13);
+    d1 += c;
+
+    h0 = d0;
+    h1 = d1;
+    h2 = d2;
+    h3 = d3;
+    h4 = d4;
+    h5 = d5;
+    h6 = d6;
+    h7 = d7;
+    h8 = d8;
+    h9 = d9;
+
+    mpos += 16;
+    bytes -= 16;
+  }
+  this.h[0] = h0;
+  this.h[1] = h1;
+  this.h[2] = h2;
+  this.h[3] = h3;
+  this.h[4] = h4;
+  this.h[5] = h5;
+  this.h[6] = h6;
+  this.h[7] = h7;
+  this.h[8] = h8;
+  this.h[9] = h9;
+};
+
+poly1305.prototype.finish = function(mac, macpos) {
+  var g = new Uint16Array(10);
+  var c, mask, f, i;
+
+  if (this.leftover) {
+    i = this.leftover;
+    this.buffer[i++] = 1;
+    for (; i < 16; i++) this.buffer[i] = 0;
+    this.fin = 1;
+    this.blocks(this.buffer, 0, 16);
+  }
+
+  c = this.h[1] >>> 13;
+  this.h[1] &= 0x1fff;
+  for (i = 2; i < 10; i++) {
+    this.h[i] += c;
+    c = this.h[i] >>> 13;
+    this.h[i] &= 0x1fff;
+  }
+  this.h[0] += (c * 5);
+  c = this.h[0] >>> 13;
+  this.h[0] &= 0x1fff;
+  this.h[1] += c;
+  c = this.h[1] >>> 13;
+  this.h[1] &= 0x1fff;
+  this.h[2] += c;
+
+  g[0] = this.h[0] + 5;
+  c = g[0] >>> 13;
+  g[0] &= 0x1fff;
+  for (i = 1; i < 10; i++) {
+    g[i] = this.h[i] + c;
+    c = g[i] >>> 13;
+    g[i] &= 0x1fff;
+  }
+  g[9] -= (1 << 13);
+
+  mask = (c ^ 1) - 1;
+  for (i = 0; i < 10; i++) g[i] &= mask;
+  mask = ~mask;
+  for (i = 0; i < 10; i++) this.h[i] = (this.h[i] & mask) | g[i];
+
+  this.h[0] = ((this.h[0]       ) | (this.h[1] << 13)                    ) & 0xffff;
+  this.h[1] = ((this.h[1] >>>  3) | (this.h[2] << 10)                    ) & 0xffff;
+  this.h[2] = ((this.h[2] >>>  6) | (this.h[3] <<  7)                    ) & 0xffff;
+  this.h[3] = ((this.h[3] >>>  9) | (this.h[4] <<  4)                    ) & 0xffff;
+  this.h[4] = ((this.h[4] >>> 12) | (this.h[5] <<  1) | (this.h[6] << 14)) & 0xffff;
+  this.h[5] = ((this.h[6] >>>  2) | (this.h[7] << 11)                    ) & 0xffff;
+  this.h[6] = ((this.h[7] >>>  5) | (this.h[8] <<  8)                    ) & 0xffff;
+  this.h[7] = ((this.h[8] >>>  8) | (this.h[9] <<  5)                    ) & 0xffff;
+
+  f = this.h[0] + this.pad[0];
+  this.h[0] = f & 0xffff;
+  for (i = 1; i < 8; i++) {
+    f = (((this.h[i] + this.pad[i]) | 0) + (f >>> 16)) | 0;
+    this.h[i] = f & 0xffff;
+  }
+
+  mac[macpos+ 0] = (this.h[0] >>> 0) & 0xff;
+  mac[macpos+ 1] = (this.h[0] >>> 8) & 0xff;
+  mac[macpos+ 2] = (this.h[1] >>> 0) & 0xff;
+  mac[macpos+ 3] = (this.h[1] >>> 8) & 0xff;
+  mac[macpos+ 4] = (this.h[2] >>> 0) & 0xff;
+  mac[macpos+ 5] = (this.h[2] >>> 8) & 0xff;
+  mac[macpos+ 6] = (this.h[3] >>> 0) & 0xff;
+  mac[macpos+ 7] = (this.h[3] >>> 8) & 0xff;
+  mac[macpos+ 8] = (this.h[4] >>> 0) & 0xff;
+  mac[macpos+ 9] = (this.h[4] >>> 8) & 0xff;
+  mac[macpos+10] = (this.h[5] >>> 0) & 0xff;
+  mac[macpos+11] = (this.h[5] >>> 8) & 0xff;
+  mac[macpos+12] = (this.h[6] >>> 0) & 0xff;
+  mac[macpos+13] = (this.h[6] >>> 8) & 0xff;
+  mac[macpos+14] = (this.h[7] >>> 0) & 0xff;
+  mac[macpos+15] = (this.h[7] >>> 8) & 0xff;
+};
+
+poly1305.prototype.update = function(m, mpos, bytes) {
+  var i, want;
+
+  if (this.leftover) {
+    want = (16 - this.leftover);
+    if (want > bytes)
+      want = bytes;
+    for (i = 0; i < want; i++)
+      this.buffer[this.leftover + i] = m[mpos+i];
+    bytes -= want;
+    mpos += want;
+    this.leftover += want;
+    if (this.leftover < 16)
+      return;
+    this.blocks(this.buffer, 0, 16);
+    this.leftover = 0;
+  }
+
+  if (bytes >= 16) {
+    want = bytes - (bytes % 16);
+    this.blocks(m, mpos, want);
+    mpos += want;
+    bytes -= want;
+  }
+
+  if (bytes) {
+    for (i = 0; i < bytes; i++)
+      this.buffer[this.leftover + i] = m[mpos+i];
+    this.leftover += bytes;
+  }
+};
+
+function crypto_onetimeauth(out, outpos, m, mpos, n, k) {
+  var s = new poly1305(k);
+  s.update(m, mpos, n);
+  s.finish(out, outpos);
+  return 0;
+}
+
+function crypto_onetimeauth_verify(h, hpos, m, mpos, n, k) {
+  var x = new Uint8Array(16);
+  crypto_onetimeauth(x,0,m,mpos,n,k);
+  return crypto_verify_16(h,hpos,x,0);
+}
+
+function crypto_secretbox(c,m,d,n,k) {
+  var i;
+  if (d < 32) return -1;
+  crypto_stream_xor(c,0,m,0,d,n,k);
+  crypto_onetimeauth(c, 16, c, 32, d - 32, c);
+  for (i = 0; i < 16; i++) c[i] = 0;
+  return 0;
+}
+
+function crypto_secretbox_open(m,c,d,n,k) {
+  var i;
+  var x = new Uint8Array(32);
+  if (d < 32) return -1;
+  crypto_stream(x,0,32,n,k);
+  if (crypto_onetimeauth_verify(c, 16,c, 32,d - 32,x) !== 0) return -1;
+  crypto_stream_xor(m,0,c,0,d,n,k);
+  for (i = 0; i < 32; i++) m[i] = 0;
+  return 0;
+}
+
+function set25519(r, a) {
+  var i;
+  for (i = 0; i < 16; i++) r[i] = a[i]|0;
+}
+
+function car25519(o) {
+  var i, v, c = 1;
+  for (i = 0; i < 16; i++) {
+    v = o[i] + c + 65535;
+    c = Math.floor(v / 65536);
+    o[i] = v - c * 65536;
+  }
+  o[0] += c-1 + 37 * (c-1);
+}
+
+function sel25519(p, q, b) {
+  var t, c = ~(b-1);
+  for (var i = 0; i < 16; i++) {
+    t = c & (p[i] ^ q[i]);
+    p[i] ^= t;
+    q[i] ^= t;
+  }
+}
+
+function pack25519(o, n) {
+  var i, j, b;
+  var m = gf(), t = gf();
+  for (i = 0; i < 16; i++) t[i] = n[i];
+  car25519(t);
+  car25519(t);
+  car25519(t);
+  for (j = 0; j < 2; j++) {
+    m[0] = t[0] - 0xffed;
+    for (i = 1; i < 15; i++) {
+      m[i] = t[i] - 0xffff - ((m[i-1]>>16) & 1);
+      m[i-1] &= 0xffff;
+    }
+    m[15] = t[15] - 0x7fff - ((m[14]>>16) & 1);
+    b = (m[15]>>16) & 1;
+    m[14] &= 0xffff;
+    sel25519(t, m, 1-b);
+  }
+  for (i = 0; i < 16; i++) {
+    o[2*i] = t[i] & 0xff;
+    o[2*i+1] = t[i]>>8;
+  }
+}
+
+function neq25519(a, b) {
+  var c = new Uint8Array(32), d = new Uint8Array(32);
+  pack25519(c, a);
+  pack25519(d, b);
+  return crypto_verify_32(c, 0, d, 0);
+}
+
+function par25519(a) {
+  var d = new Uint8Array(32);
+  pack25519(d, a);
+  return d[0] & 1;
+}
+
+function unpack25519(o, n) {
+  var i;
+  for (i = 0; i < 16; i++) o[i] = n[2*i] + (n[2*i+1] << 8);
+  o[15] &= 0x7fff;
+}
+
+function A(o, a, b) {
+  for (var i = 0; i < 16; i++) o[i] = a[i] + b[i];
+}
+
+function Z(o, a, b) {
+  for (var i = 0; i < 16; i++) o[i] = a[i] - b[i];
+}
+
+function M(o, a, b) {
+  var v, c,
+     t0 = 0,  t1 = 0,  t2 = 0,  t3 = 0,  t4 = 0,  t5 = 0,  t6 = 0,  t7 = 0,
+     t8 = 0,  t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0,
+    t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0,
+    t24 = 0, t25 = 0, t26 = 0, t27 = 0, t28 = 0, t29 = 0, t30 = 0,
+    b0 = b[0],
+    b1 = b[1],
+    b2 = b[2],
+    b3 = b[3],
+    b4 = b[4],
+    b5 = b[5],
+    b6 = b[6],
+    b7 = b[7],
+    b8 = b[8],
+    b9 = b[9],
+    b10 = b[10],
+    b11 = b[11],
+    b12 = b[12],
+    b13 = b[13],
+    b14 = b[14],
+    b15 = b[15];
+
+  v = a[0];
+  t0 += v * b0;
+  t1 += v * b1;
+  t2 += v * b2;
+  t3 += v * b3;
+  t4 += v * b4;
+  t5 += v * b5;
+  t6 += v * b6;
+  t7 += v * b7;
+  t8 += v * b8;
+  t9 += v * b9;
+  t10 += v * b10;
+  t11 += v * b11;
+  t12 += v * b12;
+  t13 += v * b13;
+  t14 += v * b14;
+  t15 += v * b15;
+  v = a[1];
+  t1 += v * b0;
+  t2 += v * b1;
+  t3 += v * b2;
+  t4 += v * b3;
+  t5 += v * b4;
+  t6 += v * b5;
+  t7 += v * b6;
+  t8 += v * b7;
+  t9 += v * b8;
+  t10 += v * b9;
+  t11 += v * b10;
+  t12 += v * b11;
+  t13 += v * b12;
+  t14 += v * b13;
+  t15 += v * b14;
+  t16 += v * b15;
+  v = a[2];
+  t2 += v * b0;
+  t3 += v * b1;
+  t4 += v * b2;
+  t5 += v * b3;
+  t6 += v * b4;
+  t7 += v * b5;
+  t8 += v * b6;
+  t9 += v * b7;
+  t10 += v * b8;
+  t11 += v * b9;
+  t12 += v * b10;
+  t13 += v * b11;
+  t14 += v * b12;
+  t15 += v * b13;
+  t16 += v * b14;
+  t17 += v * b15;
+  v = a[3];
+  t3 += v * b0;
+  t4 += v * b1;
+  t5 += v * b2;
+  t6 += v * b3;
+  t7 += v * b4;
+  t8 += v * b5;
+  t9 += v * b6;
+  t10 += v * b7;
+  t11 += v * b8;
+  t12 += v * b9;
+  t13 += v * b10;
+  t14 += v * b11;
+  t15 += v * b12;
+  t16 += v * b13;
+  t17 += v * b14;
+  t18 += v * b15;
+  v = a[4];
+  t4 += v * b0;
+  t5 += v * b1;
+  t6 += v * b2;
+  t7 += v * b3;
+  t8 += v * b4;
+  t9 += v * b5;
+  t10 += v * b6;
+  t11 += v * b7;
+  t12 += v * b8;
+  t13 += v * b9;
+  t14 += v * b10;
+  t15 += v * b11;
+  t16 += v * b12;
+  t17 += v * b13;
+  t18 += v * b14;
+  t19 += v * b15;
+  v = a[5];
+  t5 += v * b0;
+  t6 += v * b1;
+  t7 += v * b2;
+  t8 += v * b3;
+  t9 += v * b4;
+  t10 += v * b5;
+  t11 += v * b6;
+  t12 += v * b7;
+  t13 += v * b8;
+  t14 += v * b9;
+  t15 += v * b10;
+  t16 += v * b11;
+  t17 += v * b12;
+  t18 += v * b13;
+  t19 += v * b14;
+  t20 += v * b15;
+  v = a[6];
+  t6 += v * b0;
+  t7 += v * b1;
+  t8 += v * b2;
+  t9 += v * b3;
+  t10 += v * b4;
+  t11 += v * b5;
+  t12 += v * b6;
+  t13 += v * b7;
+  t14 += v * b8;
+  t15 += v * b9;
+  t16 += v * b10;
+  t17 += v * b11;
+  t18 += v * b12;
+  t19 += v * b13;
+  t20 += v * b14;
+  t21 += v * b15;
+  v = a[7];
+  t7 += v * b0;
+  t8 += v * b1;
+  t9 += v * b2;
+  t10 += v * b3;
+  t11 += v * b4;
+  t12 += v * b5;
+  t13 += v * b6;
+  t14 += v * b7;
+  t15 += v * b8;
+  t16 += v * b9;
+  t17 += v * b10;
+  t18 += v * b11;
+  t19 += v * b12;
+  t20 += v * b13;
+  t21 += v * b14;
+  t22 += v * b15;
+  v = a[8];
+  t8 += v * b0;
+  t9 += v * b1;
+  t10 += v * b2;
+  t11 += v * b3;
+  t12 += v * b4;
+  t13 += v * b5;
+  t14 += v * b6;
+  t15 += v * b7;
+  t16 += v * b8;
+  t17 += v * b9;
+  t18 += v * b10;
+  t19 += v * b11;
+  t20 += v * b12;
+  t21 += v * b13;
+  t22 += v * b14;
+  t23 += v * b15;
+  v = a[9];
+  t9 += v * b0;
+  t10 += v * b1;
+  t11 += v * b2;
+  t12 += v * b3;
+  t13 += v * b4;
+  t14 += v * b5;
+  t15 += v * b6;
+  t16 += v * b7;
+  t17 += v * b8;
+  t18 += v * b9;
+  t19 += v * b10;
+  t20 += v * b11;
+  t21 += v * b12;
+  t22 += v * b13;
+  t23 += v * b14;
+  t24 += v * b15;
+  v = a[10];
+  t10 += v * b0;
+  t11 += v * b1;
+  t12 += v * b2;
+  t13 += v * b3;
+  t14 += v * b4;
+  t15 += v * b5;
+  t16 += v * b6;
+  t17 += v * b7;
+  t18 += v * b8;
+  t19 += v * b9;
+  t20 += v * b10;
+  t21 += v * b11;
+  t22 += v * b12;
+  t23 += v * b13;
+  t24 += v * b14;
+  t25 += v * b15;
+  v = a[11];
+  t11 += v * b0;
+  t12 += v * b1;
+  t13 += v * b2;
+  t14 += v * b3;
+  t15 += v * b4;
+  t16 += v * b5;
+  t17 += v * b6;
+  t18 += v * b7;
+  t19 += v * b8;
+  t20 += v * b9;
+  t21 += v * b10;
+  t22 += v * b11;
+  t23 += v * b12;
+  t24 += v * b13;
+  t25 += v * b14;
+  t26 += v * b15;
+  v = a[12];
+  t12 += v * b0;
+  t13 += v * b1;
+  t14 += v * b2;
+  t15 += v * b3;
+  t16 += v * b4;
+  t17 += v * b5;
+  t18 += v * b6;
+  t19 += v * b7;
+  t20 += v * b8;
+  t21 += v * b9;
+  t22 += v * b10;
+  t23 += v * b11;
+  t24 += v * b12;
+  t25 += v * b13;
+  t26 += v * b14;
+  t27 += v * b15;
+  v = a[13];
+  t13 += v * b0;
+  t14 += v * b1;
+  t15 += v * b2;
+  t16 += v * b3;
+  t17 += v * b4;
+  t18 += v * b5;
+  t19 += v * b6;
+  t20 += v * b7;
+  t21 += v * b8;
+  t22 += v * b9;
+  t23 += v * b10;
+  t24 += v * b11;
+  t25 += v * b12;
+  t26 += v * b13;
+  t27 += v * b14;
+  t28 += v * b15;
+  v = a[14];
+  t14 += v * b0;
+  t15 += v * b1;
+  t16 += v * b2;
+  t17 += v * b3;
+  t18 += v * b4;
+  t19 += v * b5;
+  t20 += v * b6;
+  t21 += v * b7;
+  t22 += v * b8;
+  t23 += v * b9;
+  t24 += v * b10;
+  t25 += v * b11;
+  t26 += v * b12;
+  t27 += v * b13;
+  t28 += v * b14;
+  t29 += v * b15;
+  v = a[15];
+  t15 += v * b0;
+  t16 += v * b1;
+  t17 += v * b2;
+  t18 += v * b3;
+  t19 += v * b4;
+  t20 += v * b5;
+  t21 += v * b6;
+  t22 += v * b7;
+  t23 += v * b8;
+  t24 += v * b9;
+  t25 += v * b10;
+  t26 += v * b11;
+  t27 += v * b12;
+  t28 += v * b13;
+  t29 += v * b14;
+  t30 += v * b15;
+
+  t0  += 38 * t16;
+  t1  += 38 * t17;
+  t2  += 38 * t18;
+  t3  += 38 * t19;
+  t4  += 38 * t20;
+  t5  += 38 * t21;
+  t6  += 38 * t22;
+  t7  += 38 * t23;
+  t8  += 38 * t24;
+  t9  += 38 * t25;
+  t10 += 38 * t26;
+  t11 += 38 * t27;
+  t12 += 38 * t28;
+  t13 += 38 * t29;
+  t14 += 38 * t30;
+  // t15 left as is
+
+  // first car
+  c = 1;
+  v =  t0 + c + 65535; c = Math.floor(v / 65536);  t0 = v - c * 65536;
+  v =  t1 + c + 65535; c = Math.floor(v / 65536);  t1 = v - c * 65536;
+  v =  t2 + c + 65535; c = Math.floor(v / 65536);  t2 = v - c * 65536;
+  v =  t3 + c + 65535; c = Math.floor(v / 65536);  t3 = v - c * 65536;
+  v =  t4 + c + 65535; c = Math.floor(v / 65536);  t4 = v - c * 65536;
+  v =  t5 + c + 65535; c = Math.floor(v / 65536);  t5 = v - c * 65536;
+  v =  t6 + c + 65535; c = Math.floor(v / 65536);  t6 = v - c * 65536;
+  v =  t7 + c + 65535; c = Math.floor(v / 65536);  t7 = v - c * 65536;
+  v =  t8 + c + 65535; c = Math.floor(v / 65536);  t8 = v - c * 65536;
+  v =  t9 + c + 65535; c = Math.floor(v / 65536);  t9 = v - c * 65536;
+  v = t10 + c + 65535; c = Math.floor(v / 65536); t10 = v - c * 65536;
+  v = t11 + c + 65535; c = Math.floor(v / 65536); t11 = v - c * 65536;
+  v = t12 + c + 65535; c = Math.floor(v / 65536); t12 = v - c * 65536;
+  v = t13 + c + 65535; c = Math.floor(v / 65536); t13 = v - c * 65536;
+  v = t14 + c + 65535; c = Math.floor(v / 65536); t14 = v - c * 65536;
+  v = t15 + c + 65535; c = Math.floor(v / 65536); t15 = v - c * 65536;
+  t0 += c-1 + 37 * (c-1);
+
+  // second car
+  c = 1;
+  v =  t0 + c + 65535; c = Math.floor(v / 65536);  t0 = v - c * 65536;
+  v =  t1 + c + 65535; c = Math.floor(v / 65536);  t1 = v - c * 65536;
+  v =  t2 + c + 65535; c = Math.floor(v / 65536);  t2 = v - c * 65536;
+  v =  t3 + c + 65535; c = Math.floor(v / 65536);  t3 = v - c * 65536;
+  v =  t4 + c + 65535; c = Math.floor(v / 65536);  t4 = v - c * 65536;
+  v =  t5 + c + 65535; c = Math.floor(v / 65536);  t5 = v - c * 65536;
+  v =  t6 + c + 65535; c = Math.floor(v / 65536);  t6 = v - c * 65536;
+  v =  t7 + c + 65535; c = Math.floor(v / 65536);  t7 = v - c * 65536;
+  v =  t8 + c + 65535; c = Math.floor(v / 65536);  t8 = v - c * 65536;
+  v =  t9 + c + 65535; c = Math.floor(v / 65536);  t9 = v - c * 65536;
+  v = t10 + c + 65535; c = Math.floor(v / 65536); t10 = v - c * 65536;
+  v = t11 + c + 65535; c = Math.floor(v / 65536); t11 = v - c * 65536;
+  v = t12 + c + 65535; c = Math.floor(v / 65536); t12 = v - c * 65536;
+  v = t13 + c + 65535; c = Math.floor(v / 65536); t13 = v - c * 65536;
+  v = t14 + c + 65535; c = Math.floor(v / 65536); t14 = v - c * 65536;
+  v = t15 + c + 65535; c = Math.floor(v / 65536); t15 = v - c * 65536;
+  t0 += c-1 + 37 * (c-1);
+
+  o[ 0] = t0;
+  o[ 1] = t1;
+  o[ 2] = t2;
+  o[ 3] = t3;
+  o[ 4] = t4;
+  o[ 5] = t5;
+  o[ 6] = t6;
+  o[ 7] = t7;
+  o[ 8] = t8;
+  o[ 9] = t9;
+  o[10] = t10;
+  o[11] = t11;
+  o[12] = t12;
+  o[13] = t13;
+  o[14] = t14;
+  o[15] = t15;
+}
+
+function S(o, a) {
+  M(o, a, a);
+}
+
+function inv25519(o, i) {
+  var c = gf();
+  var a;
+  for (a = 0; a < 16; a++) c[a] = i[a];
+  for (a = 253; a >= 0; a--) {
+    S(c, c);
+    if(a !== 2 && a !== 4) M(c, c, i);
+  }
+  for (a = 0; a < 16; a++) o[a] = c[a];
+}
+
+function pow2523(o, i) {
+  var c = gf();
+  var a;
+  for (a = 0; a < 16; a++) c[a] = i[a];
+  for (a = 250; a >= 0; a--) {
+      S(c, c);
+      if(a !== 1) M(c, c, i);
+  }
+  for (a = 0; a < 16; a++) o[a] = c[a];
+}
+
+function crypto_scalarmult(q, n, p) {
+  var z = new Uint8Array(32);
+  var x = new Float64Array(80), r, i;
+  var a = gf(), b = gf(), c = gf(),
+      d = gf(), e = gf(), f = gf();
+  for (i = 0; i < 31; i++) z[i] = n[i];
+  z[31]=(n[31]&127)|64;
+  z[0]&=248;
+  unpack25519(x,p);
+  for (i = 0; i < 16; i++) {
+    b[i]=x[i];
+    d[i]=a[i]=c[i]=0;
+  }
+  a[0]=d[0]=1;
+  for (i=254; i>=0; --i) {
+    r=(z[i>>>3]>>>(i&7))&1;
+    sel25519(a,b,r);
+    sel25519(c,d,r);
+    A(e,a,c);
+    Z(a,a,c);
+    A(c,b,d);
+    Z(b,b,d);
+    S(d,e);
+    S(f,a);
+    M(a,c,a);
+    M(c,b,e);
+    A(e,a,c);
+    Z(a,a,c);
+    S(b,a);
+    Z(c,d,f);
+    M(a,c,_121665);
+    A(a,a,d);
+    M(c,c,a);
+    M(a,d,f);
+    M(d,b,x);
+    S(b,e);
+    sel25519(a,b,r);
+    sel25519(c,d,r);
+  }
+  for (i = 0; i < 16; i++) {
+    x[i+16]=a[i];
+    x[i+32]=c[i];
+    x[i+48]=b[i];
+    x[i+64]=d[i];
+  }
+  var x32 = x.subarray(32);
+  var x16 = x.subarray(16);
+  inv25519(x32,x32);
+  M(x16,x16,x32);
+  pack25519(q,x16);
+  return 0;
+}
+
+function crypto_scalarmult_base(q, n) {
+  return crypto_scalarmult(q, n, _9);
+}
+
+function crypto_box_keypair(y, x) {
+  randombytes(x, 32);
+  return crypto_scalarmult_base(y, x);
+}
+
+function crypto_box_beforenm(k, y, x) {
+  var s = new Uint8Array(32);
+  crypto_scalarmult(s, x, y);
+  return crypto_core_hsalsa20(k, _0, s, sigma);
+}
+
+var crypto_box_afternm = crypto_secretbox;
+var crypto_box_open_afternm = crypto_secretbox_open;
+
+function crypto_box(c, m, d, n, y, x) {
+  var k = new Uint8Array(32);
+  crypto_box_beforenm(k, y, x);
+  return crypto_box_afternm(c, m, d, n, k);
+}
+
+function crypto_box_open(m, c, d, n, y, x) {
+  var k = new Uint8Array(32);
+  crypto_box_beforenm(k, y, x);
+  return crypto_box_open_afternm(m, c, d, n, k);
+}
+
+var K = [
+  0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
+  0xb5c0fbcf, 0xec4d3b2f, 0xe9b5dba5, 0x8189dbbc,
+  0x3956c25b, 0xf348b538, 0x59f111f1, 0xb605d019,
+  0x923f82a4, 0xaf194f9b, 0xab1c5ed5, 0xda6d8118,
+  0xd807aa98, 0xa3030242, 0x12835b01, 0x45706fbe,
+  0x243185be, 0x4ee4b28c, 0x550c7dc3, 0xd5ffb4e2,
+  0x72be5d74, 0xf27b896f, 0x80deb1fe, 0x3b1696b1,
+  0x9bdc06a7, 0x25c71235, 0xc19bf174, 0xcf692694,
+  0xe49b69c1, 0x9ef14ad2, 0xefbe4786, 0x384f25e3,
+  0x0fc19dc6, 0x8b8cd5b5, 0x240ca1cc, 0x77ac9c65,
+  0x2de92c6f, 0x592b0275, 0x4a7484aa, 0x6ea6e483,
+  0x5cb0a9dc, 0xbd41fbd4, 0x76f988da, 0x831153b5,
+  0x983e5152, 0xee66dfab, 0xa831c66d, 0x2db43210,
+  0xb00327c8, 0x98fb213f, 0xbf597fc7, 0xbeef0ee4,
+  0xc6e00bf3, 0x3da88fc2, 0xd5a79147, 0x930aa725,
+  0x06ca6351, 0xe003826f, 0x14292967, 0x0a0e6e70,
+  0x27b70a85, 0x46d22ffc, 0x2e1b2138, 0x5c26c926,
+  0x4d2c6dfc, 0x5ac42aed, 0x53380d13, 0x9d95b3df,
+  0x650a7354, 0x8baf63de, 0x766a0abb, 0x3c77b2a8,
+  0x81c2c92e, 0x47edaee6, 0x92722c85, 0x1482353b,
+  0xa2bfe8a1, 0x4cf10364, 0xa81a664b, 0xbc423001,
+  0xc24b8b70, 0xd0f89791, 0xc76c51a3, 0x0654be30,
+  0xd192e819, 0xd6ef5218, 0xd6990624, 0x5565a910,
+  0xf40e3585, 0x5771202a, 0x106aa070, 0x32bbd1b8,
+  0x19a4c116, 0xb8d2d0c8, 0x1e376c08, 0x5141ab53,
+  0x2748774c, 0xdf8eeb99, 0x34b0bcb5, 0xe19b48a8,
+  0x391c0cb3, 0xc5c95a63, 0x4ed8aa4a, 0xe3418acb,
+  0x5b9cca4f, 0x7763e373, 0x682e6ff3, 0xd6b2b8a3,
+  0x748f82ee, 0x5defb2fc, 0x78a5636f, 0x43172f60,
+  0x84c87814, 0xa1f0ab72, 0x8cc70208, 0x1a6439ec,
+  0x90befffa, 0x23631e28, 0xa4506ceb, 0xde82bde9,
+  0xbef9a3f7, 0xb2c67915, 0xc67178f2, 0xe372532b,
+  0xca273ece, 0xea26619c, 0xd186b8c7, 0x21c0c207,
+  0xeada7dd6, 0xcde0eb1e, 0xf57d4f7f, 0xee6ed178,
+  0x06f067aa, 0x72176fba, 0x0a637dc5, 0xa2c898a6,
+  0x113f9804, 0xbef90dae, 0x1b710b35, 0x131c471b,
+  0x28db77f5, 0x23047d84, 0x32caab7b, 0x40c72493,
+  0x3c9ebe0a, 0x15c9bebc, 0x431d67c4, 0x9c100d4c,
+  0x4cc5d4be, 0xcb3e42b6, 0x597f299c, 0xfc657e2a,
+  0x5fcb6fab, 0x3ad6faec, 0x6c44198c, 0x4a475817
+];
+
+function crypto_hashblocks_hl(hh, hl, m, n) {
+  var wh = new Int32Array(16), wl = new Int32Array(16),
+      bh0, bh1, bh2, bh3, bh4, bh5, bh6, bh7,
+      bl0, bl1, bl2, bl3, bl4, bl5, bl6, bl7,
+      th, tl, i, j, h, l, a, b, c, d;
+
+  var ah0 = hh[0],
+      ah1 = hh[1],
+      ah2 = hh[2],
+      ah3 = hh[3],
+      ah4 = hh[4],
+      ah5 = hh[5],
+      ah6 = hh[6],
+      ah7 = hh[7],
+
+      al0 = hl[0],
+      al1 = hl[1],
+      al2 = hl[2],
+      al3 = hl[3],
+      al4 = hl[4],
+      al5 = hl[5],
+      al6 = hl[6],
+      al7 = hl[7];
+
+  var pos = 0;
+  while (n >= 128) {
+    for (i = 0; i < 16; i++) {
+      j = 8 * i + pos;
+      wh[i] = (m[j+0] << 24) | (m[j+1] << 16) | (m[j+2] << 8) | m[j+3];
+      wl[i] = (m[j+4] << 24) | (m[j+5] << 16) | (m[j+6] << 8) | m[j+7];
+    }
+    for (i = 0; i < 80; i++) {
+      bh0 = ah0;
+      bh1 = ah1;
+      bh2 = ah2;
+      bh3 = ah3;
+      bh4 = ah4;
+      bh5 = ah5;
+      bh6 = ah6;
+      bh7 = ah7;
+
+      bl0 = al0;
+      bl1 = al1;
+      bl2 = al2;
+      bl3 = al3;
+      bl4 = al4;
+      bl5 = al5;
+      bl6 = al6;
+      bl7 = al7;
+
+      // add
+      h = ah7;
+      l = al7;
+
+      a = l & 0xffff; b = l >>> 16;
+      c = h & 0xffff; d = h >>> 16;
+
+      // Sigma1
+      h = ((ah4 >>> 14) | (al4 << (32-14))) ^ ((ah4 >>> 18) | (al4 << (32-18))) ^ ((al4 >>> (41-32)) | (ah4 << (32-(41-32))));
+      l = ((al4 >>> 14) | (ah4 << (32-14))) ^ ((al4 >>> 18) | (ah4 << (32-18))) ^ ((ah4 >>> (41-32)) | (al4 << (32-(41-32))));
+
+      a += l & 0xffff; b += l >>> 16;
+      c += h & 0xffff; d += h >>> 16;
+
+      // Ch
+      h = (ah4 & ah5) ^ (~ah4 & ah6);
+      l = (al4 & al5) ^ (~al4 & al6);
+
+      a += l & 0xffff; b += l >>> 16;
+      c += h & 0xffff; d += h >>> 16;
+
+      // K
+      h = K[i*2];
+      l = K[i*2+1];
+
+      a += l & 0xffff; b += l >>> 16;
+      c += h & 0xffff; d += h >>> 16;
+
+      // w
+      h = wh[i%16];
+      l = wl[i%16];
+
+      a += l & 0xffff; b += l >>> 16;
+      c += h & 0xffff; d += h >>> 16;
+
+      b += a >>> 16;
+      c += b >>> 16;
+      d += c >>> 16;
+
+      th = c & 0xffff | d << 16;
+      tl = a & 0xffff | b << 16;
+
+      // add
+      h = th;
+      l = tl;
+
+      a = l & 0xffff; b = l >>> 16;
+      c = h & 0xffff; d = h >>> 16;
+
+      // Sigma0
+      h = ((ah0 >>> 28) | (al0 << (32-28))) ^ ((al0 >>> (34-32)) | (ah0 << (32-(34-32)))) ^ ((al0 >>> (39-32)) | (ah0 << (32-(39-32))));
+      l = ((al0 >>> 28) | (ah0 << (32-28))) ^ ((ah0 >>> (34-32)) | (al0 << (32-(34-32)))) ^ ((ah0 >>> (39-32)) | (al0 << (32-(39-32))));
+
+      a += l & 0xffff; b += l >>> 16;
+      c += h & 0xffff; d += h >>> 16;
+
+      // Maj
+      h = (ah0 & ah1) ^ (ah0 & ah2) ^ (ah1 & ah2);
+      l = (al0 & al1) ^ (al0 & al2) ^ (al1 & al2);
+
+      a += l & 0xffff; b += l >>> 16;
+      c += h & 0xffff; d += h >>> 16;
+
+      b += a >>> 16;
+      c += b >>> 16;
+      d += c >>> 16;
+
+      bh7 = (c & 0xffff) | (d << 16);
+      bl7 = (a & 0xffff) | (b << 16);
+
+      // add
+      h = bh3;
+      l = bl3;
+
+      a = l & 0xffff; b = l >>> 16;
+      c = h & 0xffff; d = h >>> 16;
+
+      h = th;
+      l = tl;
+
+      a += l & 0xffff; b += l >>> 16;
+      c += h & 0xffff; d += h >>> 16;
+
+      b += a >>> 16;
+      c += b >>> 16;
+      d += c >>> 16;
+
+      bh3 = (c & 0xffff) | (d << 16);
+      bl3 = (a & 0xffff) | (b << 16);
+
+      ah1 = bh0;
+      ah2 = bh1;
+      ah3 = bh2;
+      ah4 = bh3;
+      ah5 = bh4;
+      ah6 = bh5;
+      ah7 = bh6;
+      ah0 = bh7;
+
+      al1 = bl0;
+      al2 = bl1;
+      al3 = bl2;
+      al4 = bl3;
+      al5 = bl4;
+      al6 = bl5;
+      al7 = bl6;
+      al0 = bl7;
+
+      if (i%16 === 15) {
+        for (j = 0; j < 16; j++) {
+          // add
+          h = wh[j];
+          l = wl[j];
+
+          a = l & 0xffff; b = l >>> 16;
+          c = h & 0xffff; d = h >>> 16;
+
+          h = wh[(j+9)%16];
+          l = wl[(j+9)%16];
+
+          a += l & 0xffff; b += l >>> 16;
+          c += h & 0xffff; d += h >>> 16;
+
+          // sigma0
+          th = wh[(j+1)%16];
+          tl = wl[(j+1)%16];
+          h = ((th >>> 1) | (tl << (32-1))) ^ ((th >>> 8) | (tl << (32-8))) ^ (th >>> 7);
+          l = ((tl >>> 1) | (th << (32-1))) ^ ((tl >>> 8) | (th << (32-8))) ^ ((tl >>> 7) | (th << (32-7)));
+
+          a += l & 0xffff; b += l >>> 16;
+          c += h & 0xffff; d += h >>> 16;
+
+          // sigma1
+          th = wh[(j+14)%16];
+          tl = wl[(j+14)%16];
+          h = ((th >>> 19) | (tl << (32-19))) ^ ((tl >>> (61-32)) | (th << (32-(61-32)))) ^ (th >>> 6);
+          l = ((tl >>> 19) | (th << (32-19))) ^ ((th >>> (61-32)) | (tl << (32-(61-32)))) ^ ((tl >>> 6) | (th << (32-6)));
+
+          a += l & 0xffff; b += l >>> 16;
+          c += h & 0xffff; d += h >>> 16;
+
+          b += a >>> 16;
+          c += b >>> 16;
+          d += c >>> 16;
+
+          wh[j] = (c & 0xffff) | (d << 16);
+          wl[j] = (a & 0xffff) | (b << 16);
+        }
+      }
+    }
+
+    // add
+    h = ah0;
+    l = al0;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[0];
+    l = hl[0];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[0] = ah0 = (c & 0xffff) | (d << 16);
+    hl[0] = al0 = (a & 0xffff) | (b << 16);
+
+    h = ah1;
+    l = al1;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[1];
+    l = hl[1];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[1] = ah1 = (c & 0xffff) | (d << 16);
+    hl[1] = al1 = (a & 0xffff) | (b << 16);
+
+    h = ah2;
+    l = al2;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[2];
+    l = hl[2];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[2] = ah2 = (c & 0xffff) | (d << 16);
+    hl[2] = al2 = (a & 0xffff) | (b << 16);
+
+    h = ah3;
+    l = al3;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[3];
+    l = hl[3];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[3] = ah3 = (c & 0xffff) | (d << 16);
+    hl[3] = al3 = (a & 0xffff) | (b << 16);
+
+    h = ah4;
+    l = al4;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[4];
+    l = hl[4];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[4] = ah4 = (c & 0xffff) | (d << 16);
+    hl[4] = al4 = (a & 0xffff) | (b << 16);
+
+    h = ah5;
+    l = al5;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[5];
+    l = hl[5];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[5] = ah5 = (c & 0xffff) | (d << 16);
+    hl[5] = al5 = (a & 0xffff) | (b << 16);
+
+    h = ah6;
+    l = al6;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[6];
+    l = hl[6];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[6] = ah6 = (c & 0xffff) | (d << 16);
+    hl[6] = al6 = (a & 0xffff) | (b << 16);
+
+    h = ah7;
+    l = al7;
+
+    a = l & 0xffff; b = l >>> 16;
+    c = h & 0xffff; d = h >>> 16;
+
+    h = hh[7];
+    l = hl[7];
+
+    a += l & 0xffff; b += l >>> 16;
+    c += h & 0xffff; d += h >>> 16;
+
+    b += a >>> 16;
+    c += b >>> 16;
+    d += c >>> 16;
+
+    hh[7] = ah7 = (c & 0xffff) | (d << 16);
+    hl[7] = al7 = (a & 0xffff) | (b << 16);
+
+    pos += 128;
+    n -= 128;
+  }
+
+  return n;
+}
+
+function crypto_hash(out, m, n) {
+  var hh = new Int32Array(8),
+      hl = new Int32Array(8),
+      x = new Uint8Array(256),
+      i, b = n;
+
+  hh[0] = 0x6a09e667;
+  hh[1] = 0xbb67ae85;
+  hh[2] = 0x3c6ef372;
+  hh[3] = 0xa54ff53a;
+  hh[4] = 0x510e527f;
+  hh[5] = 0x9b05688c;
+  hh[6] = 0x1f83d9ab;
+  hh[7] = 0x5be0cd19;
+
+  hl[0] = 0xf3bcc908;
+  hl[1] = 0x84caa73b;
+  hl[2] = 0xfe94f82b;
+  hl[3] = 0x5f1d36f1;
+  hl[4] = 0xade682d1;
+  hl[5] = 0x2b3e6c1f;
+  hl[6] = 0xfb41bd6b;
+  hl[7] = 0x137e2179;
+
+  crypto_hashblocks_hl(hh, hl, m, n);
+  n %= 128;
+
+  for (i = 0; i < n; i++) x[i] = m[b-n+i];
+  x[n] = 128;
+
+  n = 256-128*(n<112?1:0);
+  x[n-9] = 0;
+  ts64(x, n-8,  (b / 0x20000000) | 0, b << 3);
+  crypto_hashblocks_hl(hh, hl, x, n);
+
+  for (i = 0; i < 8; i++) ts64(out, 8*i, hh[i], hl[i]);
+
+  return 0;
+}
+
+function add(p, q) {
+  var a = gf(), b = gf(), c = gf(),
+      d = gf(), e = gf(), f = gf(),
+      g = gf(), h = gf(), t = gf();
+
+  Z(a, p[1], p[0]);
+  Z(t, q[1], q[0]);
+  M(a, a, t);
+  A(b, p[0], p[1]);
+  A(t, q[0], q[1]);
+  M(b, b, t);
+  M(c, p[3], q[3]);
+  M(c, c, D2);
+  M(d, p[2], q[2]);
+  A(d, d, d);
+  Z(e, b, a);
+  Z(f, d, c);
+  A(g, d, c);
+  A(h, b, a);
+
+  M(p[0], e, f);
+  M(p[1], h, g);
+  M(p[2], g, f);
+  M(p[3], e, h);
+}
+
+function cswap(p, q, b) {
+  var i;
+  for (i = 0; i < 4; i++) {
+    sel25519(p[i], q[i], b);
+  }
+}
+
+function pack(r, p) {
+  var tx = gf(), ty = gf(), zi = gf();
+  inv25519(zi, p[2]);
+  M(tx, p[0], zi);
+  M(ty, p[1], zi);
+  pack25519(r, ty);
+  r[31] ^= par25519(tx) << 7;
+}
+
+function scalarmult(p, q, s) {
+  var b, i;
+  set25519(p[0], gf0);
+  set25519(p[1], gf1);
+  set25519(p[2], gf1);
+  set25519(p[3], gf0);
+  for (i = 255; i >= 0; --i) {
+    b = (s[(i/8)|0] >> (i&7)) & 1;
+    cswap(p, q, b);
+    add(q, p);
+    add(p, p);
+    cswap(p, q, b);
+  }
+}
+
+function scalarbase(p, s) {
+  var q = [gf(), gf(), gf(), gf()];
+  set25519(q[0], X);
+  set25519(q[1], Y);
+  set25519(q[2], gf1);
+  M(q[3], X, Y);
+  scalarmult(p, q, s);
+}
+
+function crypto_sign_keypair(pk, sk, seeded) {
+  var d = new Uint8Array(64);
+  var p = [gf(), gf(), gf(), gf()];
+  var i;
+
+  if (!seeded) randombytes(sk, 32);
+  crypto_hash(d, sk, 32);
+  d[0] &= 248;
+  d[31] &= 127;
+  d[31] |= 64;
+
+  scalarbase(p, d);
+  pack(pk, p);
+
+  for (i = 0; i < 32; i++) sk[i+32] = pk[i];
+  return 0;
+}
+
+var L = new Float64Array([0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10]);
+
+function modL(r, x) {
+  var carry, i, j, k;
+  for (i = 63; i >= 32; --i) {
+    carry = 0;
+    for (j = i - 32, k = i - 12; j < k; ++j) {
+      x[j] += carry - 16 * x[i] * L[j - (i - 32)];
+      carry = (x[j] + 128) >> 8;
+      x[j] -= carry * 256;
+    }
+    x[j] += carry;
+    x[i] = 0;
+  }
+  carry = 0;
+  for (j = 0; j < 32; j++) {
+    x[j] += carry - (x[31] >> 4) * L[j];
+    carry = x[j] >> 8;
+    x[j] &= 255;
+  }
+  for (j = 0; j < 32; j++) x[j] -= carry * L[j];
+  for (i = 0; i < 32; i++) {
+    x[i+1] += x[i] >> 8;
+    r[i] = x[i] & 255;
+  }
+}
+
+function reduce(r) {
+  var x = new Float64Array(64), i;
+  for (i = 0; i < 64; i++) x[i] = r[i];
+  for (i = 0; i < 64; i++) r[i] = 0;
+  modL(r, x);
+}
+
+// Note: difference from C - smlen returned, not passed as argument.
+function crypto_sign(sm, m, n, sk) {
+  var d = new Uint8Array(64), h = new Uint8Array(64), r = new Uint8Array(64);
+  var i, j, x = new Float64Array(64);
+  var p = [gf(), gf(), gf(), gf()];
+
+  crypto_hash(d, sk, 32);
+  d[0] &= 248;
+  d[31] &= 127;
+  d[31] |= 64;
+
+  var smlen = n + 64;
+  for (i = 0; i < n; i++) sm[64 + i] = m[i];
+  for (i = 0; i < 32; i++) sm[32 + i] = d[32 + i];
+
+  crypto_hash(r, sm.subarray(32), n+32);
+  reduce(r);
+  scalarbase(p, r);
+  pack(sm, p);
+
+  for (i = 32; i < 64; i++) sm[i] = sk[i];
+  crypto_hash(h, sm, n + 64);
+  reduce(h);
+
+  for (i = 0; i < 64; i++) x[i] = 0;
+  for (i = 0; i < 32; i++) x[i] = r[i];
+  for (i = 0; i < 32; i++) {
+    for (j = 0; j < 32; j++) {
+      x[i+j] += h[i] * d[j];
+    }
+  }
+
+  modL(sm.subarray(32), x);
+  return smlen;
+}
+
+function unpackneg(r, p) {
+  var t = gf(), chk = gf(), num = gf(),
+      den = gf(), den2 = gf(), den4 = gf(),
+      den6 = gf();
+
+  set25519(r[2], gf1);
+  unpack25519(r[1], p);
+  S(num, r[1]);
+  M(den, num, D);
+  Z(num, num, r[2]);
+  A(den, r[2], den);
+
+  S(den2, den);
+  S(den4, den2);
+  M(den6, den4, den2);
+  M(t, den6, num);
+  M(t, t, den);
+
+  pow2523(t, t);
+  M(t, t, num);
+  M(t, t, den);
+  M(t, t, den);
+  M(r[0], t, den);
+
+  S(chk, r[0]);
+  M(chk, chk, den);
+  if (neq25519(chk, num)) M(r[0], r[0], I);
+
+  S(chk, r[0]);
+  M(chk, chk, den);
+  if (neq25519(chk, num)) return -1;
+
+  if (par25519(r[0]) === (p[31]>>7)) Z(r[0], gf0, r[0]);
+
+  M(r[3], r[0], r[1]);
+  return 0;
+}
+
+function crypto_sign_open(m, sm, n, pk) {
+  var i, mlen;
+  var t = new Uint8Array(32), h = new Uint8Array(64);
+  var p = [gf(), gf(), gf(), gf()],
+      q = [gf(), gf(), gf(), gf()];
+
+  mlen = -1;
+  if (n < 64) return -1;
+
+  if (unpackneg(q, pk)) return -1;
+
+  for (i = 0; i < n; i++) m[i] = sm[i];
+  for (i = 0; i < 32; i++) m[i+32] = pk[i];
+  crypto_hash(h, m, n);
+  reduce(h);
+  scalarmult(p, q, h);
+
+  scalarbase(q, sm.subarray(32));
+  add(p, q);
+  pack(t, p);
+
+  n -= 64;
+  if (crypto_verify_32(sm, 0, t, 0)) {
+    for (i = 0; i < n; i++) m[i] = 0;
+    return -1;
+  }
+
+  for (i = 0; i < n; i++) m[i] = sm[i + 64];
+  mlen = n;
+  return mlen;
+}
+
+var crypto_secretbox_KEYBYTES = 32,
+    crypto_secretbox_NONCEBYTES = 24,
+    crypto_secretbox_ZEROBYTES = 32,
+    crypto_secretbox_BOXZEROBYTES = 16,
+    crypto_scalarmult_BYTES = 32,
+    crypto_scalarmult_SCALARBYTES = 32,
+    crypto_box_PUBLICKEYBYTES = 32,
+    crypto_box_SECRETKEYBYTES = 32,
+    crypto_box_BEFORENMBYTES = 32,
+    crypto_box_NONCEBYTES = crypto_secretbox_NONCEBYTES,
+    crypto_box_ZEROBYTES = crypto_secretbox_ZEROBYTES,
+    crypto_box_BOXZEROBYTES = crypto_secretbox_BOXZEROBYTES,
+    crypto_sign_BYTES = 64,
+    crypto_sign_PUBLICKEYBYTES = 32,
+    crypto_sign_SECRETKEYBYTES = 64,
+    crypto_sign_SEEDBYTES = 32,
+    crypto_hash_BYTES = 64;
+
+nacl.lowlevel = {
+  crypto_core_hsalsa20: crypto_core_hsalsa20,
+  crypto_stream_xor: crypto_stream_xor,
+  crypto_stream: crypto_stream,
+  crypto_stream_salsa20_xor: crypto_stream_salsa20_xor,
+  crypto_stream_salsa20: crypto_stream_salsa20,
+  crypto_onetimeauth: crypto_onetimeauth,
+  crypto_onetimeauth_verify: crypto_onetimeauth_verify,
+  crypto_verify_16: crypto_verify_16,
+  crypto_verify_32: crypto_verify_32,
+  crypto_secretbox: crypto_secretbox,
+  crypto_secretbox_open: crypto_secretbox_open,
+  crypto_scalarmult: crypto_scalarmult,
+  crypto_scalarmult_base: crypto_scalarmult_base,
+  crypto_box_beforenm: crypto_box_beforenm,
+  crypto_box_afternm: crypto_box_afternm,
+  crypto_box: crypto_box,
+  crypto_box_open: crypto_box_open,
+  crypto_box_keypair: crypto_box_keypair,
+  crypto_hash: crypto_hash,
+  crypto_sign: crypto_sign,
+  crypto_sign_keypair: crypto_sign_keypair,
+  crypto_sign_open: crypto_sign_open,
+
+  crypto_secretbox_KEYBYTES: crypto_secretbox_KEYBYTES,
+  crypto_secretbox_NONCEBYTES: crypto_secretbox_NONCEBYTES,
+  crypto_secretbox_ZEROBYTES: crypto_secretbox_ZEROBYTES,
+  crypto_secretbox_BOXZEROBYTES: crypto_secretbox_BOXZEROBYTES,
+  crypto_scalarmult_BYTES: crypto_scalarmult_BYTES,
+  crypto_scalarmult_SCALARBYTES: crypto_scalarmult_SCALARBYTES,
+  crypto_box_PUBLICKEYBYTES: crypto_box_PUBLICKEYBYTES,
+  crypto_box_SECRETKEYBYTES: crypto_box_SECRETKEYBYTES,
+  crypto_box_BEFORENMBYTES: crypto_box_BEFORENMBYTES,
+  crypto_box_NONCEBYTES: crypto_box_NONCEBYTES,
+  crypto_box_ZEROBYTES: crypto_box_ZEROBYTES,
+  crypto_box_BOXZEROBYTES: crypto_box_BOXZEROBYTES,
+  crypto_sign_BYTES: crypto_sign_BYTES,
+  crypto_sign_PUBLICKEYBYTES: crypto_sign_PUBLICKEYBYTES,
+  crypto_sign_SECRETKEYBYTES: crypto_sign_SECRETKEYBYTES,
+  crypto_sign_SEEDBYTES: crypto_sign_SEEDBYTES,
+  crypto_hash_BYTES: crypto_hash_BYTES
+};
+
+/* High-level API */
+
+function checkLengths(k, n) {
+  if (k.length !== crypto_secretbox_KEYBYTES) throw new Error('bad key size');
+  if (n.length !== crypto_secretbox_NONCEBYTES) throw new Error('bad nonce size');
+}
+
+function checkBoxLengths(pk, sk) {
+  if (pk.length !== crypto_box_PUBLICKEYBYTES) throw new Error('bad public key size');
+  if (sk.length !== crypto_box_SECRETKEYBYTES) throw new Error('bad secret key size');
+}
+
+function checkArrayTypes() {
+  for (var i = 0; i < arguments.length; i++) {
+    if (!(arguments[i] instanceof Uint8Array))
+      throw new TypeError('unexpected type, use Uint8Array');
+  }
+}
+
+function cleanup(arr) {
+  for (var i = 0; i < arr.length; i++) arr[i] = 0;
+}
+
+nacl.randomBytes = function(n) {
+  var b = new Uint8Array(n);
+  randombytes(b, n);
+  return b;
+};
+
+nacl.secretbox = function(msg, nonce, key) {
+  checkArrayTypes(msg, nonce, key);
+  checkLengths(key, nonce);
+  var m = new Uint8Array(crypto_secretbox_ZEROBYTES + msg.length);
+  var c = new Uint8Array(m.length);
+  for (var i = 0; i < msg.length; i++) m[i+crypto_secretbox_ZEROBYTES] = msg[i];
+  crypto_secretbox(c, m, m.length, nonce, key);
+  return c.subarray(crypto_secretbox_BOXZEROBYTES);
+};
+
+nacl.secretbox.open = function(box, nonce, key) {
+  checkArrayTypes(box, nonce, key);
+  checkLengths(key, nonce);
+  var c = new Uint8Array(crypto_secretbox_BOXZEROBYTES + box.length);
+  var m = new Uint8Array(c.length);
+  for (var i = 0; i < box.length; i++) c[i+crypto_secretbox_BOXZEROBYTES] = box[i];
+  if (c.length < 32) return null;
+  if (crypto_secretbox_open(m, c, c.length, nonce, key) !== 0) return null;
+  return m.subarray(crypto_secretbox_ZEROBYTES);
+};
+
+nacl.secretbox.keyLength = crypto_secretbox_KEYBYTES;
+nacl.secretbox.nonceLength = crypto_secretbox_NONCEBYTES;
+nacl.secretbox.overheadLength = crypto_secretbox_BOXZEROBYTES;
+
+nacl.scalarMult = function(n, p) {
+  checkArrayTypes(n, p);
+  if (n.length !== crypto_scalarmult_SCALARBYTES) throw new Error('bad n size');
+  if (p.length !== crypto_scalarmult_BYTES) throw new Error('bad p size');
+  var q = new Uint8Array(crypto_scalarmult_BYTES);
+  crypto_scalarmult(q, n, p);
+  return q;
+};
+
+nacl.scalarMult.base = function(n) {
+  checkArrayTypes(n);
+  if (n.length !== crypto_scalarmult_SCALARBYTES) throw new Error('bad n size');
+  var q = new Uint8Array(crypto_scalarmult_BYTES);
+  crypto_scalarmult_base(q, n);
+  return q;
+};
+
+nacl.scalarMult.scalarLength = crypto_scalarmult_SCALARBYTES;
+nacl.scalarMult.groupElementLength = crypto_scalarmult_BYTES;
+
+nacl.box = function(msg, nonce, publicKey, secretKey) {
+  var k = nacl.box.before(publicKey, secretKey);
+  return nacl.secretbox(msg, nonce, k);
+};
+
+nacl.box.before = function(publicKey, secretKey) {
+  checkArrayTypes(publicKey, secretKey);
+  checkBoxLengths(publicKey, secretKey);
+  var k = new Uint8Array(crypto_box_BEFORENMBYTES);
+  crypto_box_beforenm(k, publicKey, secretKey);
+  return k;
+};
+
+nacl.box.after = nacl.secretbox;
+
+nacl.box.open = function(msg, nonce, publicKey, secretKey) {
+  var k = nacl.box.before(publicKey, secretKey);
+  return nacl.secretbox.open(msg, nonce, k);
+};
+
+nacl.box.open.after = nacl.secretbox.open;
+
+nacl.box.keyPair = function() {
+  var pk = new Uint8Array(crypto_box_PUBLICKEYBYTES);
+  var sk = new Uint8Array(crypto_box_SECRETKEYBYTES);
+  crypto_box_keypair(pk, sk);
+  return {publicKey: pk, secretKey: sk};
+};
+
+nacl.box.keyPair.fromSecretKey = function(secretKey) {
+  checkArrayTypes(secretKey);
+  if (secretKey.length !== crypto_box_SECRETKEYBYTES)
+    throw new Error('bad secret key size');
+  var pk = new Uint8Array(crypto_box_PUBLICKEYBYTES);
+  crypto_scalarmult_base(pk, secretKey);
+  return {publicKey: pk, secretKey: new Uint8Array(secretKey)};
+};
+
+nacl.box.publicKeyLength = crypto_box_PUBLICKEYBYTES;
+nacl.box.secretKeyLength = crypto_box_SECRETKEYBYTES;
+nacl.box.sharedKeyLength = crypto_box_BEFORENMBYTES;
+nacl.box.nonceLength = crypto_box_NONCEBYTES;
+nacl.box.overheadLength = nacl.secretbox.overheadLength;
+
+nacl.sign = function(msg, secretKey) {
+  checkArrayTypes(msg, secretKey);
+  if (secretKey.length !== crypto_sign_SECRETKEYBYTES)
+    throw new Error('bad secret key size');
+  var signedMsg = new Uint8Array(crypto_sign_BYTES+msg.length);
+  crypto_sign(signedMsg, msg, msg.length, secretKey);
+  return signedMsg;
+};
+
+nacl.sign.open = function(signedMsg, publicKey) {
+  checkArrayTypes(signedMsg, publicKey);
+  if (publicKey.length !== crypto_sign_PUBLICKEYBYTES)
+    throw new Error('bad public key size');
+  var tmp = new Uint8Array(signedMsg.length);
+  var mlen = crypto_sign_open(tmp, signedMsg, signedMsg.length, publicKey);
+  if (mlen < 0) return null;
+  var m = new Uint8Array(mlen);
+  for (var i = 0; i < m.length; i++) m[i] = tmp[i];
+  return m;
+};
+
+nacl.sign.detached = function(msg, secretKey) {
+  var signedMsg = nacl.sign(msg, secretKey);
+  var sig = new Uint8Array(crypto_sign_BYTES);
+  for (var i = 0; i < sig.length; i++) sig[i] = signedMsg[i];
+  return sig;
+};
+
+nacl.sign.detached.verify = function(msg, sig, publicKey) {
+  checkArrayTypes(msg, sig, publicKey);
+  if (sig.length !== crypto_sign_BYTES)
+    throw new Error('bad signature size');
+  if (publicKey.length !== crypto_sign_PUBLICKEYBYTES)
+    throw new Error('bad public key size');
+  var sm = new Uint8Array(crypto_sign_BYTES + msg.length);
+  var m = new Uint8Array(crypto_sign_BYTES + msg.length);
+  var i;
+  for (i = 0; i < crypto_sign_BYTES; i++) sm[i] = sig[i];
+  for (i = 0; i < msg.length; i++) sm[i+crypto_sign_BYTES] = msg[i];
+  return (crypto_sign_open(m, sm, sm.length, publicKey) >= 0);
+};
+
+nacl.sign.keyPair = function() {
+  var pk = new Uint8Array(crypto_sign_PUBLICKEYBYTES);
+  var sk = new Uint8Array(crypto_sign_SECRETKEYBYTES);
+  crypto_sign_keypair(pk, sk);
+  return {publicKey: pk, secretKey: sk};
+};
+
+nacl.sign.keyPair.fromSecretKey = function(secretKey) {
+  checkArrayTypes(secretKey);
+  if (secretKey.length !== crypto_sign_SECRETKEYBYTES)
+    throw new Error('bad secret key size');
+  var pk = new Uint8Array(crypto_sign_PUBLICKEYBYTES);
+  for (var i = 0; i < pk.length; i++) pk[i] = secretKey[32+i];
+  return {publicKey: pk, secretKey: new Uint8Array(secretKey)};
+};
+
+nacl.sign.keyPair.fromSeed = function(seed) {
+  checkArrayTypes(seed);
+  if (seed.length !== crypto_sign_SEEDBYTES)
+    throw new Error('bad seed size');
+  var pk = new Uint8Array(crypto_sign_PUBLICKEYBYTES);
+  var sk = new Uint8Array(crypto_sign_SECRETKEYBYTES);
+  for (var i = 0; i < 32; i++) sk[i] = seed[i];
+  crypto_sign_keypair(pk, sk, true);
+  return {publicKey: pk, secretKey: sk};
+};
+
+nacl.sign.publicKeyLength = crypto_sign_PUBLICKEYBYTES;
+nacl.sign.secretKeyLength = crypto_sign_SECRETKEYBYTES;
+nacl.sign.seedLength = crypto_sign_SEEDBYTES;
+nacl.sign.signatureLength = crypto_sign_BYTES;
+
+nacl.hash = function(msg) {
+  checkArrayTypes(msg);
+  var h = new Uint8Array(crypto_hash_BYTES);
+  crypto_hash(h, msg, msg.length);
+  return h;
+};
+
+nacl.hash.hashLength = crypto_hash_BYTES;
+
+nacl.verify = function(x, y) {
+  checkArrayTypes(x, y);
+  // Zero length arguments are considered not equal.
+  if (x.length === 0 || y.length === 0) return false;
+  if (x.length !== y.length) return false;
+  return (vn(x, 0, y, 0, x.length) === 0) ? true : false;
+};
+
+nacl.setPRNG = function(fn) {
+  randombytes = fn;
+};
+
+(function() {
+  // Initialize PRNG if environment provides CSPRNG.
+  // If not, methods calling randombytes will throw.
+  var crypto = typeof self !== 'undefined' ? (self.crypto || self.msCrypto) : null;
+  if (crypto && crypto.getRandomValues) {
+    // Browsers.
+    var QUOTA = 65536;
+    nacl.setPRNG(function(x, n) {
+      var i, v = new Uint8Array(n);
+      for (i = 0; i < n; i += QUOTA) {
+        crypto.getRandomValues(v.subarray(i, i + Math.min(n - i, QUOTA)));
+      }
+      for (i = 0; i < n; i++) x[i] = v[i];
+      cleanup(v);
+    });
+  } else if (true) {
+    // Node.js.
+    crypto = __webpack_require__(196);
+    if (crypto && crypto.randomBytes) {
+      nacl.setPRNG(function(x, n) {
+        var i, v = crypto.randomBytes(n);
+        for (i = 0; i < n; i++) x[i] = v[i];
+        cleanup(v);
+      });
+    }
+  }
+})();
+
+})( true && module.exports ? module.exports : (self.nacl = self.nacl || {}));
+
+
+/***/ }),
+/* 196 */
+/***/ (function(module, exports) {
+
+/* (ignored) */
+
+/***/ }),
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(196), __webpack_require__(197), __webpack_require__(198), __webpack_require__(199), __webpack_require__(200), __webpack_require__(201), __webpack_require__(202), __webpack_require__(203), __webpack_require__(204), __webpack_require__(205), __webpack_require__(206), __webpack_require__(207), __webpack_require__(208), __webpack_require__(209), __webpack_require__(210), __webpack_require__(211), __webpack_require__(212), __webpack_require__(213), __webpack_require__(214), __webpack_require__(215), __webpack_require__(216), __webpack_require__(217), __webpack_require__(218), __webpack_require__(219), __webpack_require__(220), __webpack_require__(221), __webpack_require__(222), __webpack_require__(223), __webpack_require__(224), __webpack_require__(225), __webpack_require__(226), __webpack_require__(227));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(199), __webpack_require__(200), __webpack_require__(201), __webpack_require__(202), __webpack_require__(203), __webpack_require__(204), __webpack_require__(205), __webpack_require__(206), __webpack_require__(207), __webpack_require__(208), __webpack_require__(209), __webpack_require__(210), __webpack_require__(211), __webpack_require__(212), __webpack_require__(213), __webpack_require__(214), __webpack_require__(215), __webpack_require__(216), __webpack_require__(217), __webpack_require__(218), __webpack_require__(219), __webpack_require__(220), __webpack_require__(221), __webpack_require__(222), __webpack_require__(223), __webpack_require__(224), __webpack_require__(225), __webpack_require__(226), __webpack_require__(227), __webpack_require__(228), __webpack_require__(229), __webpack_require__(230));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -28018,7 +28900,7 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 195 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
@@ -28776,13 +29658,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 196 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -29078,13 +29960,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 197 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -29152,13 +30034,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 198 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -29299,13 +30181,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 199 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -29432,13 +30314,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 200 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -29698,13 +30580,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 201 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -29846,13 +30728,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 202 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -30043,13 +30925,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 203 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(202));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(205));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -30121,13 +31003,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 204 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(196));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(199));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -30442,13 +31324,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 205 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(196), __webpack_require__(204));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(199), __webpack_require__(207));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -30523,13 +31405,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 206 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(196));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(199));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -30844,13 +31726,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 207 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -31109,13 +31991,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 208 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195));
+		module.exports = exports = factory(__webpack_require__(198));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -31250,13 +32132,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 209 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(201), __webpack_require__(208));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(204), __webpack_require__(211));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -31393,13 +32275,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 210 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(201), __webpack_require__(208));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(204), __webpack_require__(211));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -31523,13 +32405,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 211 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(210));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(213));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32401,13 +33283,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 212 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32477,13 +33359,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 213 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32533,13 +33415,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 214 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32647,13 +33529,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 215 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32699,13 +33581,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 216 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32737,13 +33619,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 217 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32784,13 +33666,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 218 */
+/* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32826,13 +33708,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 219 */
+/* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32864,13 +33746,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 220 */
+/* 223 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32907,13 +33789,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 221 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32935,13 +33817,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 222 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -32999,13 +33881,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 223 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(199), __webpack_require__(200), __webpack_require__(210), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(202), __webpack_require__(203), __webpack_require__(213), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -33229,13 +34111,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 224 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(199), __webpack_require__(200), __webpack_require__(210), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(202), __webpack_require__(203), __webpack_require__(213), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -33997,13 +34879,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 225 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(199), __webpack_require__(200), __webpack_require__(210), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(202), __webpack_require__(203), __webpack_require__(213), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -34134,13 +35016,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 226 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(199), __webpack_require__(200), __webpack_require__(210), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(202), __webpack_require__(203), __webpack_require__(213), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -34324,13 +35206,13 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 227 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 ;(function (root, factory, undef) {
 	if (true) {
 		// CommonJS
-		module.exports = exports = factory(__webpack_require__(195), __webpack_require__(199), __webpack_require__(200), __webpack_require__(210), __webpack_require__(211));
+		module.exports = exports = factory(__webpack_require__(198), __webpack_require__(202), __webpack_require__(203), __webpack_require__(213), __webpack_require__(214));
 	}
 	else {}
 }(this, function (CryptoJS) {
@@ -34512,12 +35394,12 @@ module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above
 }));
 
 /***/ }),
-/* 228 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const english = __webpack_require__(229);
+const english = __webpack_require__(232);
 
-const korean = __webpack_require__(230);
+const korean = __webpack_require__(233);
 
 const COUNT = 12;
 
@@ -34533,7 +35415,7 @@ const generateMnemonic = language => {
     words = front.concat(back);
   }
 
-  return generatedMnemonic.join(', ');
+  return generatedMnemonic.join(' ');
 };
 
 module.exports = {
@@ -34541,25 +35423,25 @@ module.exports = {
 };
 
 /***/ }),
-/* 229 */
+/* 232 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"abandon\",\"ability\",\"able\",\"about\",\"above\",\"absent\",\"absorb\",\"abstract\",\"absurd\",\"abuse\",\"access\",\"accident\",\"account\",\"accuse\",\"achieve\",\"acid\",\"acoustic\",\"acquire\",\"across\",\"act\",\"action\",\"actor\",\"actress\",\"actual\",\"adapt\",\"add\",\"addict\",\"address\",\"adjust\",\"admit\",\"adult\",\"advance\",\"advice\",\"aerobic\",\"affair\",\"afford\",\"afraid\",\"again\",\"age\",\"agent\",\"agree\",\"ahead\",\"aim\",\"air\",\"airport\",\"aisle\",\"alarm\",\"album\",\"alcohol\",\"alert\",\"alien\",\"all\",\"alley\",\"allow\",\"almost\",\"alone\",\"alpha\",\"already\",\"also\",\"alter\",\"always\",\"amateur\",\"amazing\",\"among\",\"amount\",\"amused\",\"analyst\",\"anchor\",\"ancient\",\"anger\",\"angle\",\"angry\",\"animal\",\"ankle\",\"announce\",\"annual\",\"another\",\"answer\",\"antenna\",\"antique\",\"anxiety\",\"any\",\"apart\",\"apology\",\"appear\",\"apple\",\"approve\",\"april\",\"arch\",\"arctic\",\"area\",\"arena\",\"argue\",\"arm\",\"armed\",\"armor\",\"army\",\"around\",\"arrange\",\"arrest\",\"arrive\",\"arrow\",\"art\",\"artefact\",\"artist\",\"artwork\",\"ask\",\"aspect\",\"assault\",\"asset\",\"assist\",\"assume\",\"asthma\",\"athlete\",\"atom\",\"attack\",\"attend\",\"attitude\",\"attract\",\"auction\",\"audit\",\"august\",\"aunt\",\"author\",\"auto\",\"autumn\",\"average\",\"avocado\",\"avoid\",\"awake\",\"aware\",\"away\",\"awesome\",\"awful\",\"awkward\",\"axis\",\"baby\",\"bachelor\",\"bacon\",\"badge\",\"bag\",\"balance\",\"balcony\",\"ball\",\"bamboo\",\"banana\",\"banner\",\"bar\",\"barely\",\"bargain\",\"barrel\",\"base\",\"basic\",\"basket\",\"battle\",\"beach\",\"bean\",\"beauty\",\"because\",\"become\",\"beef\",\"before\",\"begin\",\"behave\",\"behind\",\"believe\",\"below\",\"belt\",\"bench\",\"benefit\",\"best\",\"betray\",\"better\",\"between\",\"beyond\",\"bicycle\",\"bid\",\"bike\",\"bind\",\"biology\",\"bird\",\"birth\",\"bitter\",\"black\",\"blade\",\"blame\",\"blanket\",\"blast\",\"bleak\",\"bless\",\"blind\",\"blood\",\"blossom\",\"blouse\",\"blue\",\"blur\",\"blush\",\"board\",\"boat\",\"body\",\"boil\",\"bomb\",\"bone\",\"bonus\",\"book\",\"boost\",\"border\",\"boring\",\"borrow\",\"boss\",\"bottom\",\"bounce\",\"box\",\"boy\",\"bracket\",\"brain\",\"brand\",\"brass\",\"brave\",\"bread\",\"breeze\",\"brick\",\"bridge\",\"brief\",\"bright\",\"bring\",\"brisk\",\"broccoli\",\"broken\",\"bronze\",\"broom\",\"brother\",\"brown\",\"brush\",\"bubble\",\"buddy\",\"budget\",\"buffalo\",\"build\",\"bulb\",\"bulk\",\"bullet\",\"bundle\",\"bunker\",\"burden\",\"burger\",\"burst\",\"bus\",\"business\",\"busy\",\"butter\",\"buyer\",\"buzz\",\"cabbage\",\"cabin\",\"cable\",\"cactus\",\"cage\",\"cake\",\"call\",\"calm\",\"camera\",\"camp\",\"can\",\"canal\",\"cancel\",\"candy\",\"cannon\",\"canoe\",\"canvas\",\"canyon\",\"capable\",\"capital\",\"captain\",\"car\",\"carbon\",\"card\",\"cargo\",\"carpet\",\"carry\",\"cart\",\"case\",\"cash\",\"casino\",\"castle\",\"casual\",\"cat\",\"catalog\",\"catch\",\"category\",\"cattle\",\"caught\",\"cause\",\"caution\",\"cave\",\"ceiling\",\"celery\",\"cement\",\"census\",\"century\",\"cereal\",\"certain\",\"chair\",\"chalk\",\"champion\",\"change\",\"chaos\",\"chapter\",\"charge\",\"chase\",\"chat\",\"cheap\",\"check\",\"cheese\",\"chef\",\"cherry\",\"chest\",\"chicken\",\"chief\",\"child\",\"chimney\",\"choice\",\"choose\",\"chronic\",\"chuckle\",\"chunk\",\"churn\",\"cigar\",\"cinnamon\",\"circle\",\"citizen\",\"city\",\"civil\",\"claim\",\"clap\",\"clarify\",\"claw\",\"clay\",\"clean\",\"clerk\",\"clever\",\"click\",\"client\",\"cliff\",\"climb\",\"clinic\",\"clip\",\"clock\",\"clog\",\"close\",\"cloth\",\"cloud\",\"clown\",\"club\",\"clump\",\"cluster\",\"clutch\",\"coach\",\"coast\",\"coconut\",\"code\",\"coffee\",\"coil\",\"coin\",\"collect\",\"color\",\"column\",\"combine\",\"come\",\"comfort\",\"comic\",\"common\",\"company\",\"concert\",\"conduct\",\"confirm\",\"congress\",\"connect\",\"consider\",\"control\",\"convince\",\"cook\",\"cool\",\"copper\",\"copy\",\"coral\",\"core\",\"corn\",\"correct\",\"cost\",\"cotton\",\"couch\",\"country\",\"couple\",\"course\",\"cousin\",\"cover\",\"coyote\",\"crack\",\"cradle\",\"craft\",\"cram\",\"crane\",\"crash\",\"crater\",\"crawl\",\"crazy\",\"cream\",\"credit\",\"creek\",\"crew\",\"cricket\",\"crime\",\"crisp\",\"critic\",\"crop\",\"cross\",\"crouch\",\"crowd\",\"crucial\",\"cruel\",\"cruise\",\"crumble\",\"crunch\",\"crush\",\"cry\",\"crystal\",\"cube\",\"culture\",\"cup\",\"cupboard\",\"curious\",\"current\",\"curtain\",\"curve\",\"cushion\",\"custom\",\"cute\",\"cycle\",\"dad\",\"damage\",\"damp\",\"dance\",\"danger\",\"daring\",\"dash\",\"daughter\",\"dawn\",\"day\",\"deal\",\"debate\",\"debris\",\"decade\",\"december\",\"decide\",\"decline\",\"decorate\",\"decrease\",\"deer\",\"defense\",\"define\",\"defy\",\"degree\",\"delay\",\"deliver\",\"demand\",\"demise\",\"denial\",\"dentist\",\"deny\",\"depart\",\"depend\",\"deposit\",\"depth\",\"deputy\",\"derive\",\"describe\",\"desert\",\"design\",\"desk\",\"despair\",\"destroy\",\"detail\",\"detect\",\"develop\",\"device\",\"devote\",\"diagram\",\"dial\",\"diamond\",\"diary\",\"dice\",\"diesel\",\"diet\",\"differ\",\"digital\",\"dignity\",\"dilemma\",\"dinner\",\"dinosaur\",\"direct\",\"dirt\",\"disagree\",\"discover\",\"disease\",\"dish\",\"dismiss\",\"disorder\",\"display\",\"distance\",\"divert\",\"divide\",\"divorce\",\"dizzy\",\"doctor\",\"document\",\"dog\",\"doll\",\"dolphin\",\"domain\",\"donate\",\"donkey\",\"donor\",\"door\",\"dose\",\"double\",\"dove\",\"draft\",\"dragon\",\"drama\",\"drastic\",\"draw\",\"dream\",\"dress\",\"drift\",\"drill\",\"drink\",\"drip\",\"drive\",\"drop\",\"drum\",\"dry\",\"duck\",\"dumb\",\"dune\",\"during\",\"dust\",\"dutch\",\"duty\",\"dwarf\",\"dynamic\",\"eager\",\"eagle\",\"early\",\"earn\",\"earth\",\"easily\",\"east\",\"easy\",\"echo\",\"ecology\",\"economy\",\"edge\",\"edit\",\"educate\",\"effort\",\"egg\",\"eight\",\"either\",\"elbow\",\"elder\",\"electric\",\"elegant\",\"element\",\"elephant\",\"elevator\",\"elite\",\"else\",\"embark\",\"embody\",\"embrace\",\"emerge\",\"emotion\",\"employ\",\"empower\",\"empty\",\"enable\",\"enact\",\"end\",\"endless\",\"endorse\",\"enemy\",\"energy\",\"enforce\",\"engage\",\"engine\",\"enhance\",\"enjoy\",\"enlist\",\"enough\",\"enrich\",\"enroll\",\"ensure\",\"enter\",\"entire\",\"entry\",\"envelope\",\"episode\",\"equal\",\"equip\",\"era\",\"erase\",\"erode\",\"erosion\",\"error\",\"erupt\",\"escape\",\"essay\",\"essence\",\"estate\",\"eternal\",\"ethics\",\"evidence\",\"evil\",\"evoke\",\"evolve\",\"exact\",\"example\",\"excess\",\"exchange\",\"excite\",\"exclude\",\"excuse\",\"execute\",\"exercise\",\"exhaust\",\"exhibit\",\"exile\",\"exist\",\"exit\",\"exotic\",\"expand\",\"expect\",\"expire\",\"explain\",\"expose\",\"express\",\"extend\",\"extra\",\"eye\",\"eyebrow\",\"fabric\",\"face\",\"faculty\",\"fade\",\"faint\",\"faith\",\"fall\",\"false\",\"fame\",\"family\",\"famous\",\"fan\",\"fancy\",\"fantasy\",\"farm\",\"fashion\",\"fat\",\"fatal\",\"father\",\"fatigue\",\"fault\",\"favorite\",\"feature\",\"february\",\"federal\",\"fee\",\"feed\",\"feel\",\"female\",\"fence\",\"festival\",\"fetch\",\"fever\",\"few\",\"fiber\",\"fiction\",\"field\",\"figure\",\"file\",\"film\",\"filter\",\"final\",\"find\",\"fine\",\"finger\",\"finish\",\"fire\",\"firm\",\"first\",\"fiscal\",\"fish\",\"fit\",\"fitness\",\"fix\",\"flag\",\"flame\",\"flash\",\"flat\",\"flavor\",\"flee\",\"flight\",\"flip\",\"float\",\"flock\",\"floor\",\"flower\",\"fluid\",\"flush\",\"fly\",\"foam\",\"focus\",\"fog\",\"foil\",\"fold\",\"follow\",\"food\",\"foot\",\"force\",\"forest\",\"forget\",\"fork\",\"fortune\",\"forum\",\"forward\",\"fossil\",\"foster\",\"found\",\"fox\",\"fragile\",\"frame\",\"frequent\",\"fresh\",\"friend\",\"fringe\",\"frog\",\"front\",\"frost\",\"frown\",\"frozen\",\"fruit\",\"fuel\",\"fun\",\"funny\",\"furnace\",\"fury\",\"future\",\"gadget\",\"gain\",\"galaxy\",\"gallery\",\"game\",\"gap\",\"garage\",\"garbage\",\"garden\",\"garlic\",\"garment\",\"gas\",\"gasp\",\"gate\",\"gather\",\"gauge\",\"gaze\",\"general\",\"genius\",\"genre\",\"gentle\",\"genuine\",\"gesture\",\"ghost\",\"giant\",\"gift\",\"giggle\",\"ginger\",\"giraffe\",\"girl\",\"give\",\"glad\",\"glance\",\"glare\",\"glass\",\"glide\",\"glimpse\",\"globe\",\"gloom\",\"glory\",\"glove\",\"glow\",\"glue\",\"goat\",\"goddess\",\"gold\",\"good\",\"goose\",\"gorilla\",\"gospel\",\"gossip\",\"govern\",\"gown\",\"grab\",\"grace\",\"grain\",\"grant\",\"grape\",\"grass\",\"gravity\",\"great\",\"green\",\"grid\",\"grief\",\"grit\",\"grocery\",\"group\",\"grow\",\"grunt\",\"guard\",\"guess\",\"guide\",\"guilt\",\"guitar\",\"gun\",\"gym\",\"habit\",\"hair\",\"half\",\"hammer\",\"hamster\",\"hand\",\"happy\",\"harbor\",\"hard\",\"harsh\",\"harvest\",\"hat\",\"have\",\"hawk\",\"hazard\",\"head\",\"health\",\"heart\",\"heavy\",\"hedgehog\",\"height\",\"hello\",\"helmet\",\"help\",\"hen\",\"hero\",\"hidden\",\"high\",\"hill\",\"hint\",\"hip\",\"hire\",\"history\",\"hobby\",\"hockey\",\"hold\",\"hole\",\"holiday\",\"hollow\",\"home\",\"honey\",\"hood\",\"hope\",\"horn\",\"horror\",\"horse\",\"hospital\",\"host\",\"hotel\",\"hour\",\"hover\",\"hub\",\"huge\",\"human\",\"humble\",\"humor\",\"hundred\",\"hungry\",\"hunt\",\"hurdle\",\"hurry\",\"hurt\",\"husband\",\"hybrid\",\"ice\",\"icon\",\"idea\",\"identify\",\"idle\",\"ignore\",\"ill\",\"illegal\",\"illness\",\"image\",\"imitate\",\"immense\",\"immune\",\"impact\",\"impose\",\"improve\",\"impulse\",\"inch\",\"include\",\"income\",\"increase\",\"index\",\"indicate\",\"indoor\",\"industry\",\"infant\",\"inflict\",\"inform\",\"inhale\",\"inherit\",\"initial\",\"inject\",\"injury\",\"inmate\",\"inner\",\"innocent\",\"input\",\"inquiry\",\"insane\",\"insect\",\"inside\",\"inspire\",\"install\",\"intact\",\"interest\",\"into\",\"invest\",\"invite\",\"involve\",\"iron\",\"island\",\"isolate\",\"issue\",\"item\",\"ivory\",\"jacket\",\"jaguar\",\"jar\",\"jazz\",\"jealous\",\"jeans\",\"jelly\",\"jewel\",\"job\",\"join\",\"joke\",\"journey\",\"joy\",\"judge\",\"juice\",\"jump\",\"jungle\",\"junior\",\"junk\",\"just\",\"kangaroo\",\"keen\",\"keep\",\"ketchup\",\"key\",\"kick\",\"kid\",\"kidney\",\"kind\",\"kingdom\",\"kiss\",\"kit\",\"kitchen\",\"kite\",\"kitten\",\"kiwi\",\"knee\",\"knife\",\"knock\",\"know\",\"lab\",\"label\",\"labor\",\"ladder\",\"lady\",\"lake\",\"lamp\",\"language\",\"laptop\",\"large\",\"later\",\"latin\",\"laugh\",\"laundry\",\"lava\",\"law\",\"lawn\",\"lawsuit\",\"layer\",\"lazy\",\"leader\",\"leaf\",\"learn\",\"leave\",\"lecture\",\"left\",\"leg\",\"legal\",\"legend\",\"leisure\",\"lemon\",\"lend\",\"length\",\"lens\",\"leopard\",\"lesson\",\"letter\",\"level\",\"liar\",\"liberty\",\"library\",\"license\",\"life\",\"lift\",\"light\",\"like\",\"limb\",\"limit\",\"link\",\"lion\",\"liquid\",\"list\",\"little\",\"live\",\"lizard\",\"load\",\"loan\",\"lobster\",\"local\",\"lock\",\"logic\",\"lonely\",\"long\",\"loop\",\"lottery\",\"loud\",\"lounge\",\"love\",\"loyal\",\"lucky\",\"luggage\",\"lumber\",\"lunar\",\"lunch\",\"luxury\",\"lyrics\",\"machine\",\"mad\",\"magic\",\"magnet\",\"maid\",\"mail\",\"main\",\"major\",\"make\",\"mammal\",\"man\",\"manage\",\"mandate\",\"mango\",\"mansion\",\"manual\",\"maple\",\"marble\",\"march\",\"margin\",\"marine\",\"market\",\"marriage\",\"mask\",\"mass\",\"master\",\"match\",\"material\",\"math\",\"matrix\",\"matter\",\"maximum\",\"maze\",\"meadow\",\"mean\",\"measure\",\"meat\",\"mechanic\",\"medal\",\"media\",\"melody\",\"melt\",\"member\",\"memory\",\"mention\",\"menu\",\"mercy\",\"merge\",\"merit\",\"merry\",\"mesh\",\"message\",\"metal\",\"method\",\"middle\",\"midnight\",\"milk\",\"million\",\"mimic\",\"mind\",\"minimum\",\"minor\",\"minute\",\"miracle\",\"mirror\",\"misery\",\"miss\",\"mistake\",\"mix\",\"mixed\",\"mixture\",\"mobile\",\"model\",\"modify\",\"mom\",\"moment\",\"monitor\",\"monkey\",\"monster\",\"month\",\"moon\",\"moral\",\"more\",\"morning\",\"mosquito\",\"mother\",\"motion\",\"motor\",\"mountain\",\"mouse\",\"move\",\"movie\",\"much\",\"muffin\",\"mule\",\"multiply\",\"muscle\",\"museum\",\"mushroom\",\"music\",\"must\",\"mutual\",\"myself\",\"mystery\",\"myth\",\"naive\",\"name\",\"napkin\",\"narrow\",\"nasty\",\"nation\",\"nature\",\"near\",\"neck\",\"need\",\"negative\",\"neglect\",\"neither\",\"nephew\",\"nerve\",\"nest\",\"net\",\"network\",\"neutral\",\"never\",\"news\",\"next\",\"nice\",\"night\",\"noble\",\"noise\",\"nominee\",\"noodle\",\"normal\",\"north\",\"nose\",\"notable\",\"note\",\"nothing\",\"notice\",\"novel\",\"now\",\"nuclear\",\"number\",\"nurse\",\"nut\",\"oak\",\"obey\",\"object\",\"oblige\",\"obscure\",\"observe\",\"obtain\",\"obvious\",\"occur\",\"ocean\",\"october\",\"odor\",\"off\",\"offer\",\"office\",\"often\",\"oil\",\"okay\",\"old\",\"olive\",\"olympic\",\"omit\",\"once\",\"one\",\"onion\",\"online\",\"only\",\"open\",\"opera\",\"opinion\",\"oppose\",\"option\",\"orange\",\"orbit\",\"orchard\",\"order\",\"ordinary\",\"organ\",\"orient\",\"original\",\"orphan\",\"ostrich\",\"other\",\"outdoor\",\"outer\",\"output\",\"outside\",\"oval\",\"oven\",\"over\",\"own\",\"owner\",\"oxygen\",\"oyster\",\"ozone\",\"pact\",\"paddle\",\"page\",\"pair\",\"palace\",\"palm\",\"panda\",\"panel\",\"panic\",\"panther\",\"paper\",\"parade\",\"parent\",\"park\",\"parrot\",\"party\",\"pass\",\"patch\",\"path\",\"patient\",\"patrol\",\"pattern\",\"pause\",\"pave\",\"payment\",\"peace\",\"peanut\",\"pear\",\"peasant\",\"pelican\",\"pen\",\"penalty\",\"pencil\",\"people\",\"pepper\",\"perfect\",\"permit\",\"person\",\"pet\",\"phone\",\"photo\",\"phrase\",\"physical\",\"piano\",\"picnic\",\"picture\",\"piece\",\"pig\",\"pigeon\",\"pill\",\"pilot\",\"pink\",\"pioneer\",\"pipe\",\"pistol\",\"pitch\",\"pizza\",\"place\",\"planet\",\"plastic\",\"plate\",\"play\",\"please\",\"pledge\",\"pluck\",\"plug\",\"plunge\",\"poem\",\"poet\",\"point\",\"polar\",\"pole\",\"police\",\"pond\",\"pony\",\"pool\",\"popular\",\"portion\",\"position\",\"possible\",\"post\",\"potato\",\"pottery\",\"poverty\",\"powder\",\"power\",\"practice\",\"praise\",\"predict\",\"prefer\",\"prepare\",\"present\",\"pretty\",\"prevent\",\"price\",\"pride\",\"primary\",\"print\",\"priority\",\"prison\",\"private\",\"prize\",\"problem\",\"process\",\"produce\",\"profit\",\"program\",\"project\",\"promote\",\"proof\",\"property\",\"prosper\",\"protect\",\"proud\",\"provide\",\"public\",\"pudding\",\"pull\",\"pulp\",\"pulse\",\"pumpkin\",\"punch\",\"pupil\",\"puppy\",\"purchase\",\"purity\",\"purpose\",\"purse\",\"push\",\"put\",\"puzzle\",\"pyramid\",\"quality\",\"quantum\",\"quarter\",\"question\",\"quick\",\"quit\",\"quiz\",\"quote\",\"rabbit\",\"raccoon\",\"race\",\"rack\",\"radar\",\"radio\",\"rail\",\"rain\",\"raise\",\"rally\",\"ramp\",\"ranch\",\"random\",\"range\",\"rapid\",\"rare\",\"rate\",\"rather\",\"raven\",\"raw\",\"razor\",\"ready\",\"real\",\"reason\",\"rebel\",\"rebuild\",\"recall\",\"receive\",\"recipe\",\"record\",\"recycle\",\"reduce\",\"reflect\",\"reform\",\"refuse\",\"region\",\"regret\",\"regular\",\"reject\",\"relax\",\"release\",\"relief\",\"rely\",\"remain\",\"remember\",\"remind\",\"remove\",\"render\",\"renew\",\"rent\",\"reopen\",\"repair\",\"repeat\",\"replace\",\"report\",\"require\",\"rescue\",\"resemble\",\"resist\",\"resource\",\"response\",\"result\",\"retire\",\"retreat\",\"return\",\"reunion\",\"reveal\",\"review\",\"reward\",\"rhythm\",\"rib\",\"ribbon\",\"rice\",\"rich\",\"ride\",\"ridge\",\"rifle\",\"right\",\"rigid\",\"ring\",\"riot\",\"ripple\",\"risk\",\"ritual\",\"rival\",\"river\",\"road\",\"roast\",\"robot\",\"robust\",\"rocket\",\"romance\",\"roof\",\"rookie\",\"room\",\"rose\",\"rotate\",\"rough\",\"round\",\"route\",\"royal\",\"rubber\",\"rude\",\"rug\",\"rule\",\"run\",\"runway\",\"rural\",\"sad\",\"saddle\",\"sadness\",\"safe\",\"sail\",\"salad\",\"salmon\",\"salon\",\"salt\",\"salute\",\"same\",\"sample\",\"sand\",\"satisfy\",\"satoshi\",\"sauce\",\"sausage\",\"save\",\"say\",\"scale\",\"scan\",\"scare\",\"scatter\",\"scene\",\"scheme\",\"school\",\"science\",\"scissors\",\"scorpion\",\"scout\",\"scrap\",\"screen\",\"script\",\"scrub\",\"sea\",\"search\",\"season\",\"seat\",\"second\",\"secret\",\"section\",\"security\",\"seed\",\"seek\",\"segment\",\"select\",\"sell\",\"seminar\",\"senior\",\"sense\",\"sentence\",\"series\",\"service\",\"session\",\"settle\",\"setup\",\"seven\",\"shadow\",\"shaft\",\"shallow\",\"share\",\"shed\",\"shell\",\"sheriff\",\"shield\",\"shift\",\"shine\",\"ship\",\"shiver\",\"shock\",\"shoe\",\"shoot\",\"shop\",\"short\",\"shoulder\",\"shove\",\"shrimp\",\"shrug\",\"shuffle\",\"shy\",\"sibling\",\"sick\",\"side\",\"siege\",\"sight\",\"sign\",\"silent\",\"silk\",\"silly\",\"silver\",\"similar\",\"simple\",\"since\",\"sing\",\"siren\",\"sister\",\"situate\",\"six\",\"size\",\"skate\",\"sketch\",\"ski\",\"skill\",\"skin\",\"skirt\",\"skull\",\"slab\",\"slam\",\"sleep\",\"slender\",\"slice\",\"slide\",\"slight\",\"slim\",\"slogan\",\"slot\",\"slow\",\"slush\",\"small\",\"smart\",\"smile\",\"smoke\",\"smooth\",\"snack\",\"snake\",\"snap\",\"sniff\",\"snow\",\"soap\",\"soccer\",\"social\",\"sock\",\"soda\",\"soft\",\"solar\",\"soldier\",\"solid\",\"solution\",\"solve\",\"someone\",\"song\",\"soon\",\"sorry\",\"sort\",\"soul\",\"sound\",\"soup\",\"source\",\"south\",\"space\",\"spare\",\"spatial\",\"spawn\",\"speak\",\"special\",\"speed\",\"spell\",\"spend\",\"sphere\",\"spice\",\"spider\",\"spike\",\"spin\",\"spirit\",\"split\",\"spoil\",\"sponsor\",\"spoon\",\"sport\",\"spot\",\"spray\",\"spread\",\"spring\",\"spy\",\"square\",\"squeeze\",\"squirrel\",\"stable\",\"stadium\",\"staff\",\"stage\",\"stairs\",\"stamp\",\"stand\",\"start\",\"state\",\"stay\",\"steak\",\"steel\",\"stem\",\"step\",\"stereo\",\"stick\",\"still\",\"sting\",\"stock\",\"stomach\",\"stone\",\"stool\",\"story\",\"stove\",\"strategy\",\"street\",\"strike\",\"strong\",\"struggle\",\"student\",\"stuff\",\"stumble\",\"style\",\"subject\",\"submit\",\"subway\",\"success\",\"such\",\"sudden\",\"suffer\",\"sugar\",\"suggest\",\"suit\",\"summer\",\"sun\",\"sunny\",\"sunset\",\"super\",\"supply\",\"supreme\",\"sure\",\"surface\",\"surge\",\"surprise\",\"surround\",\"survey\",\"suspect\",\"sustain\",\"swallow\",\"swamp\",\"swap\",\"swarm\",\"swear\",\"sweet\",\"swift\",\"swim\",\"swing\",\"switch\",\"sword\",\"symbol\",\"symptom\",\"syrup\",\"system\",\"table\",\"tackle\",\"tag\",\"tail\",\"talent\",\"talk\",\"tank\",\"tape\",\"target\",\"task\",\"taste\",\"tattoo\",\"taxi\",\"teach\",\"team\",\"tell\",\"ten\",\"tenant\",\"tennis\",\"tent\",\"term\",\"test\",\"text\",\"thank\",\"that\",\"theme\",\"then\",\"theory\",\"there\",\"they\",\"thing\",\"this\",\"thought\",\"three\",\"thrive\",\"throw\",\"thumb\",\"thunder\",\"ticket\",\"tide\",\"tiger\",\"tilt\",\"timber\",\"time\",\"tiny\",\"tip\",\"tired\",\"tissue\",\"title\",\"toast\",\"tobacco\",\"today\",\"toddler\",\"toe\",\"together\",\"toilet\",\"token\",\"tomato\",\"tomorrow\",\"tone\",\"tongue\",\"tonight\",\"tool\",\"tooth\",\"top\",\"topic\",\"topple\",\"torch\",\"tornado\",\"tortoise\",\"toss\",\"total\",\"tourist\",\"toward\",\"tower\",\"town\",\"toy\",\"track\",\"trade\",\"traffic\",\"tragic\",\"train\",\"transfer\",\"trap\",\"trash\",\"travel\",\"tray\",\"treat\",\"tree\",\"trend\",\"trial\",\"tribe\",\"trick\",\"trigger\",\"trim\",\"trip\",\"trophy\",\"trouble\",\"truck\",\"true\",\"truly\",\"trumpet\",\"trust\",\"truth\",\"try\",\"tube\",\"tuition\",\"tumble\",\"tuna\",\"tunnel\",\"turkey\",\"turn\",\"turtle\",\"twelve\",\"twenty\",\"twice\",\"twin\",\"twist\",\"two\",\"type\",\"typical\",\"ugly\",\"umbrella\",\"unable\",\"unaware\",\"uncle\",\"uncover\",\"under\",\"undo\",\"unfair\",\"unfold\",\"unhappy\",\"uniform\",\"unique\",\"unit\",\"universe\",\"unknown\",\"unlock\",\"until\",\"unusual\",\"unveil\",\"update\",\"upgrade\",\"uphold\",\"upon\",\"upper\",\"upset\",\"urban\",\"urge\",\"usage\",\"use\",\"used\",\"useful\",\"useless\",\"usual\",\"utility\",\"vacant\",\"vacuum\",\"vague\",\"valid\",\"valley\",\"valve\",\"van\",\"vanish\",\"vapor\",\"various\",\"vast\",\"vault\",\"vehicle\",\"velvet\",\"vendor\",\"venture\",\"venue\",\"verb\",\"verify\",\"version\",\"very\",\"vessel\",\"veteran\",\"viable\",\"vibrant\",\"vicious\",\"victory\",\"video\",\"view\",\"village\",\"vintage\",\"violin\",\"virtual\",\"virus\",\"visa\",\"visit\",\"visual\",\"vital\",\"vivid\",\"vocal\",\"voice\",\"void\",\"volcano\",\"volume\",\"vote\",\"voyage\",\"wage\",\"wagon\",\"wait\",\"walk\",\"wall\",\"walnut\",\"want\",\"warfare\",\"warm\",\"warrior\",\"wash\",\"wasp\",\"waste\",\"water\",\"wave\",\"way\",\"wealth\",\"weapon\",\"wear\",\"weasel\",\"weather\",\"web\",\"wedding\",\"weekend\",\"weird\",\"welcome\",\"west\",\"wet\",\"whale\",\"what\",\"wheat\",\"wheel\",\"when\",\"where\",\"whip\",\"whisper\",\"wide\",\"width\",\"wife\",\"wild\",\"will\",\"win\",\"window\",\"wine\",\"wing\",\"wink\",\"winner\",\"winter\",\"wire\",\"wisdom\",\"wise\",\"wish\",\"witness\",\"wolf\",\"woman\",\"wonder\",\"wood\",\"wool\",\"word\",\"work\",\"world\",\"worry\",\"worth\",\"wrap\",\"wreck\",\"wrestle\",\"wrist\",\"write\",\"wrong\",\"yard\",\"year\",\"yellow\",\"you\",\"young\",\"youth\",\"zebra\",\"zero\",\"zone\",\"zoo\"]");
 
 /***/ }),
-/* 230 */
+/* 233 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"가격\",\"가끔\",\"가난\",\"가능\",\"가득\",\"가르침\",\"가뭄\",\"가방\",\"가상\",\"가슴\",\"가운데\",\"가을\",\"가이드\",\"가입\",\"가장\",\"가정\",\"가족\",\"가죽\",\"각오\",\"각자\",\"간격\",\"간부\",\"간섭\",\"간장\",\"간접\",\"간판\",\"갈등\",\"갈비\",\"갈색\",\"갈증\",\"감각\",\"감기\",\"감소\",\"감수성\",\"감자\",\"감정\",\"갑자기\",\"강남\",\"강당\",\"강도\",\"강력히\",\"강변\",\"강북\",\"강사\",\"강수량\",\"강아지\",\"강원도\",\"강의\",\"강제\",\"강조\",\"같이\",\"개구리\",\"개나리\",\"개방\",\"개별\",\"개선\",\"개성\",\"개인\",\"객관적\",\"거실\",\"거액\",\"거울\",\"거짓\",\"거품\",\"걱정\",\"건강\",\"건물\",\"건설\",\"건조\",\"건축\",\"걸음\",\"검사\",\"검토\",\"게시판\",\"게임\",\"겨울\",\"견해\",\"결과\",\"결국\",\"결론\",\"결석\",\"결승\",\"결심\",\"결정\",\"결혼\",\"경계\",\"경고\",\"경기\",\"경력\",\"경복궁\",\"경비\",\"경상도\",\"경영\",\"경우\",\"경쟁\",\"경제\",\"경주\",\"경찰\",\"경치\",\"경향\",\"경험\",\"계곡\",\"계단\",\"계란\",\"계산\",\"계속\",\"계약\",\"계절\",\"계층\",\"계획\",\"고객\",\"고구려\",\"고궁\",\"고급\",\"고등학생\",\"고무신\",\"고민\",\"고양이\",\"고장\",\"고전\",\"고집\",\"고춧가루\",\"고통\",\"고향\",\"곡식\",\"골목\",\"골짜기\",\"골프\",\"공간\",\"공개\",\"공격\",\"공군\",\"공급\",\"공기\",\"공동\",\"공무원\",\"공부\",\"공사\",\"공식\",\"공업\",\"공연\",\"공원\",\"공장\",\"공짜\",\"공책\",\"공통\",\"공포\",\"공항\",\"공휴일\",\"과목\",\"과일\",\"과장\",\"과정\",\"과학\",\"관객\",\"관계\",\"관광\",\"관념\",\"관람\",\"관련\",\"관리\",\"관습\",\"관심\",\"관점\",\"관찰\",\"광경\",\"광고\",\"광장\",\"광주\",\"괴로움\",\"굉장히\",\"교과서\",\"교문\",\"교복\",\"교실\",\"교양\",\"교육\",\"교장\",\"교직\",\"교통\",\"교환\",\"교훈\",\"구경\",\"구름\",\"구멍\",\"구별\",\"구분\",\"구석\",\"구성\",\"구속\",\"구역\",\"구입\",\"구청\",\"구체적\",\"국가\",\"국기\",\"국내\",\"국립\",\"국물\",\"국민\",\"국수\",\"국어\",\"국왕\",\"국적\",\"국제\",\"국회\",\"군대\",\"군사\",\"군인\",\"궁극적\",\"권리\",\"권위\",\"권투\",\"귀국\",\"귀신\",\"규정\",\"규칙\",\"균형\",\"그날\",\"그냥\",\"그늘\",\"그러나\",\"그룹\",\"그릇\",\"그림\",\"그제서야\",\"그토록\",\"극복\",\"극히\",\"근거\",\"근교\",\"근래\",\"근로\",\"근무\",\"근본\",\"근원\",\"근육\",\"근처\",\"글씨\",\"글자\",\"금강산\",\"금고\",\"금년\",\"금메달\",\"금액\",\"금연\",\"금요일\",\"금지\",\"긍정적\",\"기간\",\"기관\",\"기념\",\"기능\",\"기독교\",\"기둥\",\"기록\",\"기름\",\"기법\",\"기본\",\"기분\",\"기쁨\",\"기숙사\",\"기술\",\"기억\",\"기업\",\"기온\",\"기운\",\"기원\",\"기적\",\"기준\",\"기침\",\"기혼\",\"기획\",\"긴급\",\"긴장\",\"길이\",\"김밥\",\"김치\",\"김포공항\",\"깍두기\",\"깜빡\",\"깨달음\",\"깨소금\",\"껍질\",\"꼭대기\",\"꽃잎\",\"나들이\",\"나란히\",\"나머지\",\"나물\",\"나침반\",\"나흘\",\"낙엽\",\"난방\",\"날개\",\"날씨\",\"날짜\",\"남녀\",\"남대문\",\"남매\",\"남산\",\"남자\",\"남편\",\"남학생\",\"낭비\",\"낱말\",\"내년\",\"내용\",\"내일\",\"냄비\",\"냄새\",\"냇물\",\"냉동\",\"냉면\",\"냉방\",\"냉장고\",\"넥타이\",\"넷째\",\"노동\",\"노란색\",\"노력\",\"노인\",\"녹음\",\"녹차\",\"녹화\",\"논리\",\"논문\",\"논쟁\",\"놀이\",\"농구\",\"농담\",\"농민\",\"농부\",\"농업\",\"농장\",\"농촌\",\"높이\",\"눈동자\",\"눈물\",\"눈썹\",\"뉴욕\",\"느낌\",\"늑대\",\"능동적\",\"능력\",\"다방\",\"다양성\",\"다음\",\"다이어트\",\"다행\",\"단계\",\"단골\",\"단독\",\"단맛\",\"단순\",\"단어\",\"단위\",\"단점\",\"단체\",\"단추\",\"단편\",\"단풍\",\"달걀\",\"달러\",\"달력\",\"달리\",\"닭고기\",\"담당\",\"담배\",\"담요\",\"담임\",\"답변\",\"답장\",\"당근\",\"당분간\",\"당연히\",\"당장\",\"대규모\",\"대낮\",\"대단히\",\"대답\",\"대도시\",\"대략\",\"대량\",\"대륙\",\"대문\",\"대부분\",\"대신\",\"대응\",\"대장\",\"대전\",\"대접\",\"대중\",\"대책\",\"대출\",\"대충\",\"대통령\",\"대학\",\"대한민국\",\"대합실\",\"대형\",\"덩어리\",\"데이트\",\"도대체\",\"도덕\",\"도둑\",\"도망\",\"도서관\",\"도심\",\"도움\",\"도입\",\"도자기\",\"도저히\",\"도전\",\"도중\",\"도착\",\"독감\",\"독립\",\"독서\",\"독일\",\"독창적\",\"동화책\",\"뒷모습\",\"뒷산\",\"딸아이\",\"마누라\",\"마늘\",\"마당\",\"마라톤\",\"마련\",\"마무리\",\"마사지\",\"마약\",\"마요네즈\",\"마을\",\"마음\",\"마이크\",\"마중\",\"마지막\",\"마찬가지\",\"마찰\",\"마흔\",\"막걸리\",\"막내\",\"막상\",\"만남\",\"만두\",\"만세\",\"만약\",\"만일\",\"만점\",\"만족\",\"만화\",\"많이\",\"말기\",\"말씀\",\"말투\",\"맘대로\",\"망원경\",\"매년\",\"매달\",\"매력\",\"매번\",\"매스컴\",\"매일\",\"매장\",\"맥주\",\"먹이\",\"먼저\",\"먼지\",\"멀리\",\"메일\",\"며느리\",\"며칠\",\"면담\",\"멸치\",\"명단\",\"명령\",\"명예\",\"명의\",\"명절\",\"명칭\",\"명함\",\"모금\",\"모니터\",\"모델\",\"모든\",\"모범\",\"모습\",\"모양\",\"모임\",\"모조리\",\"모집\",\"모퉁이\",\"목걸이\",\"목록\",\"목사\",\"목소리\",\"목숨\",\"목적\",\"목표\",\"몰래\",\"몸매\",\"몸무게\",\"몸살\",\"몸속\",\"몸짓\",\"몸통\",\"몹시\",\"무관심\",\"무궁화\",\"무더위\",\"무덤\",\"무릎\",\"무슨\",\"무엇\",\"무역\",\"무용\",\"무조건\",\"무지개\",\"무척\",\"문구\",\"문득\",\"문법\",\"문서\",\"문제\",\"문학\",\"문화\",\"물가\",\"물건\",\"물결\",\"물고기\",\"물론\",\"물리학\",\"물음\",\"물질\",\"물체\",\"미국\",\"미디어\",\"미사일\",\"미술\",\"미역\",\"미용실\",\"미움\",\"미인\",\"미팅\",\"미혼\",\"민간\",\"민족\",\"민주\",\"믿음\",\"밀가루\",\"밀리미터\",\"밑바닥\",\"바가지\",\"바구니\",\"바나나\",\"바늘\",\"바닥\",\"바닷가\",\"바람\",\"바이러스\",\"바탕\",\"박물관\",\"박사\",\"박수\",\"반대\",\"반드시\",\"반말\",\"반발\",\"반성\",\"반응\",\"반장\",\"반죽\",\"반지\",\"반찬\",\"받침\",\"발가락\",\"발걸음\",\"발견\",\"발달\",\"발레\",\"발목\",\"발바닥\",\"발생\",\"발음\",\"발자국\",\"발전\",\"발톱\",\"발표\",\"밤하늘\",\"밥그릇\",\"밥맛\",\"밥상\",\"밥솥\",\"방금\",\"방면\",\"방문\",\"방바닥\",\"방법\",\"방송\",\"방식\",\"방안\",\"방울\",\"방지\",\"방학\",\"방해\",\"방향\",\"배경\",\"배꼽\",\"배달\",\"배드민턴\",\"백두산\",\"백색\",\"백성\",\"백인\",\"백제\",\"백화점\",\"버릇\",\"버섯\",\"버튼\",\"번개\",\"번역\",\"번지\",\"번호\",\"벌금\",\"벌레\",\"벌써\",\"범위\",\"범인\",\"범죄\",\"법률\",\"법원\",\"법적\",\"법칙\",\"베이징\",\"벨트\",\"변경\",\"변동\",\"변명\",\"변신\",\"변호사\",\"변화\",\"별도\",\"별명\",\"별일\",\"병실\",\"병아리\",\"병원\",\"보관\",\"보너스\",\"보라색\",\"보람\",\"보름\",\"보상\",\"보안\",\"보자기\",\"보장\",\"보전\",\"보존\",\"보통\",\"보편적\",\"보험\",\"복도\",\"복사\",\"복숭아\",\"복습\",\"볶음\",\"본격적\",\"본래\",\"본부\",\"본사\",\"본성\",\"본인\",\"본질\",\"볼펜\",\"봉사\",\"봉지\",\"봉투\",\"부근\",\"부끄러움\",\"부담\",\"부동산\",\"부문\",\"부분\",\"부산\",\"부상\",\"부엌\",\"부인\",\"부작용\",\"부장\",\"부정\",\"부족\",\"부지런히\",\"부친\",\"부탁\",\"부품\",\"부회장\",\"북부\",\"북한\",\"분노\",\"분량\",\"분리\",\"분명\",\"분석\",\"분야\",\"분위기\",\"분필\",\"분홍색\",\"불고기\",\"불과\",\"불교\",\"불꽃\",\"불만\",\"불법\",\"불빛\",\"불안\",\"불이익\",\"불행\",\"브랜드\",\"비극\",\"비난\",\"비닐\",\"비둘기\",\"비디오\",\"비로소\",\"비만\",\"비명\",\"비밀\",\"비바람\",\"비빔밥\",\"비상\",\"비용\",\"비율\",\"비중\",\"비타민\",\"비판\",\"빌딩\",\"빗물\",\"빗방울\",\"빗줄기\",\"빛깔\",\"빨간색\",\"빨래\",\"빨리\",\"사건\",\"사계절\",\"사나이\",\"사냥\",\"사람\",\"사랑\",\"사립\",\"사모님\",\"사물\",\"사방\",\"사상\",\"사생활\",\"사설\",\"사슴\",\"사실\",\"사업\",\"사용\",\"사월\",\"사장\",\"사전\",\"사진\",\"사촌\",\"사춘기\",\"사탕\",\"사투리\",\"사흘\",\"산길\",\"산부인과\",\"산업\",\"산책\",\"살림\",\"살인\",\"살짝\",\"삼계탕\",\"삼국\",\"삼십\",\"삼월\",\"삼촌\",\"상관\",\"상금\",\"상대\",\"상류\",\"상반기\",\"상상\",\"상식\",\"상업\",\"상인\",\"상자\",\"상점\",\"상처\",\"상추\",\"상태\",\"상표\",\"상품\",\"상황\",\"새벽\",\"색깔\",\"색연필\",\"생각\",\"생명\",\"생물\",\"생방송\",\"생산\",\"생선\",\"생신\",\"생일\",\"생활\",\"서랍\",\"서른\",\"서명\",\"서민\",\"서비스\",\"서양\",\"서울\",\"서적\",\"서점\",\"서쪽\",\"서클\",\"석사\",\"석유\",\"선거\",\"선물\",\"선배\",\"선생\",\"선수\",\"선원\",\"선장\",\"선전\",\"선택\",\"선풍기\",\"설거지\",\"설날\",\"설렁탕\",\"설명\",\"설문\",\"설사\",\"설악산\",\"설치\",\"설탕\",\"섭씨\",\"성공\",\"성당\",\"성명\",\"성별\",\"성인\",\"성장\",\"성적\",\"성질\",\"성함\",\"세금\",\"세미나\",\"세상\",\"세월\",\"세종대왕\",\"세탁\",\"센터\",\"센티미터\",\"셋째\",\"소규모\",\"소극적\",\"소금\",\"소나기\",\"소년\",\"소득\",\"소망\",\"소문\",\"소설\",\"소속\",\"소아과\",\"소용\",\"소원\",\"소음\",\"소중히\",\"소지품\",\"소질\",\"소풍\",\"소형\",\"속담\",\"속도\",\"속옷\",\"손가락\",\"손길\",\"손녀\",\"손님\",\"손등\",\"손목\",\"손뼉\",\"손실\",\"손질\",\"손톱\",\"손해\",\"솔직히\",\"솜씨\",\"송아지\",\"송이\",\"송편\",\"쇠고기\",\"쇼핑\",\"수건\",\"수년\",\"수단\",\"수돗물\",\"수동적\",\"수면\",\"수명\",\"수박\",\"수상\",\"수석\",\"수술\",\"수시로\",\"수업\",\"수염\",\"수영\",\"수입\",\"수준\",\"수집\",\"수출\",\"수컷\",\"수필\",\"수학\",\"수험생\",\"수화기\",\"숙녀\",\"숙소\",\"숙제\",\"순간\",\"순서\",\"순수\",\"순식간\",\"순위\",\"숟가락\",\"술병\",\"술집\",\"숫자\",\"스님\",\"스물\",\"스스로\",\"스승\",\"스웨터\",\"스위치\",\"스케이트\",\"스튜디오\",\"스트레스\",\"스포츠\",\"슬쩍\",\"슬픔\",\"습관\",\"습기\",\"승객\",\"승리\",\"승부\",\"승용차\",\"승진\",\"시각\",\"시간\",\"시골\",\"시금치\",\"시나리오\",\"시댁\",\"시리즈\",\"시멘트\",\"시민\",\"시부모\",\"시선\",\"시설\",\"시스템\",\"시아버지\",\"시어머니\",\"시월\",\"시인\",\"시일\",\"시작\",\"시장\",\"시절\",\"시점\",\"시중\",\"시즌\",\"시집\",\"시청\",\"시합\",\"시험\",\"식구\",\"식기\",\"식당\",\"식량\",\"식료품\",\"식물\",\"식빵\",\"식사\",\"식생활\",\"식초\",\"식탁\",\"식품\",\"신고\",\"신규\",\"신념\",\"신문\",\"신발\",\"신비\",\"신사\",\"신세\",\"신용\",\"신제품\",\"신청\",\"신체\",\"신화\",\"실감\",\"실내\",\"실력\",\"실례\",\"실망\",\"실수\",\"실습\",\"실시\",\"실장\",\"실정\",\"실질적\",\"실천\",\"실체\",\"실컷\",\"실태\",\"실패\",\"실험\",\"실현\",\"심리\",\"심부름\",\"심사\",\"심장\",\"심정\",\"심판\",\"쌍둥이\",\"씨름\",\"씨앗\",\"아가씨\",\"아나운서\",\"아드님\",\"아들\",\"아쉬움\",\"아스팔트\",\"아시아\",\"아울러\",\"아저씨\",\"아줌마\",\"아직\",\"아침\",\"아파트\",\"아프리카\",\"아픔\",\"아홉\",\"아흔\",\"악기\",\"악몽\",\"악수\",\"안개\",\"안경\",\"안과\",\"안내\",\"안녕\",\"안동\",\"안방\",\"안부\",\"안주\",\"알루미늄\",\"알코올\",\"암시\",\"암컷\",\"압력\",\"앞날\",\"앞문\",\"애인\",\"애정\",\"액수\",\"앨범\",\"야간\",\"야단\",\"야옹\",\"약간\",\"약국\",\"약속\",\"약수\",\"약점\",\"약품\",\"약혼녀\",\"양념\",\"양력\",\"양말\",\"양배추\",\"양주\",\"양파\",\"어둠\",\"어려움\",\"어른\",\"어젯밤\",\"어쨌든\",\"어쩌다가\",\"어쩐지\",\"언니\",\"언덕\",\"언론\",\"언어\",\"얼굴\",\"얼른\",\"얼음\",\"얼핏\",\"엄마\",\"업무\",\"업종\",\"업체\",\"엉덩이\",\"엉망\",\"엉터리\",\"엊그제\",\"에너지\",\"에어컨\",\"엔진\",\"여건\",\"여고생\",\"여관\",\"여군\",\"여권\",\"여대생\",\"여덟\",\"여동생\",\"여든\",\"여론\",\"여름\",\"여섯\",\"여성\",\"여왕\",\"여인\",\"여전히\",\"여직원\",\"여학생\",\"여행\",\"역사\",\"역시\",\"역할\",\"연결\",\"연구\",\"연극\",\"연기\",\"연락\",\"연설\",\"연세\",\"연속\",\"연습\",\"연애\",\"연예인\",\"연인\",\"연장\",\"연주\",\"연출\",\"연필\",\"연합\",\"연휴\",\"열기\",\"열매\",\"열쇠\",\"열심히\",\"열정\",\"열차\",\"열흘\",\"염려\",\"엽서\",\"영국\",\"영남\",\"영상\",\"영양\",\"영역\",\"영웅\",\"영원히\",\"영하\",\"영향\",\"영혼\",\"영화\",\"옆구리\",\"옆방\",\"옆집\",\"예감\",\"예금\",\"예방\",\"예산\",\"예상\",\"예선\",\"예술\",\"예습\",\"예식장\",\"예약\",\"예전\",\"예절\",\"예정\",\"예컨대\",\"옛날\",\"오늘\",\"오락\",\"오랫동안\",\"오렌지\",\"오로지\",\"오른발\",\"오븐\",\"오십\",\"오염\",\"오월\",\"오전\",\"오직\",\"오징어\",\"오페라\",\"오피스텔\",\"오히려\",\"옥상\",\"옥수수\",\"온갖\",\"온라인\",\"온몸\",\"온종일\",\"온통\",\"올가을\",\"올림픽\",\"올해\",\"옷차림\",\"와이셔츠\",\"와인\",\"완성\",\"완전\",\"왕비\",\"왕자\",\"왜냐하면\",\"왠지\",\"외갓집\",\"외국\",\"외로움\",\"외삼촌\",\"외출\",\"외침\",\"외할머니\",\"왼발\",\"왼손\",\"왼쪽\",\"요금\",\"요일\",\"요즘\",\"요청\",\"용기\",\"용서\",\"용어\",\"우산\",\"우선\",\"우승\",\"우연히\",\"우정\",\"우체국\",\"우편\",\"운동\",\"운명\",\"운반\",\"운전\",\"운행\",\"울산\",\"울음\",\"움직임\",\"웃어른\",\"웃음\",\"워낙\",\"원고\",\"원래\",\"원서\",\"원숭이\",\"원인\",\"원장\",\"원피스\",\"월급\",\"월드컵\",\"월세\",\"월요일\",\"웨이터\",\"위반\",\"위법\",\"위성\",\"위원\",\"위험\",\"위협\",\"윗사람\",\"유난히\",\"유럽\",\"유명\",\"유물\",\"유산\",\"유적\",\"유치원\",\"유학\",\"유행\",\"유형\",\"육군\",\"육상\",\"육십\",\"육체\",\"은행\",\"음력\",\"음료\",\"음반\",\"음성\",\"음식\",\"음악\",\"음주\",\"의견\",\"의논\",\"의문\",\"의복\",\"의식\",\"의심\",\"의외로\",\"의욕\",\"의원\",\"의학\",\"이것\",\"이곳\",\"이념\",\"이놈\",\"이달\",\"이대로\",\"이동\",\"이렇게\",\"이력서\",\"이론적\",\"이름\",\"이민\",\"이발소\",\"이별\",\"이불\",\"이빨\",\"이상\",\"이성\",\"이슬\",\"이야기\",\"이용\",\"이웃\",\"이월\",\"이윽고\",\"이익\",\"이전\",\"이중\",\"이튿날\",\"이틀\",\"이혼\",\"인간\",\"인격\",\"인공\",\"인구\",\"인근\",\"인기\",\"인도\",\"인류\",\"인물\",\"인생\",\"인쇄\",\"인연\",\"인원\",\"인재\",\"인종\",\"인천\",\"인체\",\"인터넷\",\"인하\",\"인형\",\"일곱\",\"일기\",\"일단\",\"일대\",\"일등\",\"일반\",\"일본\",\"일부\",\"일상\",\"일생\",\"일손\",\"일요일\",\"일월\",\"일정\",\"일종\",\"일주일\",\"일찍\",\"일체\",\"일치\",\"일행\",\"일회용\",\"임금\",\"임무\",\"입대\",\"입력\",\"입맛\",\"입사\",\"입술\",\"입시\",\"입원\",\"입장\",\"입학\",\"자가용\",\"자격\",\"자극\",\"자동\",\"자랑\",\"자부심\",\"자식\",\"자신\",\"자연\",\"자원\",\"자율\",\"자전거\",\"자정\",\"자존심\",\"자판\",\"작가\",\"작년\",\"작성\",\"작업\",\"작용\",\"작은딸\",\"작품\",\"잔디\",\"잔뜩\",\"잔치\",\"잘못\",\"잠깐\",\"잠수함\",\"잠시\",\"잠옷\",\"잠자리\",\"잡지\",\"장관\",\"장군\",\"장기간\",\"장래\",\"장례\",\"장르\",\"장마\",\"장면\",\"장모\",\"장미\",\"장비\",\"장사\",\"장소\",\"장식\",\"장애인\",\"장인\",\"장점\",\"장차\",\"장학금\",\"재능\",\"재빨리\",\"재산\",\"재생\",\"재작년\",\"재정\",\"재채기\",\"재판\",\"재학\",\"재활용\",\"저것\",\"저고리\",\"저곳\",\"저녁\",\"저런\",\"저렇게\",\"저번\",\"저울\",\"저절로\",\"저축\",\"적극\",\"적당히\",\"적성\",\"적용\",\"적응\",\"전개\",\"전공\",\"전기\",\"전달\",\"전라도\",\"전망\",\"전문\",\"전반\",\"전부\",\"전세\",\"전시\",\"전용\",\"전자\",\"전쟁\",\"전주\",\"전철\",\"전체\",\"전통\",\"전혀\",\"전후\",\"절대\",\"절망\",\"절반\",\"절약\",\"절차\",\"점검\",\"점수\",\"점심\",\"점원\",\"점점\",\"점차\",\"접근\",\"접시\",\"접촉\",\"젓가락\",\"정거장\",\"정도\",\"정류장\",\"정리\",\"정말\",\"정면\",\"정문\",\"정반대\",\"정보\",\"정부\",\"정비\",\"정상\",\"정성\",\"정오\",\"정원\",\"정장\",\"정지\",\"정치\",\"정확히\",\"제공\",\"제과점\",\"제대로\",\"제목\",\"제발\",\"제법\",\"제삿날\",\"제안\",\"제일\",\"제작\",\"제주도\",\"제출\",\"제품\",\"제한\",\"조각\",\"조건\",\"조금\",\"조깅\",\"조명\",\"조미료\",\"조상\",\"조선\",\"조용히\",\"조절\",\"조정\",\"조직\",\"존댓말\",\"존재\",\"졸업\",\"졸음\",\"종교\",\"종로\",\"종류\",\"종소리\",\"종업원\",\"종종\",\"종합\",\"좌석\",\"죄인\",\"주관적\",\"주름\",\"주말\",\"주머니\",\"주먹\",\"주문\",\"주민\",\"주방\",\"주변\",\"주식\",\"주인\",\"주일\",\"주장\",\"주전자\",\"주택\",\"준비\",\"줄거리\",\"줄기\",\"줄무늬\",\"중간\",\"중계방송\",\"중국\",\"중년\",\"중단\",\"중독\",\"중반\",\"중부\",\"중세\",\"중소기업\",\"중순\",\"중앙\",\"중요\",\"중학교\",\"즉석\",\"즉시\",\"즐거움\",\"증가\",\"증거\",\"증권\",\"증상\",\"증세\",\"지각\",\"지갑\",\"지경\",\"지극히\",\"지금\",\"지급\",\"지능\",\"지름길\",\"지리산\",\"지방\",\"지붕\",\"지식\",\"지역\",\"지우개\",\"지원\",\"지적\",\"지점\",\"지진\",\"지출\",\"직선\",\"직업\",\"직원\",\"직장\",\"진급\",\"진동\",\"진로\",\"진료\",\"진리\",\"진짜\",\"진찰\",\"진출\",\"진통\",\"진행\",\"질문\",\"질병\",\"질서\",\"짐작\",\"집단\",\"집안\",\"집중\",\"짜증\",\"찌꺼기\",\"차남\",\"차라리\",\"차량\",\"차림\",\"차별\",\"차선\",\"차츰\",\"착각\",\"찬물\",\"찬성\",\"참가\",\"참기름\",\"참새\",\"참석\",\"참여\",\"참외\",\"참조\",\"찻잔\",\"창가\",\"창고\",\"창구\",\"창문\",\"창밖\",\"창작\",\"창조\",\"채널\",\"채점\",\"책가방\",\"책방\",\"책상\",\"책임\",\"챔피언\",\"처벌\",\"처음\",\"천국\",\"천둥\",\"천장\",\"천재\",\"천천히\",\"철도\",\"철저히\",\"철학\",\"첫날\",\"첫째\",\"청년\",\"청바지\",\"청소\",\"청춘\",\"체계\",\"체력\",\"체온\",\"체육\",\"체중\",\"체험\",\"초등학생\",\"초반\",\"초밥\",\"초상화\",\"초순\",\"초여름\",\"초원\",\"초저녁\",\"초점\",\"초청\",\"초콜릿\",\"촛불\",\"총각\",\"총리\",\"총장\",\"촬영\",\"최근\",\"최상\",\"최선\",\"최신\",\"최악\",\"최종\",\"추석\",\"추억\",\"추진\",\"추천\",\"추측\",\"축구\",\"축소\",\"축제\",\"축하\",\"출근\",\"출발\",\"출산\",\"출신\",\"출연\",\"출입\",\"출장\",\"출판\",\"충격\",\"충고\",\"충돌\",\"충분히\",\"충청도\",\"취업\",\"취직\",\"취향\",\"치약\",\"친구\",\"친척\",\"칠십\",\"칠월\",\"칠판\",\"침대\",\"침묵\",\"침실\",\"칫솔\",\"칭찬\",\"카메라\",\"카운터\",\"칼국수\",\"캐릭터\",\"캠퍼스\",\"캠페인\",\"커튼\",\"컨디션\",\"컬러\",\"컴퓨터\",\"코끼리\",\"코미디\",\"콘서트\",\"콜라\",\"콤플렉스\",\"콩나물\",\"쾌감\",\"쿠데타\",\"크림\",\"큰길\",\"큰딸\",\"큰소리\",\"큰아들\",\"큰어머니\",\"큰일\",\"큰절\",\"클래식\",\"클럽\",\"킬로\",\"타입\",\"타자기\",\"탁구\",\"탁자\",\"탄생\",\"태권도\",\"태양\",\"태풍\",\"택시\",\"탤런트\",\"터널\",\"터미널\",\"테니스\",\"테스트\",\"테이블\",\"텔레비전\",\"토론\",\"토마토\",\"토요일\",\"통계\",\"통과\",\"통로\",\"통신\",\"통역\",\"통일\",\"통장\",\"통제\",\"통증\",\"통합\",\"통화\",\"퇴근\",\"퇴원\",\"퇴직금\",\"튀김\",\"트럭\",\"특급\",\"특별\",\"특성\",\"특수\",\"특징\",\"특히\",\"튼튼히\",\"티셔츠\",\"파란색\",\"파일\",\"파출소\",\"판결\",\"판단\",\"판매\",\"판사\",\"팔십\",\"팔월\",\"팝송\",\"패션\",\"팩스\",\"팩시밀리\",\"팬티\",\"퍼센트\",\"페인트\",\"편견\",\"편의\",\"편지\",\"편히\",\"평가\",\"평균\",\"평생\",\"평소\",\"평양\",\"평일\",\"평화\",\"포스터\",\"포인트\",\"포장\",\"포함\",\"표면\",\"표정\",\"표준\",\"표현\",\"품목\",\"품질\",\"풍경\",\"풍속\",\"풍습\",\"프랑스\",\"프린터\",\"플라스틱\",\"피곤\",\"피망\",\"피아노\",\"필름\",\"필수\",\"필요\",\"필자\",\"필통\",\"핑계\",\"하느님\",\"하늘\",\"하드웨어\",\"하룻밤\",\"하반기\",\"하숙집\",\"하순\",\"하여튼\",\"하지만\",\"하천\",\"하품\",\"하필\",\"학과\",\"학교\",\"학급\",\"학기\",\"학년\",\"학력\",\"학번\",\"학부모\",\"학비\",\"학생\",\"학술\",\"학습\",\"학용품\",\"학원\",\"학위\",\"학자\",\"학점\",\"한계\",\"한글\",\"한꺼번에\",\"한낮\",\"한눈\",\"한동안\",\"한때\",\"한라산\",\"한마디\",\"한문\",\"한번\",\"한복\",\"한식\",\"한여름\",\"한쪽\",\"할머니\",\"할아버지\",\"할인\",\"함께\",\"함부로\",\"합격\",\"합리적\",\"항공\",\"항구\",\"항상\",\"항의\",\"해결\",\"해군\",\"해답\",\"해당\",\"해물\",\"해석\",\"해설\",\"해수욕장\",\"해안\",\"핵심\",\"핸드백\",\"햄버거\",\"햇볕\",\"햇살\",\"행동\",\"행복\",\"행사\",\"행운\",\"행위\",\"향기\",\"향상\",\"향수\",\"허락\",\"허용\",\"헬기\",\"현관\",\"현금\",\"현대\",\"현상\",\"현실\",\"현장\",\"현재\",\"현지\",\"혈액\",\"협력\",\"형부\",\"형사\",\"형수\",\"형식\",\"형제\",\"형태\",\"형편\",\"혜택\",\"호기심\",\"호남\",\"호랑이\",\"호박\",\"호텔\",\"호흡\",\"혹시\",\"홀로\",\"홈페이지\",\"홍보\",\"홍수\",\"홍차\",\"화면\",\"화분\",\"화살\",\"화요일\",\"화장\",\"화학\",\"확보\",\"확인\",\"확장\",\"확정\",\"환갑\",\"환경\",\"환영\",\"환율\",\"환자\",\"활기\",\"활동\",\"활발히\",\"활용\",\"활짝\",\"회견\",\"회관\",\"회복\",\"회색\",\"회원\",\"회장\",\"회전\",\"횟수\",\"횡단보도\",\"효율적\",\"후반\",\"후춧가루\",\"훈련\",\"훨씬\",\"휴식\",\"휴일\",\"흉내\",\"흐름\",\"흑백\",\"흑인\",\"흔적\",\"흔히\",\"흥미\",\"흥분\",\"희곡\",\"희망\",\"희생\",\"흰색\",\"힘껏\"]");
 
 /***/ }),
-/* 231 */
+/* 234 */
 /***/ (function(module, exports) {
 
 
 
 /***/ }),
-/* 232 */
+/* 235 */
 /***/ (function(module, exports) {
 
 class Network {
@@ -34572,7 +35454,7 @@ class Network {
 exports.Network = Network;
 
 /***/ }),
-/* 233 */
+/* 236 */
 /***/ (function(module, exports) {
 
 class Transaction {
@@ -34597,7 +35479,13 @@ class Transaction {
     };
   }
 
-  sendTransaction(hash) {
+  sendTransaction({
+    from,
+    to,
+    value,
+    data,
+    nonce
+  }) {
     const id = "dontcare";
     const method = "tx_sync";
     return {
@@ -34613,7 +35501,7 @@ class Transaction {
 exports.Transaction = Transaction;
 
 /***/ }),
-/* 234 */
+/* 237 */
 /***/ (function(module, exports) {
 
 class Block {
@@ -34712,7 +35600,7 @@ class Block {
 exports.Block = Block;
 
 /***/ }),
-/* 235 */
+/* 238 */
 /***/ (function(module, exports) {
 
 class Node {
@@ -34780,7 +35668,7 @@ class Node {
 exports.Node = Node;
 
 /***/ }),
-/* 236 */
+/* 239 */
 /***/ (function(module, exports) {
 
 class Validator {

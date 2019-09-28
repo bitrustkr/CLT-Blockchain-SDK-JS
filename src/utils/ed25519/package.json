@@ -1,0 +1,28 @@
+{
+  "name": "tendermintelectronkey",
+  "version": "0.0.5",
+  "description": "A module for creating bip39 mnemonic, ed25519 key pair and ripemd160 address for Tendermint and Hyperledger Burrow",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "bip39": "2.5.0",
+    "ripemd160": "2.0.2",
+    "tweetnacl": "^1.0.0"
+  },
+  "keywords": [
+    "Ed25519",
+    "elliptic",
+    "tendermint",
+    "burrow",
+    "hyperledger",
+    "finterra"
+  ],
+  "author": "Ahmad Pouladzadeh, webfans",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qqqzhch/tendermintkeys"
+  }
+}

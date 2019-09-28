@@ -23,43 +23,43 @@ const sdk = new SDK({
   console.log('decryptPrvKey: ', decryptPrvKey)
   console.log('recoveryAddress: ', recoveryAddress)
   
-  console.log("===========================================")
-  console.log("============= Query Account ===============")
-  console.log("===========================================")
+  // console.log("===========================================")
+  // console.log("============= Query Account ===============")
+  // console.log("===========================================")
 
-  const account = sdk.accounts.getAccount(createdAccount.address)
+  // const account = sdk.accounts.getAccount(createdAccount.address)
 
-  console.log(account)
+  // console.log(account)
 
-  console.log("===========================================")
-  console.log("============= Transaction ===============")
-  console.log("===========================================")
+  // console.log("===========================================")
+  // console.log("============= Transaction ===============")
+  // console.log("===========================================")
 
-  const txhash1 = sdk.transaction.getTransaction('tx hash')
-  console.log(txhash1)
+  // const txhash1 = sdk.transaction.getTransaction('tx hash')
+  // console.log(txhash1)
 
-  const txhash2 = sdk.transaction.sendTransaction({
-    from: '',
-    to: '',
-    value: '',
-    data: '',
-    nonce: ''
-  })
+  // const txhash2 = sdk.transaction.sendTransaction({
+  //   from: '',
+  //   to: '',
+  //   value: '',
+  //   data: '',
+  //   nonce: ''
+  // })
 
-  console.log(txhash2)
+  // console.log(txhash2)
 
   // console.log()
-  // console.log("===========================================")
-  // console.log("============= Recovery Account=============")
-  // console.log("===========================================")
-  // const mnemonic = sdk.accounts.getMnemonic()
-  // const createdAccount1 = await sdk.accounts.create(mnemonic)
-  // const createdAccount2 = await sdk.accounts.create(mnemonic)
+  console.log("===========================================")
+  console.log("============= Recovery Account=============")
+  console.log("===========================================")
+  const mnemonic = sdk.accounts.getMnemonic()
+  const createdAccount1 = await sdk.accounts.create(mnemonic)
+  const createdAccount2 = await sdk.accounts.create(mnemonic)
 
-  // console.log(`mnemonic: ${mnemonic}`)
-  // console.log(createdAccount1)
-  // console.log(createdAccount2)
-  // console.log(createdAccount1.address === createdAccount2.address)
+  console.log(`mnemonic: ${mnemonic}`)
+  console.log(createdAccount1)
+  console.log(createdAccount2)
+  console.log(createdAccount1.address === createdAccount2.address)
 
   // console.log( " _____   _   _   ____   ")
   // console.log( "| ____| | \\ | | |  _ \\  ")

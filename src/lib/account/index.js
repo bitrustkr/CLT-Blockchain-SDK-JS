@@ -1,12 +1,14 @@
 const crypto = require('crypto');
 const sha256 = require('sha256')
 // const ed25519 = require('ed25519');
-const ed25519 = require('curve25519-js')
+let ed25519 = require('../../utils/ed25519')
 const bip39 = require("bip39");
 var CryptoJS = require("crypto-js");
 
 const { generateMnemonic } = require('./words')
 const validator = require('../../utils/validator')
+
+ed25519 = new ed25519;
 
 class Account{
   constructor() {
@@ -33,10 +35,16 @@ class Account{
     let { seed } = await this.getSeed(mnemonic)
     seed = Buffer.from(seed, "hex");
     seed = seed.slice(0, 32)
-    let keyPair = await ed25519.generateKeyPair(seed);
-    
-    let prvKey = this.decimalToHex(keyPair.private.toString("hex"))
-    let pubKey = this.decimalToHex(keyPair.public.toString("hex"))
+    let keyPair = await ed25519.generateKeyPair(seed.toString('hex'));
+    let prvKey = keyPair.privateKey.toString("hex")
+
+    /*
+      * ed25519 모듈은 pricateKey의 64~128을 잘라서 사용하지만, supercop는 아닌듯 하다
+      * ./test/test.js를 보면 pubKey는 동일하게 생성되는데 prvKey만 다름
+      * ed25519처럼 강제로 prvKey에서 64~128을 잘라서 사용하는 형태로 임시사용
+      * let pubKey = keyPair.publicKey.toString("hex")
+    */
+    let pubKey = keyPair.publicKey.toString('hex')
     let address = sha256(pubKey)
     
     return {
@@ -111,6 +119,7 @@ class Account{
   }
 
   privateKeyToAccount (prvKey) {
+    console.log('test: '. prvKey)
     let pubKey = prvKey.slice(64, 128)
     let address = sha256(pubKey)
     return {

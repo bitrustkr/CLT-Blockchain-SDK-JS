@@ -1,6 +1,6 @@
 {
   "name": "@dominantlab/clt-blockchain-sdk",
-  "version": "2.0.11",
+  "version": "2.0.13",
   "description": "SDK for IO-Blockchain(IOB)",
   "main": "./src/index.js",
   "scripts": {
@@ -39,14 +39,17 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.6.0",
+    "@epicinium/clavem": "^1.0.2",
+    "@hawkingnetwork/ed25519-hd-key-rn": "^1.0.1",
     "bindings": "^1.5.0",
     "bip39": "^3.0.2",
     "core-js": "^3.2.1",
     "crypto-js": "^3.1.9-1",
-    "curve25519-js": "0.0.4",
     "node-json-rpc2": "^1.1.0",
     "regenerator-runtime": "^0.13.3",
-    "sha256": "^0.2.0"
+    "sha256": "^0.2.0",
+    "ripemd160": "2.0.2",
+    "tweetnacl": "^1.0.0"
   },
   "homepage": "https://github.com/bitrustkr/CLT-Blockchain-SDK#readme",
   "directories": {
