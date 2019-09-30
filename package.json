@@ -1,6 +1,6 @@
 {
   "name": "@dominantlab/clt-blockchain-sdk",
-  "version": "2.0.15",
+  "version": "2.0.17",
   "description": "SDK for IO-Blockchain(IOB)",
   "main": "./src/index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "url": "git://github.com/bitrustkr/CLT-Blockchain-SDK.git"
   },
   "bugs": {
-    "url": "http://github.com/bitrustkr/CLT-Blockchain-SDK/issues"
+    "url": "http://github.com/bitrustkr/CLT-Blockchain-SDK-JS/issues"
   },
   "author": "Dominantlab",
   "authors": [

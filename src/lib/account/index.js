@@ -123,13 +123,13 @@ class Account{
 
     return {
       mnemonic,
-      seed, 
+      seed: seed.toString('hex'), 
     }
   }
 
   async mnemonicToSeed(mnemonic) {
     const seed = await bip39.mnemonicToSeed(mnemonic);
-    return seed
+    return seed.toString('hex')
   }
 }
 

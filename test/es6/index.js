@@ -75,7 +75,7 @@ const sdk = new SDK({
   const s1 = await sdk.accounts.mnemonicToSeed(m)
   console.log(m)
   console.log('original: ', seed.toString('hex'))
-  console.log('recovery: ', s1.toString('hex'))
+  console.log('recovery: ', s1)
 
   console.log( " _____   _   _   ____   ")
   console.log( "| ____| | \\ | | |  _ \\  ")
