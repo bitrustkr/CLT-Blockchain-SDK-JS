@@ -22,7 +22,7 @@ class Transaction{
     }
   }
 
-  sendTransaction ({from, to, value, data, nonce}) {
+  sendTransaction (prvKey, {from, to, value, data, nonce}) {
     const id = "dontcare"
     const method = "tx_sync"
 

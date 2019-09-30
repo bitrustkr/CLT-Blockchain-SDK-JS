@@ -213,13 +213,16 @@ const txhash = sdk.transaction.getTransaction('tx hash');
 트랜잭션 발생
 
 ```javascript
-const txhash1 = sdk.transaction.sendTransaction({
-  from: '',
-  to: '',
-  value: '',
-  data: '',
-  nonce: ''
-})
+const txhash1 = sdk.transaction.sendTransaction(
+  PRIVATEKEY, 
+  {
+    from: '',
+    to: '',
+    value: '',
+    data: '',
+    nonce: ''
+  }
+)
 
 { 
   code: 0,
@@ -229,17 +232,21 @@ const txhash1 = sdk.transaction.sendTransaction({
 }
 ```
 
-다음 데이터를 json으로 파라미터 전달
+트랜잭션을 발생하기 위해 2개의 인자를 전달
 
-from: 송신주소
+-> 첫 번쨰 인자 `PRIVATE_KEY`
 
-to: 수신주소
+-> 두 번쨰 인자는 다음과 같이 json으로 파라미터 전달
 
-value: 전달코인
+`from`: 송신주소
 
-data: 데이터
+`to`: 수신주소
 
-nonce: `account.getAccount`로 조회한 `nonce`
+`value`: 전달코인
+
+`data`: 데이터
+
+`nonce`: `account.getAccount`로 조회한 `nonce`
 
 
 
