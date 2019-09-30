@@ -96,7 +96,15 @@ const recovery = await sdk.accounts.create(mnemonic);
 
 create() 메서드는 파라미터로 `MNEMONIC`을 전달할 수 있으며, MNEMONIC 이용하여 `PRIVATE_KEY`와 `PUBLIC_KEY` 복구
 
+* **`mnemonicToSeed`**
 
+MNEMONIC을 seed로 변환
+
+```javascript
+const seed = await sdk.accounts.mnemonicToSeed(mnemonic)
+
+593dbfffe3d95293d154386c693caa20f0e81fc879d5113a798e3adc62d21dbd8cb9d8bd9110e2907ba4943842891dde3362a618e9fdd525445dbc7ce17fbd3e
+```
 
 * **`encrypt(암호화)`**
 
@@ -259,7 +267,7 @@ const txhash1 = sdk.transaction.sendTransaction(signature)
 }
 ```
 
-**`signature()`**로 생생한 트랜잭션은 **`sendTransaction()`**의 인자로 전달하여 트랜잭션 발생
+**`signature()`** 로 생생한 트랜잭션은 **`sendTransaction()`** 의 인자로 전달하여 트랜잭션 발생
 
 
 

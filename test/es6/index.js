@@ -64,6 +64,18 @@ const sdk = new SDK({
   console.log(createdAccount1)
   console.log(createdAccount2)
   console.log(createdAccount1.address === createdAccount2.address)
+  console.log()
+
+  console.log("===========================================")
+  console.log("========= Mnemonic to Seed Convert ========")
+  console.log("===========================================")
+
+  let {seed, mnemonic: m} = await sdk.accounts.getSeed()
+  
+  const s1 = await sdk.accounts.mnemonicToSeed(m)
+  console.log(m)
+  console.log('original: ', seed.toString('hex'))
+  console.log('recovery: ', s1.toString('hex'))
 
   console.log( " _____   _   _   ____   ")
   console.log( "| ____| | \\ | | |  _ \\  ")

@@ -126,7 +126,11 @@ class Account{
       seed, 
     }
   }
-}
 
+  async mnemonicToSeed(mnemonic) {
+    const seed = await bip39.mnemonicToSeed(mnemonic);
+    return seed
+  }
+}
 
 exports.Account = Account;

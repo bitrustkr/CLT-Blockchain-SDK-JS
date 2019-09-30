@@ -1,6 +1,6 @@
 <img src="./docs/images/logo.png" width="100%" height="auto">
 
-# CLT-Blockchain-SDK
+# EITRI-Blockchain-SDK
 
 [![npm](https://img.shields.io/badge/node-SDK-green)](https://www.npmjs.com/package/@dominantlab/clt-blockchain-sdk)
 
@@ -15,7 +15,6 @@ $ npm install --save @dominantlab/clt-blockchain-sdk
 ```
 
 * node.js 
-
 
 ```js
 const {SDK} = require('@dominantlab/clt-blockchain-sdk')
