@@ -3,7 +3,7 @@ const sha256 = require('sha256')
 // const ed25519 = require('ed25519');
 let ed25519 = require('../../utils/ed25519')
 const bip39 = require("bip39");
-var CryptoJS = require("crypto-js");
+const CryptoJS = require("crypto-js");
 
 const { generateMnemonic } = require('./words')
 const validator = require('../../utils/validator')
@@ -33,17 +33,12 @@ class Account{
 
   async create (mnemonic) {
     let { seed } = await this.getSeed(mnemonic)
+    
     seed = Buffer.from(seed, "hex");
     seed = seed.slice(0, 32)
+    
     let keyPair = await ed25519.generateKeyPair(seed.toString('hex'));
     let prvKey = keyPair.privateKey.toString("hex")
-
-    /*
-      * ed25519 모듈은 pricateKey의 64~128을 잘라서 사용하지만, supercop는 아닌듯 하다
-      * ./test/test.js를 보면 pubKey는 동일하게 생성되는데 prvKey만 다름
-      * ed25519처럼 강제로 prvKey에서 64~128을 잘라서 사용하는 형태로 임시사용
-      * let pubKey = keyPair.publicKey.toString("hex")
-    */
     let pubKey = keyPair.publicKey.toString('hex')
     let address = sha256(pubKey)
     
@@ -66,15 +61,13 @@ class Account{
   }
 
   encrypt (prvKey, password) {
-    var salt    = CryptoJS.lib.WordArray.random(256 / 8);
-    var iv      = CryptoJS.lib.WordArray.random(256 / 32)
-    var encKey 	= CryptoJS.PBKDF2(password, salt, {keySize: 256 / 32});
+    let salt    = CryptoJS.lib.WordArray.random(256 / 8);
+    let iv      = CryptoJS.lib.WordArray.random(256 / 32)
+    let encKey 	= CryptoJS.PBKDF2(password, salt, {keySize: 256 / 32});
 
-    var plainText = CryptoJS.enc.Hex.parse(prvKey);
-    // console.log("plainText", plainText.toString());
-
-    var cipherText = CryptoJS.AES.encrypt(plainText, encKey, {iv: iv});
-    // console.log("cipherText", cipherText.ciphertext.toString());
+    let plainText = CryptoJS.enc.Hex.parse(prvKey);
+    let cipherText = CryptoJS.AES.encrypt(plainText, encKey, {iv: iv});
+    
     return {
       encrypted: {
         ciphertext: cipherText.ciphertext, 
@@ -85,43 +78,37 @@ class Account{
   }
 
   decrypt (encrypted, password) {
-    var cipherText2 =  encrypted.ciphertext  // load the 'encrypted.ciphertext'
-    var salt2       =  encrypted.salt                   // load the 'salt'
-    var iv2         =  encrypted.iv                     // load the 'initial vector'
+    let cipherText2 =  encrypted.ciphertext  // load the 'encrypted.ciphertext'
+    let salt2       =  encrypted.salt        // load the 'salt'
+    let iv2         =  encrypted.iv          // load the 'initial vector'
 
     // derive the 'encKey2' from the 'salt2' and 'user's password'
-    var encKey2 = CryptoJS.PBKDF2(password, salt2, {keySize: 256 / 32});
+    let encKey2 = CryptoJS.PBKDF2(password, salt2, {keySize: 256 / 32});
 
-    // console.log("cipherText2", cipherText2.toString());
-    var plainText2 = CryptoJS.AES.decrypt( { ciphertext: cipherText2 },
-                                              encKey2,
-                                              { iv: iv2 }
-                                          )
-    // console.log("plainText2", plainText2.toString());
+    let plainText2 = CryptoJS.AES.decrypt( 
+      { 
+        ciphertext: cipherText2 
+      },
+      encKey2, { 
+        iv: iv2 
+      }
+    )
+
     return plainText2.toString()
-  }
-
-  signature (prvKey) {
-    let message = 'Hi Bob, How are your pet monkeys doing? What were their names again? -Alice';
-    let signature = ed25519.Sign(new Buffer(message, 'utf8'), this.privateKeyToPublicKey(prvKey),  prvKey); //Using Sign(Buffer, Keypair object)
-
-    return {
-      signature
-    }
   }
 
   getMnemonic() {
     return generateMnemonic()
   }
 
-  privateKeyToPublicKey (prvKey) {
+  static privateKeyToPublicKey (prvKey) {
     return prvKey.slice(64, 128)
   }
 
   privateKeyToAccount (prvKey) {
-    console.log('test: '. prvKey)
     let pubKey = prvKey.slice(64, 128)
     let address = sha256(pubKey)
+
     return {
       prvKey,
       pubKey,
@@ -133,13 +120,10 @@ class Account{
   async getSeed (mnemonic) {
     if (!mnemonic) mnemonic = this.getMnemonic()
     const seed = await bip39.mnemonicToSeed(mnemonic); // seed === entropy
-    // const rootKey = hdkey.fromMasterSeed(seed);
-    // console.log(mnemonic)
-    // console.log(seed.toString('hex'))
+
     return {
       mnemonic,
       seed, 
-      // rootKey
     }
   }
 }

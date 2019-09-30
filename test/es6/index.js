@@ -31,24 +31,28 @@ const sdk = new SDK({
 
   // console.log(account)
 
-  // console.log("===========================================")
-  // console.log("============= Transaction ===============")
-  // console.log("===========================================")
+  console.log("===========================================")
+  console.log("============= Transaction ===============")
+  console.log("===========================================")
+  const prvKey = "871e91321a6940b05585b9f7fb17c23530c20c3b431a028629f94221e8189e85fb1bb6e33f86e57a3b50fb2d637fb32effd2084cc8f178d99e332ea4d22ebae7"
 
-  // const txhash1 = sdk.transaction.getTransaction('tx hash')
-  // console.log(txhash1)
+  const txhash1 = sdk.transaction.getTransaction('tx hash')
+  console.log('getTransaction ', txhash1)
 
-  // const txhash2 = sdk.transaction.sendTransaction({
-  //   from: '',
-  //   to: '',
-  //   value: '',
-  //   data: '',
-  //   nonce: ''
-  // })
+  const txhash2 = sdk.transaction.signature(prvKey, {
+    from: '',
+    to: '',
+    value: '',
+    data: '',
+    nonce: ''
+  })
+  console.log('signature ', txhash2)
 
-  // console.log(txhash2)
+  const txhash3 = sdk.transaction.sendTransaction(txhash2.signature)
 
-  // console.log()
+  console.log('sendTransaction ', txhash3)
+  console.log()
+
   console.log("===========================================")
   console.log("============= Recovery Account=============")
   console.log("===========================================")
@@ -61,10 +65,10 @@ const sdk = new SDK({
   console.log(createdAccount2)
   console.log(createdAccount1.address === createdAccount2.address)
 
-  // console.log( " _____   _   _   ____   ")
-  // console.log( "| ____| | \\ | | |  _ \\  ")
-  // console.log( "|  _|   |  \\| | | | | | ")
-  // console.log( "| |___  | |\\  | | |_| | ")
-  // console.log( "|_____| |_| \\_| |____/  ")
+  console.log( " _____   _   _   ____   ")
+  console.log( "| ____| | \\ | | |  _ \\  ")
+  console.log( "|  _|   |  \\| | | | | | ")
+  console.log( "| |___  | |\\  | | |_| | ")
+  console.log( "|_____| |_| \\_| |____/  ")
 })()
 

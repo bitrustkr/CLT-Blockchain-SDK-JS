@@ -6,6 +6,7 @@ class Block {
   getLastBlock () {
     const id = "dontcare"
     const method = "block_last"
+    
     return {
       block: {
         block_id: {

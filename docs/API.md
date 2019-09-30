@@ -206,14 +206,12 @@ const txhash = sdk.transaction.getTransaction('tx hash');
 }
 ```
 
+* **`signature`**
 
-
-* **`sendTransaction`**
-
-트랜잭션 발생
+트랜잭션 생성
 
 ```javascript
-const txhash1 = sdk.transaction.sendTransaction(
+const txhash1 = sdk.transaction.signature(
   PRIVATEKEY, 
   {
     from: '',
@@ -225,14 +223,11 @@ const txhash1 = sdk.transaction.sendTransaction(
 )
 
 { 
-  code: 0,
-  data: '',
-  log: '',
-  hash: '51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F' 
+  "signature": '0x123456789123456789'
 }
 ```
 
-트랜잭션을 발생하기 위해 2개의 인자를 전달
+트랜잭션 생성을 위해 2개의 인자를 전달
 
 -> 첫 번쨰 인자 `PRIVATE_KEY`
 
@@ -247,6 +242,24 @@ const txhash1 = sdk.transaction.sendTransaction(
 `data`: 데이터
 
 `nonce`: `account.getAccount`로 조회한 `nonce`
+
+
+* **`sendTransaction`**
+
+트랜잭션 발생
+
+```javascript
+const txhash1 = sdk.transaction.sendTransaction(signature)
+
+{ 
+  code: 0,
+  data: '',
+  log: '',
+  hash: '51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F' 
+}
+```
+
+**`signature()`**로 생생한 트랜잭션은 **`sendTransaction()`**의 인자로 전달하여 트랜잭션 발생
 
 
 

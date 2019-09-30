@@ -1,3 +1,8 @@
+let ed25519 = require('../../utils/ed25519')
+let { Account } = require('../account')
+
+ed25519 = new ed25519;
+
 class Transaction{
   constructor() {
     
@@ -22,7 +27,7 @@ class Transaction{
     }
   }
 
-  sendTransaction (prvKey, {from, to, value, data, nonce}) {
+  sendTransaction (signedTransaction) {
     const id = "dontcare"
     const method = "tx_sync"
 
@@ -31,6 +36,16 @@ class Transaction{
       "data": "",
       "log": "",
       "hash": "51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F"
+    }
+  }
+
+  signature (prvKey, {from, to, value, data, nonce}) {
+    let message = 'Hi Bob, How are your pet monkeys doing? What were their names again? -Alice';
+    
+    let signature = ed25519.sign(prvKey, message); //Using Sign(Buffer, Keypair object)
+
+    return {
+      signature: signature.toString('hex')
     }
   }
 }
