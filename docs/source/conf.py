@@ -12,6 +12,8 @@
 #
 import os
 import sys
+
+sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 
 from recommonmark.parser import CommonMarkParser
@@ -22,12 +24,12 @@ source_parsers = {
 
 # -- Project information -----------------------------------------------------
 
-project = 'SDK interface'
+project = 'test'
 copyright = '2019, mung'
 author = 'mung'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.0'
+release = '1.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -36,8 +38,8 @@ release = '1.0.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+  'sphinx.ext.autodoc'
 ]
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
