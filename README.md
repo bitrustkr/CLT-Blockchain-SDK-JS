@@ -6,7 +6,7 @@
 
 * [usage](#usage)
 * [development](#development)
-* [interface](https://github.com/bitrustkr/CLT-Blockchain-SDK-JS/blob/master/docs/API.md)
+* [interface](https://github.com/bitrustkr/CLT-Blockchain-SDK-JS/blob/master/docs/source/interface/API.md)
 
 ## usage
 

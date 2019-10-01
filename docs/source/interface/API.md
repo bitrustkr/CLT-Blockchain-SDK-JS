@@ -1,6 +1,6 @@
 # Interface
 
-* [connection](https://github.com/bitrustkr/CLT-Blockchain-SDK#usage)
+* [connection](https://github.com/bitrustkr/CLT-Blockchain-SDK-JS#usage)
 * [account](#account)
 * [transaction](#transaction)
 * [block](#block)

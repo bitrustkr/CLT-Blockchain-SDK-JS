@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Interface &mdash; SDK interface 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Welcome to SDK interface’s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SDK interface
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interface</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SDK interface</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Interface</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/interface/API.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="interface">
+<h1>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/bitrustkr/CLT-Blockchain-SDK-JS#usage">connection</a></p></li>
+<li><p><a class="reference external" href="#account">account</a></p></li>
+<li><p><a class="reference external" href="#transaction">transaction</a></p></li>
+<li><p><a class="reference external" href="#block">block</a></p></li>
+<li><p><a class="reference external" href="#validator">validator</a></p></li>
+<li><p><a class="reference external" href="#node">node</a></p></li>
+<li><p><a class="reference external" href="#network">network</a></p></li>
+</ul>
+<div class="section" id="account">
+<h2>account<a class="headerlink" href="#account" title="Permalink to this headline">¶</a></h2>
+<p>연결된 SDK 객체에서 accounts를 이용하여 <code class="docutils literal notranslate"><span class="pre">PRIVATE_KEY</span></code>,<code class="docutils literal notranslate"> <span class="pre">PUBLIC_KEY</span></code>, <code class="docutils literal notranslate"><span class="pre">MNEMONIC</span></code> 관리</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">address</span> <span class="pre">생성</span></code></strong></p></li>
+</ul>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">();</span>
+
+<span class="p">{</span> 
+  <span class="nx">prvKey</span><span class="o">:</span>
+   <span class="s1">&#39;3291222254144801722201558458886812409762391441441861691302472446917823216021318613592&#39;</span><span class="p">,</span>
+  <span class="nx">pubKey</span><span class="o">:</span>
+   <span class="s1">&#39;2021681018540163192451112021012216022011311323899149255239231129225922351992510118153&#39;</span><span class="p">,</span>
+  <span class="nx">address</span><span class="o">:</span>
+   <span class="s1">&#39;ee61db8ae8003c4c07b546eb91658938df94c49086b02298ef37669d33c1593a&#39;</span><span class="p">,</span>
+  <span class="nx">encrypt</span><span class="o">:</span> <span class="p">[</span><span class="nb">Function</span><span class="o">:</span> <span class="nx">encrypt</span><span class="p">]</span> 
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>create() 메서드는 파라미터가 없으면 <code class="docutils literal notranslate"><span class="pre">PRIVATE_KEY</span></code>와 <code class="docutils literal notranslate"><span class="pre">PUBLIC_KEY</span></code> 생성</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">address</span> <span class="pre">조회</span></code></strong></p></li>
+</ul>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">account</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">getAccount</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">.</span><span class="nx">address</span><span class="p">);</span>
+
+<span class="p">{</span> 
+  <span class="nx">ddress</span><span class="o">:</span> <span class="s1">&#39;5860EA6D8D8BD810812D43D1F44157EEB89F5F57&#39;</span><span class="p">,</span>
+  <span class="nx">nonce</span><span class="o">:</span> <span class="s1">&#39;1234&#39;</span><span class="p">,</span>
+  <span class="nx">pub_key</span><span class="o">:</span>
+   <span class="s1">&#39;A33519E2814109F0EF3189971E6C18A2BA05EDD91BB328DEBA2B930B8160656A&#39;</span><span class="p">,</span>
+  <span class="nx">balance</span><span class="o">:</span> <span class="s1">&#39;999999999999990&#39;</span><span class="p">,</span>
+  <span class="nx">stake</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+  <span class="nx">unstaking</span><span class="o">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+  <span class="nx">reward</span><span class="o">:</span> <span class="s1">&#39;10671&#39;</span><span class="p">,</span>
+  <span class="nx">un_freezing_reward</span><span class="o">:</span> <span class="s1">&#39;0&#39;</span> 
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>getAccount() 메서드에 조회대상의 주소를 파라미터로 전달</p>
+<p>nonce: 트랜잭션 발생 갯수</p>
+<p>pub_key: address의 <code class="docutils literal notranslate"><span class="pre">PUBLIC_KEY</span></code></p>
+<p>balance: 보유코인 수량</p>
+<p>state: staking 된 코인은 lock(잠김상태) 되어 사용불가</p>
+<p>unstaking:</p>
+<p>reward:</p>
+<p>un_freezing_reward:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">mnemonic</span> <span class="pre">생성</span></code></strong></p></li>
+</ul>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">mnemonic</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">getMnemonic</span><span class="p">();</span>
+
+<span class="nx">exclude</span> <span class="nx">please</span> <span class="nx">guess</span> <span class="nx">vehicle</span> <span class="nx">mask</span> <span class="nx">apple</span> <span class="nx">crush</span> <span class="nx">silly</span> <span class="nx">tape</span> <span class="nx">wink</span> <span class="nx">giant</span> <span class="nx">jaguar</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">mnemonic</span> <span class="pre">복구</span></code></strong></p></li>
+</ul>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">recovery</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">mnemonic</span><span class="p">);</span>
+
+<span class="p">{</span> 
+  <span class="nx">prvKey</span><span class="o">:</span>
+   <span class="s1">&#39;321333312525113834742257263892101371865214310408240193927011574461864918123664&#39;</span><span class="p">,</span>
+  <span class="nx">pubKey</span><span class="o">:</span>
+   <span class="s1">&#39;118235174224244177177281546840255144174151731081072421801601101111181798079818118321404&#39;</span><span class="p">,</span>
+  <span class="nx">address</span><span class="o">:</span>
+   <span class="s1">&#39;4cf3c3e62841489a0341daf4bfb7b4a390bf152c0af82c26a8c072ed2afdffc9&#39;</span><span class="p">,</span>
+  <span class="nx">encrypt</span><span class="o">:</span> <span class="p">[</span><span class="nb">Function</span><span class="o">:</span> <span class="nx">encrypt</span><span class="p">]</span> 
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>create() 메서드는 파라미터로 <code class="docutils literal notranslate"><span class="pre">MNEMONIC</span></code>을 전달할 수 있으며, MNEMONIC 이용하여 <code class="docutils literal notranslate"><span class="pre">PRIVATE_KEY</span></code>와 <code class="docutils literal notranslate"><span class="pre">PUBLIC_KEY</span></code> 복구</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">mnemonicToSeed</span></code></strong></p></li>
+</ul>
+<p>MNEMONIC을 seed로 변환</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">seed</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">mnemonicToSeed</span><span class="p">(</span><span class="nx">mnemonic</span><span class="p">)</span>
+
+<span class="mi">593</span><span class="nx">dbfffe3d95293d154386c693caa20f0e81fc879d5113a798e3adc62d21dbd8cb9d8bd9110e2907ba4943842891dde3362a618e9fdd525445dbc7ce17fbd3e</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">encrypt(암호화)</span></code></strong></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">PRIVATE_KEY</span></code>를 비밀번호로 암호화 하여 안전한 방법으로 보관</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// 방법 1.</span>
+<span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">();</span>
+<span class="kr">const</span> <span class="p">{</span> <span class="nx">encrypted</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">createdAccount</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">.</span><span class="nx">prvKey</span><span class="p">,</span> <span class="nx">password</span><span class="p">);</span>
+
+<span class="c1">// 방법 2.</span>
+<span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">();</span>
+<span class="kr">const</span> <span class="p">{</span> <span class="nx">encrypted</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">.</span><span class="nx">prvKey</span><span class="p">,</span> <span class="nx">password</span><span class="p">);</span>
+
+<span class="p">{</span> <span class="nx">ciphertext</span><span class="o">:</span>
+   <span class="p">{</span> <span class="nx">words</span><span class="o">:</span>
+      <span class="p">[</span> <span class="mi">274343827</span><span class="p">,</span>
+        <span class="mi">475958623</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">259734138</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">836139230</span><span class="p">,</span>
+        <span class="mi">742775034</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">793468286</span><span class="p">,</span>
+        <span class="mi">1543184607</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">804120574</span><span class="p">,</span>
+        <span class="mi">654577960</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">1801356116</span><span class="p">,</span>
+        <span class="mi">87949877</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">843209791</span> <span class="p">],</span>
+     <span class="nx">sigBytes</span><span class="o">:</span> <span class="mi">48</span> <span class="p">},</span>
+  <span class="nx">salt</span><span class="o">:</span>
+   <span class="p">{</span> <span class="nx">words</span><span class="o">:</span>
+      <span class="p">[</span> <span class="mi">1145971852</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">1312248208</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">1386138489</span><span class="p">,</span>
+        <span class="mi">1018292036</span><span class="p">,</span>
+        <span class="mi">1371625497</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">1125526333</span><span class="p">,</span>
+        <span class="mi">1496055911</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">1265506989</span> <span class="p">],</span>
+     <span class="nx">sigBytes</span><span class="o">:</span> <span class="mi">32</span> <span class="p">},</span>
+  <span class="nx">iv</span><span class="o">:</span> <span class="p">{</span> <span class="nx">words</span><span class="o">:</span> <span class="p">[</span> <span class="o">-</span><span class="mi">1279458473</span><span class="p">,</span> <span class="o">-</span><span class="mi">1029465677</span> <span class="p">],</span> <span class="nx">sigBytes</span><span class="o">:</span> <span class="mi">8</span> <span class="p">}</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>encrypt는 2가지 방법으로 사용가능</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">accounts의</span> <span class="n">encrypt</span><span class="p">()</span> <span class="n">메서드</span> <span class="n">호출</span>
+<span class="mf">2.</span> <span class="n">create</span><span class="p">()</span> <span class="n">메서드로</span> <span class="n">생성한</span> <span class="n">지갑</span> <span class="n">객체를</span> <span class="n">통해</span> <span class="n">encrypt</span><span class="p">()</span> <span class="n">호출</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">decrypt(복호화)</span></code></strong></p></li>
+</ul>
+<p>encrypt()를 통해 암호화 된 <code class="docutils literal notranslate"><span class="pre">PRIVATE_KEY</span></code>를 비밀번호를 이용하여 원래의 상태로 복구</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">decryptPrvKey</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">decrypt</span><span class="p">(</span><span class="nx">encrypted</span><span class="p">,</span> <span class="nx">password</span><span class="p">);</span>
+
+<span class="mi">321333312525113834742257263892101371865214310408240193927011574461864918123664</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">privateKeyToAccount</span></code></strong></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">PRIVATE_KEY</span></code>를 이용하여 <code class="docutils literal notranslate"><span class="pre">PUBLIC_KEY</span></code>와 address 복구</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">recoveryAddress</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">privateKeyToAccount</span><span class="p">(</span><span class="nx">prvKey</span><span class="p">);</span>
+
+<span class="p">{</span> 
+  <span class="nx">prvKey</span><span class="o">:</span>
+   <span class="s1">&#39;3291222254144801722201558458886812409762391441441861691302472446917823216021318613592&#39;</span><span class="p">,</span>
+  <span class="nx">pubKey</span><span class="o">:</span>
+   <span class="s1">&#39;2021681018540163192451112021012216022011311323899149255239231129225922351992510118153&#39;</span><span class="p">,</span>
+  <span class="nx">address</span><span class="o">:</span>
+   <span class="s1">&#39;ee61db8ae8003c4c07b546eb91658938df94c49086b02298ef37669d33c1593a&#39;</span><span class="p">,</span>
+  <span class="nx">encrypt</span><span class="o">:</span> <span class="p">[</span><span class="nb">Function</span><span class="o">:</span> <span class="nx">encrypt</span><span class="p">]</span> 
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="transaction">
+<h2>transaction<a class="headerlink" href="#transaction" title="Permalink to this headline">¶</a></h2>
+<p>트랜잭션 발생, 조회</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">getTransaction</span></code></strong></p></li>
+</ul>
+<p>트랜잭션 조회</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">txhash</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">transaction</span><span class="p">.</span><span class="nx">getTransaction</span><span class="p">(</span><span class="s1">&#39;tx hash&#39;</span><span class="p">);</span>
+
+<span class="p">{</span> 
+  <span class="nx">hash</span><span class="o">:</span> <span class="s1">&#39;51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F&#39;</span><span class="p">,</span>
+  <span class="nx">height</span><span class="o">:</span> <span class="s1">&#39;11202&#39;</span><span class="p">,</span>
+  <span class="nx">index</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="nx">nonce</span><span class="o">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+  <span class="nx">time</span><span class="o">:</span> <span class="s1">&#39;2019-08-23T00:34:42.6221603Z&#39;</span><span class="p">,</span>
+  <span class="nx">sender</span><span class="o">:</span> <span class="s1">&#39;742B63B4AA18361B903E9F164E5B6873706239FB&#39;</span><span class="p">,</span>
+  <span class="nx">receiver</span><span class="o">:</span> <span class="s1">&#39;D99E8939133DEB1475E03AE4B21657E46C8E594F&#39;</span><span class="p">,</span>
+  <span class="nx">gas</span><span class="o">:</span> <span class="s1">&#39;12345&#39;</span><span class="p">,</span>
+  <span class="nx">action</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="nx">amount</span><span class="o">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+  <span class="nx">pub_key</span><span class="o">:</span> <span class="s1">&#39;5C8854D05667EDE74458EF3DE0DA3F50647AF4049EC258AA01EAD1E6E2C91945&#39;</span><span class="p">,</span>
+  <span class="nx">sig</span><span class="o">:</span> <span class="s1">&#39;BC86BC6BD1D0A0B7F8B33A0E3482AD9131FAD85DD080AC4A950BF78196FC17F5EF14BAF898796D3DEA67A5A71DF7946EC1B0A4876BCCE1E1578D20D4E7284109&#39;</span> 
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">signature</span></code></strong></p></li>
+</ul>
+<p>트랜잭션 생성</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">txhash1</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">transaction</span><span class="p">.</span><span class="nx">signature</span><span class="p">(</span>
+  <span class="nx">PRIVATEKEY</span><span class="p">,</span> 
+  <span class="p">{</span>
+    <span class="nx">from</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="nx">data</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="nx">nonce</span><span class="o">:</span> <span class="s1">&#39;&#39;</span>
+  <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="p">{</span> 
+  <span class="s2">&quot;signature&quot;</span><span class="o">:</span> <span class="s1">&#39;0x123456789123456789&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>트랜잭션 생성을 위해 2개의 인자를 전달</p>
+<p>-&gt; 첫 번쨰 인자 <code class="docutils literal notranslate"><span class="pre">PRIVATE_KEY</span></code></p>
+<p>-&gt; 두 번쨰 인자는 다음과 같이 json으로 파라미터 전달</p>
+<p><code class="docutils literal notranslate"><span class="pre">from</span></code>: 송신주소</p>
+<p><code class="docutils literal notranslate"><span class="pre">to</span></code>: 수신주소</p>
+<p><code class="docutils literal notranslate"><span class="pre">value</span></code>: 전달코인</p>
+<p><code class="docutils literal notranslate"><span class="pre">data</span></code>: 데이터</p>
+<p><code class="docutils literal notranslate"><span class="pre">nonce</span></code>: <code class="docutils literal notranslate"><span class="pre">account.getAccount</span></code>로 조회한 <code class="docutils literal notranslate"><span class="pre">nonce</span></code></p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">sendTransaction</span></code></strong></p></li>
+</ul>
+<p>트랜잭션 발생</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">txhash1</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">transaction</span><span class="p">.</span><span class="nx">sendTransaction</span><span class="p">(</span><span class="nx">signature</span><span class="p">)</span>
+
+<span class="p">{</span> 
+  <span class="nx">code</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="nx">data</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="nx">log</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="nx">hash</span><span class="o">:</span> <span class="s1">&#39;51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F&#39;</span> 
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong><code class="docutils literal notranslate"><span class="pre">signature()</span></code></strong> 로 생생한 트랜잭션은 <strong><code class="docutils literal notranslate"><span class="pre">sendTransaction()</span></code></strong> 의 인자로 전달하여 트랜잭션 발생</p>
+</div>
+<div class="section" id="block">
+<h2>block<a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="validator">
+<h2>validator<a class="headerlink" href="#validator" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="node">
+<h2>node<a class="headerlink" href="#node" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="network">
+<h2>network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to SDK interface’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, mung
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
