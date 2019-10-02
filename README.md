@@ -1,6 +1,6 @@
 <img src="./docs/images/logo.png" width="100%" height="auto">
 
-# EITRI-Blockchain-SDK
+# EITRI.js
 
 [![npm](https://img.shields.io/badge/node-SDK-green)](https://www.npmjs.com/package/@dominantlab/clt-blockchain-sdk)
 
@@ -146,3 +146,8 @@ $ npm run publish
 ```
 
 [npm](https://www.npmjs.com/package/@dominantlab/clt-blockchain-sdk) 배포
+
+
+### Similar libraries in other languages
+
+* python [EITRI.py](https://github.com/bitrustkr/CLT-Blockchain-SDK-PY)
