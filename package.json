@@ -9,7 +9,8 @@
     "build:babel": "npx babel ./src -d ./build",
     "build": "webpack",
     "start": "echo \"start\"",
-    "publish": "npm publish --access public"
+    "publish": "npm publish --access public",
+    "make:docs": "cd docs; make html"
   },
   "repository": {
     "type": "git",

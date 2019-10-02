@@ -28,3 +28,11 @@ Contents:
 
     interface/*
     
+
+************************************
+Similar libraries in other languages
+************************************
+
+* python: ETIRI.py_
+
+.. _ETIRI.py: https://github.com/bitrustkr/CLT-Blockchain-SDK-PY

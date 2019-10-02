@@ -1,4 +1,4 @@
-# Getting Started
+# getting started
 
 ```bash
 $ npm install --save @dominantlab/clt-blockchain-sdk
@@ -6,7 +6,7 @@ $ npm install --save @dominantlab/clt-blockchain-sdk
 
 * node.js 
 
-```js
+```javascript
 const {SDK} = require('@dominantlab/clt-blockchain-sdk')
 
 const sdk = new SDK({
@@ -23,7 +23,7 @@ const sdk = new SDK({
 
 ```
 
-```json
+```jsonml
 { 
   "prvKey": "4aca257c4e1f71689569183b532754080c683d42e5e769509d444c1dd77ae58df69750cf915757745fa8789ac68240f62bf9ec29a7c9b6f06483c562c767c06d",
   "pubKey": "f69750cf915757745fa8789ac68240f62bf9ec29a7c9b6f06483c562c767c06d",
@@ -34,15 +34,14 @@ const sdk = new SDK({
 
 * react 
 
-```js
+```javascript
 import {SDK}  from '@dominantlab/clt-blockchain-sdk'
-// let {SDK} = require('./SDK')
+
+let sdk = new SDK({})
 
 function App() {
   useEffect(() => {
     (async() => {
-      let sdk = new SDK({})
-      // console.log(sdk)
       const password = 'password'
       const createdAccount = await sdk.accounts.create()
       const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
@@ -56,7 +55,6 @@ function App() {
   }, [])
   return (
     <div className="App">
-     
     </div>
   );
 }
@@ -64,7 +62,7 @@ function App() {
 export default App;
 ```
 
-```json
+```jsonml
 { 
   "prvKey": "4aca257c4e1f71689569183b532754080c683d42e5e769509d444c1dd77ae58df69750cf915757745fa8789ac68240f62bf9ec29a7c9b6f06483c562c767c06d",
   "pubKey": "f69750cf915757745fa8789ac68240f62bf9ec29a7c9b6f06483c562c767c06d",
@@ -94,7 +92,6 @@ export default App;
         console.log(encrypted)
         console.log(recoveryAddress)
       })()
-     
     </script>
   </body>
 </html>
