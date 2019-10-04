@@ -7,7 +7,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'index.js',
-    library: 'SDK',
+    library: 'EITRI',
   },
   module: {
     rules: [

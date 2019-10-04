@@ -17,9 +17,9 @@ $ npm install --save @dominantlab/clt-blockchain-sdk
 * node.js 
 
 ```js
-const {SDK} = require('@dominantlab/clt-blockchain-sdk')
+const {EITRI} = require('@dominantlab/clt-blockchain-sdk')
 
-const sdk = new SDK({
+const eitri = new EITRI({
   ip: "127.0.0.1",
   port: 8545,
   user: '',
@@ -27,7 +27,7 @@ const sdk = new SDK({
 });
 
 (async () => {
-  const createdAccount = await sdk.accounts.create()
+  const createdAccount = await eitri.accounts.create()
   console.log(createdAccount)
 })()
 
@@ -45,19 +45,18 @@ const sdk = new SDK({
 * react 
 
 ```js
-import {SDK}  from '@dominantlab/clt-blockchain-sdk'
-// let {SDK} = require('./SDK')
+import {EITRI}  from '@dominantlab/clt-blockchain-sdk'
 
 function App() {
   useEffect(() => {
     (async() => {
-      let sdk = new SDK({})
-      // console.log(sdk)
+      let eitri = new EITRI({})
+      // console.log(eitri)
       const password = 'password'
-      const createdAccount = await sdk.accounts.create()
-      const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
-      const decryptPrvKey = sdk.accounts.decrypt(encrypted, password)
-      const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
+      const createdAccount = await eitri.accounts.create()
+      const { encrypted } = eitri.accounts.encrypt(createdAccount.prvKey, password)
+      const decryptPrvKey = eitri.accounts.decrypt(encrypted, password)
+      const recoveryAddress = eitri.accounts.privateKeyToAccount(decryptPrvKey)
       
       console.log(createdAccount)
       console.log(encrypted)
@@ -93,12 +92,12 @@ export default App;
   <body>
     <script>
       (async () => {
-        let sdk = new SDK.SDK({})
+        let eitri = new EITRI.EITRI({})
         const password = 'password'
-        const createdAccount = await sdk.accounts.create()
-        const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
-        const decryptPrvKey = sdk.accounts.decrypt(encrypted, password)
-        const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
+        const createdAccount = await eitri.accounts.create()
+        const { encrypted } = eitri.accounts.encrypt(createdAccount.prvKey, password)
+        const decryptPrvKey = eitri.accounts.decrypt(encrypted, password)
+        const recoveryAddress = eitri.accounts.privateKeyToAccount(decryptPrvKey)
         
         console.log(createdAccount)
         console.log(encrypted)

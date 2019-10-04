@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>test &mdash; EITRI.js 1.0 documentation</title>
+  <title>RPC &mdash; EITRI.js 1.0 documentation</title>
   
 
   
@@ -38,7 +38,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Utils" href="../utils/utils.html" />
-    <link rel="prev" title="Interface" href="API.html" /> 
+    <link rel="prev" title="Event" href="event.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,7 +89,8 @@
 <p class="caption"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="API.html">Interface</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event.html">Event</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RPC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../utils/utils.html">Utils</a></li>
 </ul>
 
@@ -136,13 +137,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>test</li>
+      <li>RPC</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/interface/test.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/interface/rpcs.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -155,16 +156,68 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="test">
-<h1>test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="test1">
-<h2>test1<a class="headerlink" href="#test1" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="test2">
-<h3>test2<a class="headerlink" href="#test2" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="test3">
-<h4>test3<a class="headerlink" href="#test3" title="Permalink to this headline">¶</a></h4>
+  <div class="section" id="rpc">
+<h1>RPC<a class="headerlink" href="#rpc" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="account">
+<h2>Account<a class="headerlink" href="#account" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Create Account</p></li>
+<li><p>Get Balance</p></li>
+<li><p>Get Last Nonce</p></li>
+<li><p>Send Asset</p></li>
+<li><p>Deposit Asset (Staking)</p></li>
+<li><p>Withdraw Asset (UnStaking)</p></li>
+<li><p>Gov. Rules Proposal</p></li>
+<li><p>Gov. Rules Vote</p></li>
+</ul>
+<!-- - <span style="color:gray;">Exchange Asset</span> --></div>
+<div class="section" id="transaction">
+<h2>Transaction<a class="headerlink" href="#transaction" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Build Transaction
+Transaction 을 생성한다.</p></li>
+<li><p>Sign Transaction</p></li>
+<li><p>Send Transaction</p></li>
+<li><p>Get Transaction</p></li>
+</ul>
 </div>
+<div class="section" id="block">
+<h2>Block<a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Get Block</p></li>
+<li><p>Get Last Block</p></li>
+</ul>
 </div>
+<div class="section" id="valiator">
+<h2>Valiator<a class="headerlink" href="#valiator" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Get Validators</p></li>
+</ul>
+</div>
+<div class="section" id="network">
+<h2>Network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>GetNodeInfo</p></li>
+<li><p>GetPeers</p></li>
+</ul>
+</div>
+<div class="section" id="asynchronous-event-notification">
+<h2>Asynchronous Event Notification<a class="headerlink" href="#asynchronous-event-notification" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>StartEvent(by block numbers, by tx’s type, by addresses)</p></li>
+<li><p>StopEvent</p></li>
+</ul>
+</div>
+<div class="section" id="data">
+<h2>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Publish</p></li>
+<li><p>Update</p></li>
+<li><p>Verify</p></li>
+<li><p>GetData</p></li>
+<li><p>GetAuthors</p></li>
+<li><p>UpdateAuthors</p></li>
+</ul>
 </div>
 </div>
 
@@ -179,7 +232,7 @@
         <a href="../utils/utils.html" class="btn btn-neutral float-right" title="Utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="API.html" class="btn btn-neutral float-left" title="Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="event.html" class="btn btn-neutral float-left" title="Event" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

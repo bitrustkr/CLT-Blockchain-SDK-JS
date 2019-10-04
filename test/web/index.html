@@ -4,16 +4,21 @@
   <body>
     <script>
       (async () => {
-        let sdk = new SDK.SDK({})
+        let eitri = new EITRI.EITRI({})
         const password = 'password'
-        const createdAccount = await sdk.accounts.create()
-        const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
-        const decryptPrvKey = sdk.accounts.decrypt(encrypted, password)
-        const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
+        const createdAccount = await eitri.accounts.create()
+        const { encrypted } = eitri.accounts.encrypt(createdAccount.prvKey, password)
+        const decryptPrvKey = eitri.accounts.decrypt(encrypted, password)
+        const recoveryAddress = eitri.accounts.privateKeyToAccount(decryptPrvKey)
         
         console.log(createdAccount)
         console.log(encrypted)
         console.log(recoveryAddress)
+
+        console.log("===========================================")
+        console.log("=============== utils test  ===============")
+        console.log("===========================================")
+        console.log(EITRI.EITRI.utils)
       })()
      
     </script>

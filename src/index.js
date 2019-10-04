@@ -1,15 +1,18 @@
 const RpcClient = require('node-json-rpc2');
 
 const {Account, Network, Transaction, Block, Node, Validator} = require('./lib')
+const utils = require('./utils')
 
-class SDK {
-  
+class EITRI {
+  static get utils() { return utils }
+
   constructor ({ip, port, user, password}) {
     this.accounts = {}
     this.network = {}
     this.transaction = {}
     this.block = {}
     this.node = {}
+
     this.setProvider({ip, port, user, password})
   }
 
@@ -31,8 +34,8 @@ class SDK {
   }
 
 }
-exports.SDK = SDK
+// exports.SDK = SDK
 
-// module.exports = {
-//   SDK: IOB
-// }
+module.exports = {
+  EITRI: EITRI
+}

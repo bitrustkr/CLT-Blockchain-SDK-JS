@@ -1,5 +1,7 @@
 # Interface
 
+Interface는 노드와 통신하여 CRUD를 진행합니다.
+
 * [connection](https://github.com/bitrustkr/CLT-Blockchain-SDK-JS#usage)
 * [account](#account)
 * [transaction](#transaction)
@@ -8,8 +10,6 @@
 * [node](#node)
 * [network](#network)
 
-
-
 ## account
 
 연결된 SDK 객체에서 accounts를 이용하여 `PRIVATE_KEY`,` PUBLIC_KEY`, `MNEMONIC` 관리
@@ -17,7 +17,7 @@
 * **`address 생성`**
 
 ```javascript
-const createdAccount = await sdk.accounts.create();
+const createdAccount = await eitri.accounts.create();
 
 { 
   prvKey:
@@ -35,7 +35,7 @@ create() 메서드는 파라미터가 없으면 `PRIVATE_KEY`와 `PUBLIC_KEY` �
 * **`address 조회`**
 
 ```javascript
-const account = sdk.accounts.getAccount(createdAccount.address);
+const account = eitri.accounts.getAccount(createdAccount.address);
 
 { 
   ddress: '5860EA6D8D8BD810812D43D1F44157EEB89F5F57',
@@ -71,7 +71,7 @@ un_freezing_reward:
 * **`mnemonic 생성`**
 
 ```javascript
-const mnemonic = sdk.accounts.getMnemonic();
+const mnemonic = eitri.accounts.getMnemonic();
 
 exclude please guess vehicle mask apple crush silly tape wink giant jaguar
 ```
@@ -81,7 +81,7 @@ exclude please guess vehicle mask apple crush silly tape wink giant jaguar
 * **`mnemonic 복구`**
 
 ```javascript
-const recovery = await sdk.accounts.create(mnemonic);
+const recovery = await eitri.accounts.create(mnemonic);
 
 { 
   prvKey:
@@ -101,7 +101,7 @@ create() 메서드는 파라미터로 `MNEMONIC`을 전달할 수 있으며, MNE
 MNEMONIC을 seed로 변환
 
 ```javascript
-const seed = await sdk.accounts.mnemonicToSeed(mnemonic)
+const seed = await eitri.accounts.mnemonicToSeed(mnemonic)
 
 593dbfffe3d95293d154386c693caa20f0e81fc879d5113a798e3adc62d21dbd8cb9d8bd9110e2907ba4943842891dde3362a618e9fdd525445dbc7ce17fbd3e
 ```
@@ -112,12 +112,12 @@ const seed = await sdk.accounts.mnemonicToSeed(mnemonic)
 
 ```javascript
 // 방법 1.
-const createdAccount = await sdk.accounts.create();
+const createdAccount = await eitri.accounts.create();
 const { encrypted } = createdAccount.encrypt(createdAccount.prvKey, password);
 
 // 방법 2.
-const createdAccount = await sdk.accounts.create();
-const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password);
+const createdAccount = await eitri.accounts.create();
+const { encrypted } = eitri.accounts.encrypt(createdAccount.prvKey, password);
 
 { ciphertext:
    { words:
@@ -160,7 +160,7 @@ encrypt는 2가지 방법으로 사용가능
 encrypt()를 통해 암호화 된 `PRIVATE_KEY`를 비밀번호를 이용하여 원래의 상태로 복구
 
 ```javascript
-const decryptPrvKey = sdk.accounts.decrypt(encrypted, password);
+const decryptPrvKey = eitri.accounts.decrypt(encrypted, password);
 
 321333312525113834742257263892101371865214310408240193927011574461864918123664
 ```
@@ -172,7 +172,7 @@ const decryptPrvKey = sdk.accounts.decrypt(encrypted, password);
 `PRIVATE_KEY`를 이용하여 `PUBLIC_KEY`와 address 복구
 
 ```javascript
-const recoveryAddress = sdk.accounts.privateKeyToAccount(prvKey);
+const recoveryAddress = eitri.accounts.privateKeyToAccount(prvKey);
 
 { 
   prvKey:
@@ -196,7 +196,7 @@ const recoveryAddress = sdk.accounts.privateKeyToAccount(prvKey);
 트랜잭션 조회
 
 ```javascript
-const txhash = sdk.transaction.getTransaction('tx hash');
+const txhash = eitri.transaction.getTransaction('tx hash');
 
 { 
   hash: '51D316323EC833DCEBF0BE0B05C4910FD3FBC2DD0990C027AD26351EE375317F',
@@ -219,7 +219,7 @@ const txhash = sdk.transaction.getTransaction('tx hash');
 트랜잭션 생성
 
 ```javascript
-const txhash1 = sdk.transaction.signature(
+const txhash1 = eitri.transaction.signature(
   PRIVATEKEY, 
   {
     from: '',
@@ -257,7 +257,7 @@ const txhash1 = sdk.transaction.signature(
 트랜잭션 발생
 
 ```javascript
-const txhash1 = sdk.transaction.sendTransaction(signature)
+const txhash1 = eitri.transaction.sendTransaction(signature)
 
 { 
   code: 0,

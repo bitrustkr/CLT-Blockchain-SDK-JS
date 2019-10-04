@@ -89,7 +89,9 @@
 <p class="caption"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../interface/API.html">Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../interface/test.html">test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface/event.html">Event</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface/rpcs.html">RPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/utils.html">Utils</a></li>
 </ul>
 
             
@@ -162,9 +164,9 @@
 <ul class="simple">
 <li><p>node.js</p></li>
 </ul>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="p">{</span><span class="nx">SDK</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;@dominantlab/clt-blockchain-sdk&#39;</span><span class="p">)</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="p">{</span><span class="nx">EIRTI</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;@dominantlab/clt-blockchain-sdk&#39;</span><span class="p">)</span>
 
-<span class="kr">const</span> <span class="nx">sdk</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">SDK</span><span class="p">({</span>
+<span class="kr">const</span> <span class="nx">eirti</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EIRTI</span><span class="p">({</span>
   <span class="nx">ip</span><span class="o">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
   <span class="nx">port</span><span class="o">:</span> <span class="mi">8545</span><span class="p">,</span>
   <span class="nx">user</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -172,7 +174,7 @@
 <span class="p">});</span>
 
 <span class="p">(</span><span class="nx">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
-  <span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+  <span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">eirti</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">)</span>
 <span class="p">})()</span>
 </pre></div>
@@ -188,18 +190,18 @@
 <ul class="simple">
 <li><p>react</p></li>
 </ul>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>import {SDK}  from &#39;@dominantlab/clt-blockchain-sdk&#39;
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>import {EIRTI}  from &#39;@dominantlab/clt-blockchain-sdk&#39;
 
-let sdk = new SDK({})
+let eirti = new EIRTI({})
 
 function App() {
   useEffect(() =&gt; {
     (async() =&gt; {
       const password = &#39;password&#39;
-      const createdAccount = await sdk.accounts.create()
-      const { encrypted } = sdk.accounts.encrypt(createdAccount.prvKey, password)
-      const decryptPrvKey = sdk.accounts.decrypt(encrypted, password)
-      const recoveryAddress = sdk.accounts.privateKeyToAccount(decryptPrvKey)
+      const createdAccount = await eirti.accounts.create()
+      const { encrypted } = eirti.accounts.encrypt(createdAccount.prvKey, password)
+      const decryptPrvKey = eirti.accounts.decrypt(encrypted, password)
+      const recoveryAddress = eirti.accounts.privateKeyToAccount(decryptPrvKey)
       
       console.log(createdAccount)
       console.log(encrypted)
@@ -233,12 +235,12 @@ export default App;
   <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
     <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
       <span class="p">(</span><span class="nx">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
-        <span class="kd">let</span> <span class="nx">sdk</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">SDK</span><span class="p">.</span><span class="nx">SDK</span><span class="p">({})</span>
+        <span class="kd">let</span> <span class="nx">eirti</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EIRTI</span><span class="p">.</span><span class="nx">EIRTI</span><span class="p">({})</span>
         <span class="kr">const</span> <span class="nx">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span>
-        <span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
-        <span class="kr">const</span> <span class="p">{</span> <span class="nx">encrypted</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">.</span><span class="nx">prvKey</span><span class="p">,</span> <span class="nx">password</span><span class="p">)</span>
-        <span class="kr">const</span> <span class="nx">decryptPrvKey</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">decrypt</span><span class="p">(</span><span class="nx">encrypted</span><span class="p">,</span> <span class="nx">password</span><span class="p">)</span>
-        <span class="kr">const</span> <span class="nx">recoveryAddress</span> <span class="o">=</span> <span class="nx">sdk</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">privateKeyToAccount</span><span class="p">(</span><span class="nx">decryptPrvKey</span><span class="p">)</span>
+        <span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">eirti</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+        <span class="kr">const</span> <span class="p">{</span> <span class="nx">encrypted</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">eirti</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">.</span><span class="nx">prvKey</span><span class="p">,</span> <span class="nx">password</span><span class="p">)</span>
+        <span class="kr">const</span> <span class="nx">decryptPrvKey</span> <span class="o">=</span> <span class="nx">eirti</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">decrypt</span><span class="p">(</span><span class="nx">encrypted</span><span class="p">,</span> <span class="nx">password</span><span class="p">)</span>
+        <span class="kr">const</span> <span class="nx">recoveryAddress</span> <span class="o">=</span> <span class="nx">eirti</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">privateKeyToAccount</span><span class="p">(</span><span class="nx">decryptPrvKey</span><span class="p">)</span>
         
         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">)</span>
         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">encrypted</span><span class="p">)</span>

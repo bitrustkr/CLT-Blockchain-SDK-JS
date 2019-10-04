@@ -27,6 +27,7 @@ Contents:
     :titlesonly:
 
     interface/*
+    utils/*
     
 
 ************************************
