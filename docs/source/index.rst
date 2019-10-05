@@ -36,4 +36,4 @@ Similar libraries in other languages
 
 * python: ETIRI.py_
 
-.. _ETIRI.py: https://github.com/bitrustkr/CLT-Blockchain-SDK-PY
+.. _ETIRI.py: https://bitrustkr.github.io/CLT-Blockchain-SDK-PY

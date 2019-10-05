@@ -149,4 +149,4 @@ $ npm run publish
 
 ### Similar libraries in other languages
 
-* python [EITRI.py](https://github.com/bitrustkr/CLT-Blockchain-SDK-PY)
+* python [EITRI.py](https://bitrustkr.github.io/CLT-Blockchain-SDK-PY)
