@@ -235,7 +235,12 @@ export default App;
   <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
     <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
       <span class="p">(</span><span class="nx">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
-        <span class="kd">let</span> <span class="nx">eirti</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EIRTI</span><span class="p">.</span><span class="nx">EIRTI</span><span class="p">({})</span>
+        <span class="kd">let</span> <span class="nx">eirti</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EIRTI</span><span class="p">.</span><span class="nx">EIRTI</span><span class="p">({</span>
+            <span class="nx">ip</span><span class="o">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+            <span class="nx">port</span><span class="o">:</span> <span class="mi">8545</span><span class="p">,</span>
+            <span class="nx">user</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="nx">password</span><span class="o">:</span> <span class="s1">&#39;&#39;</span>
+        <span class="p">})</span>
         <span class="kr">const</span> <span class="nx">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span>
         <span class="kr">const</span> <span class="nx">createdAccount</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">eirti</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
         <span class="kr">const</span> <span class="p">{</span> <span class="nx">encrypted</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">eirti</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">createdAccount</span><span class="p">.</span><span class="nx">prvKey</span><span class="p">,</span> <span class="nx">password</span><span class="p">)</span>

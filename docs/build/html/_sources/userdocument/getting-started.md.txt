@@ -81,7 +81,12 @@ export default App;
   <body>
     <script>
       (async () => {
-        let eirti = new EIRTI.EIRTI({})
+        let eirti = new EIRTI.EIRTI({
+            ip: "127.0.0.1",
+            port: 8545,
+            user: '',
+            password: ''
+        })
         const password = 'password'
         const createdAccount = await eirti.accounts.create()
         const { encrypted } = eirti.accounts.encrypt(createdAccount.prvKey, password)
